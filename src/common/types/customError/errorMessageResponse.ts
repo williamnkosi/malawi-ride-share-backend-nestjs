@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ErrorDetails } from './errorDetails';
 
 // 400 Bad Request: The request is malformed or invalid (e.g., missing required parameters).
 
@@ -18,17 +19,12 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 // 429 Too Many Requests: The client has sent too many requests in a given amount of time (rate limiting).
 
-export class CustomErrorResonse extends HttpException {
+export class CustomError extends HttpException {
   constructor(
-    public message: string, // Custom error message
-    public statusCode: HttpStatus, // HTTP status code
+    message: string,
+    status = HttpStatus.BAD_REQUEST,
+    details?: ErrorDetails,
   ) {
-    super(
-      {
-        statusCode,
-        message,
-      },
-      statusCode,
-    );
+    super({ statusCode: status, message, details }, status);
   }
 }
