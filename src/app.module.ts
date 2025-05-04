@@ -10,7 +10,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { DriversModule } from './drivers/drivers.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
+import { TestingModule } from './testing/testing.module';
 
+const isProd = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -22,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     PaymentsModule,
     DriversModule,
     FirebaseModule,
+    ...(!isProd ? [TestingModule] : []),
   ],
   controllers: [AppController],
   providers: [AppService],
