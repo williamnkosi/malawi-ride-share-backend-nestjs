@@ -9,9 +9,11 @@ import { LocationModule } from './location/location.module';
 import { PaymentsModule } from './payments/payments.module';
 import { DriversModule } from './drivers/drivers.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UsersModule,
     NotificationsModule,
