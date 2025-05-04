@@ -8,6 +8,7 @@ import { RidesModule } from './rides/rides.module';
 import { LocationModule } from './location/location.module';
 import { PaymentsModule } from './payments/payments.module';
 import { DriversModule } from './drivers/drivers.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DriversModule } from './drivers/drivers.module';
     LocationModule,
     PaymentsModule,
     DriversModule,
+    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
