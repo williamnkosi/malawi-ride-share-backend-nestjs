@@ -9,7 +9,6 @@ export class FirebaseService implements OnModuleInit {
   onModuleInit() {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-      databaseURL: this.config.get<string>('FIREBASE_DB_URL'),
     });
   }
 
