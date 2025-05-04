@@ -4,6 +4,6 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   controllers: [TestingController],
-  imports:[NotificationsModule],
+  imports: [NotificationsModule],
 })
 export class TestingModule {}
