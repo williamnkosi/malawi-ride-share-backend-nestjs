@@ -5,16 +5,17 @@ import { Server } from 'http';
 import { LocationDto } from 'src/common/dto/location/locationDto';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  namespace: '/tracking',
+  cors: {
+    origin: '*', // Allow all origins for testing. You should restrict this in production.
+  },
+})
 export class TrackingGateway {
   server: Server;
 
   private riderLocations: Record<string, LocationDto> = {};
   private driverLocations: Record<string, LocationDto> = {};
-
-  afterInit(server: Server) {
-    console.log('WebSocket server initialized', server);
-  }
 
   @SubscribeMessage('updateRiderLocation')
   handleRiderLocationUpdate(@MessageBody() data: LocationDto) {
@@ -34,8 +35,9 @@ export class TrackingGateway {
     }
   }
 
-  @SubscribeMessage('updateRiderLocation')
+  @SubscribeMessage('updateDriverLocation')
   handleDriverLocationUpdate(@MessageBody() data: LocationDto) {
+    console.log('Driver');
     try {
       this.driverLocations[data.userId] = data;
     } catch {
@@ -43,7 +45,7 @@ export class TrackingGateway {
     }
   }
 
-  @SubscribeMessage('getRiderLocation')
+  @SubscribeMessage('getDriverLocation')
   handleGetDriverLocation(@MessageBody() userId: string): LocationDto | null {
     try {
       return this.riderLocations[userId] || null;
