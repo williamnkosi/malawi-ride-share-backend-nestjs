@@ -27,7 +27,11 @@ export class TrackingGateway {
 
   @SubscribeMessage('getRiderLocation')
   handleGetRiderLocation(@MessageBody() userId: string): LocationDto | null {
-    return this.riderLocations[userId] || null;
+    try {
+      return this.riderLocations[userId] || null;
+    } catch {
+      throw new CustomError('Error getting rider location', 500);
+    }
   }
 
   @SubscribeMessage('updateRiderLocation')
@@ -41,6 +45,10 @@ export class TrackingGateway {
 
   @SubscribeMessage('getRiderLocation')
   handleGetDriverLocation(@MessageBody() userId: string): LocationDto | null {
-    return this.driverLocations[userId] || null;
+    try {
+      return this.riderLocations[userId] || null;
+    } catch {
+      throw new CustomError('Error getting driver location', 500);
+    }
   }
 }

@@ -1,5 +1,5 @@
-import { Controller, HttpStatus, Param, Post } from '@nestjs/common';
-import { CustomErrorResonse } from 'src/common/types/errorMessageResponse';
+import { Controller, Param, Post } from '@nestjs/common';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Controller('testing')
@@ -14,7 +14,7 @@ export class TestingController {
       await this.notificationsService.sendNotification(token, title, body);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-      throw new CustomErrorResonse('Failed', HttpStatus.BAD_REQUEST);
+      throw new CustomError('Failed', 500);
     }
   }
 }

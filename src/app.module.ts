@@ -12,7 +12,6 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TrackingModule } from './tracking/tracking.module';
-import { TrackerGateway } from './tracker/tracker.gateway';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -30,6 +29,6 @@ const isProd = process.env.NODE_ENV === 'production';
     TrackingModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TrackerGateway],
+  providers: [AppService],
 })
 export class AppModule {}
