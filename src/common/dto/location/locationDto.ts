@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsNumber } from 'class-validator';
+import { IsString, IsEnum, IsNumber, Min, Max } from 'class-validator';
 import { UserType } from './userType';
 
 export class LocationDto {
@@ -9,9 +9,13 @@ export class LocationDto {
   userType: UserType;
 
   @IsNumber()
+  @Min(-90)
+  @Max(90)
   latitude: number;
 
   @IsNumber()
+  @Min(-180)
+  @Max(180)
   longitude: number;
 
   @IsNumber()
