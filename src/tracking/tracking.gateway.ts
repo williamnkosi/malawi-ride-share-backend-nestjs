@@ -2,7 +2,8 @@ import { MessageBody } from '@nestjs/websockets/decorators/message-body.decorato
 import { WebSocketGateway } from '@nestjs/websockets/decorators/socket-gateway.decorator';
 import { SubscribeMessage } from '@nestjs/websockets/decorators/subscribe-message.decorator';
 import { Server } from 'http';
-import { LocationDto } from 'src/common/dto/location/locationDto';
+import { DriverLocationDto } from 'src/common/dto/driverlocation/driverlLocationDto';
+import { RiderLocationDto } from 'src/common/dto/location/riderLocationDto';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
 @WebSocketGateway({
@@ -14,11 +15,11 @@ import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 export class TrackingGateway {
   server: Server;
 
-  private riderLocations: Record<string, LocationDto> = {};
-  private driverLocations: Record<string, LocationDto> = {};
+  private riderLocations: Record<string, RiderLocationDto> = {};
+  private driverLocations: Record<string, DriverLocationDto> = {};
 
   @SubscribeMessage('updateRiderLocation')
-  handleRiderLocationUpdate(@MessageBody() data: LocationDto) {
+  handleRiderLocationUpdate(@MessageBody() data: RiderLocationDto) {
     try {
       this.riderLocations[data.userId] = data;
     } catch {
@@ -27,7 +28,9 @@ export class TrackingGateway {
   }
 
   @SubscribeMessage('getRiderLocation')
-  handleGetRiderLocation(@MessageBody() userId: string): LocationDto | null {
+  handleGetRiderLocation(
+    @MessageBody() userId: string,
+  ): RiderLocationDto | null {
     try {
       return this.riderLocations[userId] || null;
     } catch {
@@ -36,7 +39,7 @@ export class TrackingGateway {
   }
 
   @SubscribeMessage('updateDriverLocation')
-  handleDriverLocationUpdate(@MessageBody() data: LocationDto) {
+  handleDriverLocationUpdate(@MessageBody() data: DriverLocationDto) {
     console.log('Driver');
     try {
       this.driverLocations[data.userId] = data;
@@ -46,9 +49,11 @@ export class TrackingGateway {
   }
 
   @SubscribeMessage('getDriverLocation')
-  handleGetDriverLocation(@MessageBody() userId: string): LocationDto | null {
+  handleGetDriverLocation(
+    @MessageBody() userId: string,
+  ): DriverLocationDto | null {
     try {
-      return this.riderLocations[userId] || null;
+      return this.driverLocations[userId] || null;
     } catch {
       throw new CustomError('Error getting driver location', 500);
     }
