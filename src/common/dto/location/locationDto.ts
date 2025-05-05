@@ -1,8 +1,4 @@
-import {
-  IsEnum,
-  IsNumber,
-  IsString,
-} from 'class-validator/types/decorator/decorators';
+import { IsString, IsEnum, IsNumber } from 'class-validator';
 import { UserType } from './userType';
 
 export class LocationDto {

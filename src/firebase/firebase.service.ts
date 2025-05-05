@@ -8,7 +8,6 @@ export class FirebaseService implements OnModuleInit {
   constructor(private readonly config: ConfigService) {}
 
   onModuleInit() {
-    console.log('Cred:', JSON.stringify(serviceAccount, null, 2));
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
     });
