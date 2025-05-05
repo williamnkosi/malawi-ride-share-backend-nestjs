@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
@@ -13,12 +14,9 @@ export class NotificationsService {
     try {
       const message1 = this.firebaseService.getMessaging();
       const response = await message1.send(message);
-      console.log('✅ Notification sent:', response);
       return response;
-    } catch (error) {
-      console.error('❌ Failed to send notification:', error);
-      // Optional: throw an HTTP exception or handle gracefully
-      throw new Error('Push notification failed');
+    } catch {
+      throw new CustomError('Error sending notification', 500);
     }
   }
 }
