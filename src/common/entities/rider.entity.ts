@@ -4,8 +4,8 @@ import { RiderReview } from './rider_review.entity';
 
 @Entity('riders')
 export class Rider {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;

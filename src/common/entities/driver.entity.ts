@@ -3,8 +3,8 @@ import { DriverReview } from './driver_review.entity';
 
 @Entity('drivers')
 export class Driver {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
