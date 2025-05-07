@@ -16,6 +16,11 @@ import { RidersService } from './riders/riders.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RiderModule } from './riders/riders.module';
 import { RidersController } from './riders/riders.controller';
+import { RiderReviewsModule } from './rider_reviews/rider_reviews.module';
+import { DriversReviewsModule } from './drivers_reviews/drivers_reviews.module';
+import { RidersReviewsService } from './riders_reviews/riders_reviews.service';
+import { RidersReviewsController } from './riders_reviews/riders_reviews.controller';
+import { RidersReviewsModule } from './riders_reviews/riders_reviews.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -43,8 +48,12 @@ const isProd = process.env.NODE_ENV === 'production';
     TrackingModule,
     RiderModule,
     RidesModule,
+    CoModule,
+    RiderReviewsModule,
+    DriversReviewsModule,
+    RidersReviewsModule,
   ],
-  controllers: [AppController, RidersController],
-  providers: [AppService, RidersService],
+  controllers: [AppController, RidersController, RidersReviewsController],
+  providers: [AppService, RidersService, RidersReviewsService],
 })
 export class AppModule {}
