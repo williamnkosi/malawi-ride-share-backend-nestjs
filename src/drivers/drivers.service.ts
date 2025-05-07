@@ -6,7 +6,7 @@ import { Driver } from 'src/common/entities/driver.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class DriverService {
+export class DriversService {
   constructor(
     @InjectRepository(Driver)
     private readonly driverRepository: Repository<Driver>,

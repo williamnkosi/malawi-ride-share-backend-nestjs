@@ -9,16 +9,17 @@ import {
 } from '@nestjs/common';
 import { CreateDriverDto } from 'src/common/dto/driver/create_driver_dto';
 import { UpdateDriverDto } from 'src/common/dto/driver/update_driver_dto';
-import { DriverService } from './drivers.service';
+import { DriversService } from './drivers.service';
 
 @Controller('drivers')
-export class DriverController {
-  constructor(private readonly driverService: DriverService) {}
+export class DriversController {
+  driversService: DriversService;
+  constructor(private readonly driverService: DriversService) {}
 
   // Create a new driver
   @Post()
   create(@Body() createDriverDto: CreateDriverDto) {
-    return this.driverService.create(createDriverDto);
+    return this.driversService.create(createDriverDto);
   }
 
   // Get all drivers

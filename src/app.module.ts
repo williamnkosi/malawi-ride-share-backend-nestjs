@@ -12,9 +12,10 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TrackingModule } from './tracking/tracking.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { RidersController } from './riders/riders.controller';
 import { RidersService } from './riders/riders.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RiderModule } from './rider/rider.module';
+import { RidersModule } from './riders/riders.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -40,6 +41,8 @@ const isProd = process.env.NODE_ENV === 'production';
     FirebaseModule,
     ...(!isProd ? [TestingModule] : []),
     TrackingModule,
+    RiderModule,
+    RidersModule,
   ],
   controllers: [AppController, RidersController],
   providers: [AppService, RidersService],
