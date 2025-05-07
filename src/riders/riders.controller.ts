@@ -13,7 +13,7 @@ import { Rider } from 'src/common/entities/rider.entity';
 import { RidersService } from './riders.service';
 
 @Controller('riders')
-export class RiderController {
+export class RidersController {
   constructor(private readonly riderService: RidersService) {}
 
   @Get()
