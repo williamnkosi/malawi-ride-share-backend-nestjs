@@ -13,6 +13,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TrackingModule } from './tracking/tracking.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RidersController } from './riders/riders.controller';
+import { RidersService } from './riders/riders.service';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -39,7 +41,7 @@ const isProd = process.env.NODE_ENV === 'production';
     ...(!isProd ? [TestingModule] : []),
     TrackingModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, RidersController],
+  providers: [AppService, RidersService],
 })
 export class AppModule {}
