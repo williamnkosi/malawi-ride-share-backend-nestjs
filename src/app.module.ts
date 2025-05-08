@@ -23,6 +23,8 @@ import { RidersReviewsController } from './riders_reviews/riders_reviews.control
 import { RidersReviewsModule } from './riders_reviews/riders_reviews.module';
 import { RiderReviewModule } from './rider_review/rider_review.module';
 import { DriverReviewModule } from './driver_review/driver_review.module';
+import { UserDeviceService } from './user_device/user_device.service';
+import { UserDeviceModule } from './user_device/user_device.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -56,8 +58,9 @@ const isProd = process.env.NODE_ENV === 'production';
     RidersReviewsModule,
     RiderReviewModule,
     DriverReviewModule,
+    UserDeviceModule,
   ],
   controllers: [AppController, RidersController, RidersReviewsController],
-  providers: [AppService, RidersService, RidersReviewsService],
+  providers: [AppService, RidersService, RidersReviewsService, UserDeviceService],
 })
 export class AppModule {}
