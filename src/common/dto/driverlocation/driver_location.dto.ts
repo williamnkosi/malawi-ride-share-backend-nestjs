@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, Min, Max, IsString, IsDate } from 'class-validator';
-import { DriverStatus } from './driverStatus';
+import { DriverStatus } from './driver_status';
 
 export class DriverLocationDto {
   @IsString()

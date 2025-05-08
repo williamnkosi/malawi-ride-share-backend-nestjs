@@ -1,5 +1,5 @@
 import { IsString, IsNumber, Min, Max, IsDate, IsEnum } from 'class-validator';
-import { RiderStatus } from './riderStatus';
+import { RiderStatus } from './rider_status';
 
 export class RiderLocationDto {
   @IsString()

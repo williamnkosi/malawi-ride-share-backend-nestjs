@@ -1,4 +1,4 @@
-export enum RideStatus {
+export enum TripStatus {
   REQUESTED = 'requested',
   ACCEPTED = 'accepted',
   STARTED = 'started',

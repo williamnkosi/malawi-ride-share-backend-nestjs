@@ -25,6 +25,7 @@ import { RiderReviewModule } from './rider_review/rider_review.module';
 import { DriverReviewModule } from './driver_review/driver_review.module';
 import { UserDeviceService } from './user_device/user_device.service';
 import { UserDeviceModule } from './user_device/user_device.module';
+import { TripModule } from './trip/trip.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -59,6 +60,7 @@ const isProd = process.env.NODE_ENV === 'production';
     RiderReviewModule,
     DriverReviewModule,
     UserDeviceModule,
+    TripModule,
   ],
   controllers: [AppController, RidersController, RidersReviewsController],
   providers: [AppService, RidersService, RidersReviewsService, UserDeviceService],
