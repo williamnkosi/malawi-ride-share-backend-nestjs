@@ -8,33 +8,36 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { DriverReview } from 'src/common/entities/driver_review.entity';
+
+import { DriverReviewEntity } from 'src/common/entities/driver_review.entity';
 import { DriverReviewService } from './driver_review.service';
 
 @Controller('driver-reviews')
-export class DriverReviewController {
+export class DriverReviewEntityController {
   constructor(private readonly reviewService: DriverReviewService) {}
 
   @Get()
-  findAll(): Promise<DriverReview[]> {
+  findAll(): Promise<DriverReviewEntity[]> {
     return this.reviewService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<DriverReview | null> {
+  findOne(@Param('id') id: string): Promise<DriverReviewEntity | null> {
     return this.reviewService.findOne(id);
   }
 
   @Post()
-  create(@Body() body: Partial<DriverReview>): Promise<DriverReview> {
+  create(
+    @Body() body: Partial<DriverReviewEntity>,
+  ): Promise<DriverReviewEntity> {
     return this.reviewService.create(body);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() body: Partial<DriverReview>,
-  ): Promise<DriverReview | null> {
+    @Body() body: Partial<DriverReviewEntity>,
+  ): Promise<DriverReviewEntity | null> {
     return this.reviewService.update(id, body);
   }
 

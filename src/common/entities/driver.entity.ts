@@ -1,14 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { DriverReview } from './driver_review.entity';
+import { DriverReviewEntity } from './driver_review.entity';
 
 @Entity('drivers')
-export class Driver {
+export class DriverEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   name: string;
 
-  @OneToMany(() => DriverReview, (review) => review.driver)
-  reviews: DriverReview[]; // Relationship to DriverReview
+  @OneToMany(() => DriverReviewEntity, (review) => review.driver)
+  reviews: DriverReviewEntity[]; // Relationship to DriverReview
 }

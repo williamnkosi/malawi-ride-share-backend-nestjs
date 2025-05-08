@@ -5,11 +5,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Driver } from './driver.entity'; // Assuming you have a Driver entity
-import { Rider } from './rider.entity'; // Assuming you have a Rider entity
+
+import { DriverEntity } from './driver.entity';
+import { RiderEntity } from './rider.entity';
 
 @Entity('driver_reviews')
-export class DriverReview {
+export class DriverReviewEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,11 +20,11 @@ export class DriverReview {
   @Column({ type: 'text', nullable: true })
   comment: string; // Optional review comment
 
-  @ManyToOne(() => Driver, (driver) => driver.reviews, { eager: true })
+  @ManyToOne(() => DriverEntity, (driver) => driver.reviews, { eager: true })
   @JoinColumn({ name: 'driver_id' })
-  driver: Driver; // Reference to the Driver being reviewed
+  driver: DriverEntity; // Reference to the Driver being reviewed
 
-  @ManyToOne(() => Rider, (rider) => rider.riderReviews, { eager: true })
+  @ManyToOne(() => RiderEntity, (rider) => rider.riderReviews, { eager: true })
   @JoinColumn({ name: 'rider_id' })
-  rider: Rider; // Reference to the Rider leaving the review
+  rider: RiderEntity; // Reference to the Rider leaving the review
 }

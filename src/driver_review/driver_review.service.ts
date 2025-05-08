@@ -1,33 +1,33 @@
 // driver-review.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DriverReview } from 'src/common/entities/driver_review.entity';
+import { DriverReviewEntity } from 'src/common/entities/driver_review.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class DriverReviewService {
   constructor(
-    @InjectRepository(DriverReview)
-    private readonly reviewRepo: Repository<DriverReview>,
+    @InjectRepository(DriverReviewEntity)
+    private readonly reviewRepo: Repository<DriverReviewEntity>,
   ) {}
 
-  findAll(): Promise<DriverReview[]> {
+  findAll(): Promise<DriverReviewEntity[]> {
     return this.reviewRepo.find();
   }
 
-  findOne(id: string): Promise<DriverReview | null> {
+  findOne(id: string): Promise<DriverReviewEntity | null> {
     return this.reviewRepo.findOne({ where: { id: Number(id) } });
   }
 
-  create(data: Partial<DriverReview>): Promise<DriverReview> {
+  create(data: Partial<DriverReviewEntity>): Promise<DriverReviewEntity> {
     const review = this.reviewRepo.create(data);
     return this.reviewRepo.save(review);
   }
 
   async update(
     id: string,
-    data: Partial<DriverReview>,
-  ): Promise<DriverReview | null> {
+    data: Partial<DriverReviewEntity>,
+  ): Promise<DriverReviewEntity | null> {
     await this.reviewRepo.update(id, data);
     return this.findOne(id);
   }
