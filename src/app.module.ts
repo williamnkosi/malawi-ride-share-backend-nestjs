@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { RidesModule } from './rides/rides.module';
+
 import { LocationModule } from './location/location.module';
 import { PaymentsModule } from './payments/payments.module';
 import { DriversModule } from './drivers/drivers.module';
@@ -15,17 +15,14 @@ import { TrackingModule } from './tracking/tracking.module';
 import { RidersService } from './riders/riders.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RiderModule } from './riders/riders.module';
-import { RidersController } from './riders/riders.controller';
-import { RiderReviewsModule } from './rider_reviews/rider_reviews.module';
-import { DriversReviewsModule } from './drivers_reviews/drivers_reviews.module';
-import { RidersReviewsService } from './riders_reviews/riders_reviews.service';
-import { RidersReviewsController } from './riders_reviews/riders_reviews.controller';
-import { RidersReviewsModule } from './riders_reviews/riders_reviews.module';
+//import { RidersController } from './riders/riders.controller';
+
 import { RiderReviewModule } from './rider_review/rider_review.module';
 import { DriverReviewModule } from './driver_review/driver_review.module';
 import { UserDeviceService } from './user_device/user_device.service';
 import { UserDeviceModule } from './user_device/user_device.module';
 import { TripModule } from './trip/trip.module';
+import { DriversService } from './drivers/drivers.service';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -44,7 +41,6 @@ const isProd = process.env.NODE_ENV === 'production';
     AuthModule,
     UsersModule,
     NotificationsModule,
-    RidesModule,
     LocationModule,
     PaymentsModule,
     DriversModule,
@@ -52,17 +48,12 @@ const isProd = process.env.NODE_ENV === 'production';
     ...(!isProd ? [TestingModule] : []),
     TrackingModule,
     RiderModule,
-    RidesModule,
-    CoModule,
-    RiderReviewsModule,
-    DriversReviewsModule,
-    RidersReviewsModule,
     RiderReviewModule,
     DriverReviewModule,
     UserDeviceModule,
     TripModule,
   ],
-  controllers: [AppController, RidersController, RidersReviewsController],
-  providers: [AppService, RidersService, RidersReviewsService, UserDeviceService],
+  controllers: [AppController],
+  providers: [AppService, RidersService, DriversService, UserDeviceService],
 })
 export class AppModule {}

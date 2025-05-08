@@ -13,7 +13,7 @@ import { DriverReviewEntity } from 'src/common/entities/driver_review.entity';
 import { DriverReviewService } from './driver_review.service';
 
 @Controller('driver-reviews')
-export class DriverReviewEntityController {
+export class DriverReviewController {
   constructor(private readonly reviewService: DriverReviewService) {}
 
   @Get()

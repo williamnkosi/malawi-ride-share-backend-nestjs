@@ -21,20 +21,27 @@ export class TripService {
     private driverRepository: Repository<DriverEntity>,
   ) {}
 
+  currentTrips: TripEntity[] = [];
+
   // Create a new trip request
   async createTrip(riderId: string): Promise<TripEntity> {
-    const rider = await this.riderRepository.findOne({
-      where: { id: riderId },
-    });
-    if (!rider) {
-      throw new Error('Rider not found');
+    try {
+      const rider = await this.riderRepository.findOne({
+        where: { id: riderId },
+      });
+      if (!rider) {
+        throw new Error('Rider not found');
+      }
+
+      const trip = new TripEntity();
+      trip.rider = rider;
+      trip.status = TripStatus.REQUESTED; // Initial status
+      this.currentTrips.push(trip);
+      return trip;
+    } catch {
+      throw new Error('Error creating trip');
     }
-
-    const trip = new TripEntity();
-    trip.rider = rider;
-    trip.status = TripStatus.REQUESTED; // Initial status
-
-    return this.tripRepository.save(trip);
+    //return this.tripRepository.save(trip);
   }
 
   // Assign a driver to a trip

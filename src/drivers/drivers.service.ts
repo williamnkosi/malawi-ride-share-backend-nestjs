@@ -2,29 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateDriverDto } from 'src/common/dto/driver/create_driver.dto';
 import { UpdateDriverDto } from 'src/common/dto/driver/update_driver.dto';
-import { Driver } from 'src/common/entities/driver.entity';
+import { DriverEntity } from 'src/common/entities/driver.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class DriversService {
   constructor(
-    @InjectRepository(Driver)
-    private readonly driverRepository: Repository<Driver>,
+    @InjectRepository(DriverEntity)
+    private readonly driverRepository: Repository<DriverEntity>,
   ) {}
 
   // Create a new driver
-  async create(createDriverDto: CreateDriverDto): Promise<Driver> {
+  async create(createDriverDto: CreateDriverDto): Promise<DriverEntity> {
     const driver = this.driverRepository.create(createDriverDto);
     return this.driverRepository.save(driver);
   }
 
   // Get all drivers
-  async findAll(): Promise<Driver[]> {
+  async findAll(): Promise<DriverEntity[]> {
     return this.driverRepository.find();
   }
 
   // Get a driver by ID
-  async findOne(id: string): Promise<Driver | null> {
+  async findOne(id: string): Promise<DriverEntity | null> {
     return this.driverRepository.findOne({ where: { id } });
   }
 
@@ -32,7 +32,7 @@ export class DriversService {
   async update(
     id: string,
     updateDriverDto: UpdateDriverDto,
-  ): Promise<Driver | null> {
+  ): Promise<DriverEntity | null> {
     await this.driverRepository.update(id, updateDriverDto);
     return this.driverRepository.findOne({ where: { id } });
   }
