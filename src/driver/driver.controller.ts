@@ -11,6 +11,8 @@ import { CreateDriverDto } from 'src/common/dto/driver/create_driver.dto';
 import { UpdateDriverDto } from 'src/common/dto/driver/update_driver.dto';
 import { DriverService } from './driver.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { DriverEntity } from 'src/common/entities/driver.entity';
+import { ApiResponse } from 'src/common/types/api_response';
 
 @Controller('driver')
 export class DriverController {
@@ -19,10 +21,14 @@ export class DriverController {
 
   // Create a new driver
   @Post()
-  create(@Body() createDriverDto: CreateDriverDto) {
+  async create(
+    @Body() createDriverDto: CreateDriverDto,
+  ): Promise<ApiResponse<DriverEntity>> {
     try {
-      return this.driverService.create(createDriverDto);
-    } catch {
+      const response = await this.driverService.create(createDriverDto);
+      return new ApiResponse(true, 'Driver created successfully', response);
+    } catch (error) {
+      console.error('Error creating rider:', error);
       throw new CustomError('Error creating driver');
     }
   }
