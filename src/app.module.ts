@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -12,17 +10,14 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TrackingModule } from './tracking/tracking.module';
-import { RidersService } from './riders/riders.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RiderModule } from './riders/riders.module';
 //import { RidersController } from './riders/riders.controller';
 
 import { RiderReviewModule } from './rider_review/rider_review.module';
 import { DriverReviewModule } from './driver_review/driver_review.module';
-import { UserDeviceService } from './user_device/user_device.service';
 import { UserDeviceModule } from './user_device/user_device.module';
 import { TripModule } from './trip/trip.module';
-import { DriversService } from './drivers/drivers.service';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -53,7 +48,7 @@ const isProd = process.env.NODE_ENV === 'production';
     UserDeviceModule,
     TripModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, RidersService, DriversService, UserDeviceService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
