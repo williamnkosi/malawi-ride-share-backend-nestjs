@@ -1,8 +1,8 @@
 import { MessageBody } from '@nestjs/websockets/decorators/message-body.decorator';
 import { WebSocketGateway } from '@nestjs/websockets/decorators/socket-gateway.decorator';
 import { SubscribeMessage } from '@nestjs/websockets/decorators/subscribe-message.decorator';
-import { DriverLocationDto } from 'src/common/dto/driverlocation/driverlLocationDto';
-import { RiderLocationDto } from 'src/common/dto/location/riderLocationDto';
+import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
+import { RiderLocationDto } from 'src/common/dto/location/rider_location.dto';
 import { TrackingService } from './tracking.service';
 
 @WebSocketGateway({

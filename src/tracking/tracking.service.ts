@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'http';
-import { DriverLocationDto } from 'src/common/dto/driverlocation/driverlLocationDto';
-import { RiderLocationDto } from 'src/common/dto/location/riderLocationDto';
+import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
+import { RiderLocationDto } from 'src/common/dto/location/rider_location.dto';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
 @Injectable()
