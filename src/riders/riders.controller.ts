@@ -6,10 +6,13 @@ import {
   Param,
   Patch,
   Delete,
+  InternalServerErrorException,
 } from '@nestjs/common';
 
 import { RiderEntity } from 'src/common/entities/rider.entity';
 import { RiderService } from './riders.service';
+import { ApiResponse } from 'src/common/types/api_response';
+import { CreateRiderDto } from 'src/common/dto/rider/create_driver.dto';
 
 @Controller('rider')
 export class RiderController {
@@ -22,12 +25,25 @@ export class RiderController {
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<RiderEntity | null> {
-    return this.riderService.findOne(id);
+    try {
+      return this.riderService.findOne(id);
+    } catch {
+      throw new Error('Rider not found');
+    }
   }
 
   @Post()
-  create(@Body() body: Partial<RiderEntity>): Promise<RiderEntity> {
-    return this.riderService.create(body);
+  async create(
+    @Body() body: Partial<CreateRiderDto>,
+  ): Promise<ApiResponse<RiderEntity>> {
+    try {
+      console.log('Creating rider with data:', body);
+      const response = await this.riderService.create(body);
+      return new ApiResponse(true, 'Rider created successfully', response);
+    } catch (error) {
+      console.error('Error creating rider:', error);
+      throw new InternalServerErrorException('Error creating rider');
+    }
   }
 
   @Patch(':id')

@@ -1,6 +1,7 @@
 // rider.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateRiderDto } from 'src/common/dto/rider/create_driver.dto';
 import { RiderEntity } from 'src/common/entities/rider.entity';
 
 import { Repository } from 'typeorm';
@@ -17,12 +18,22 @@ export class RiderService {
   }
 
   async findOne(id: string): Promise<RiderEntity | null> {
-    return this.riderRepository.findOne({ where: { id } });
+    try {
+      return this.riderRepository.findOne({ where: { firebaseId: id } });
+    } catch {
+      throw new Error('Error creating rider: ');
+    }
   }
 
-  async create(data: Partial<RiderEntity>): Promise<RiderEntity> {
-    const rider = this.riderRepository.create(data);
-    return this.riderRepository.save(rider);
+  async create(data: Partial<CreateRiderDto>): Promise<RiderEntity> {
+    try {
+      const rider = this.riderRepository.create(data);
+      console.log('Creating rider with data:', data);
+      return this.riderRepository.save(rider);
+    } catch (error) {
+      console.log(error);
+      throw new Error('Error creating rider: ' + error);
+    }
   }
 
   async update(

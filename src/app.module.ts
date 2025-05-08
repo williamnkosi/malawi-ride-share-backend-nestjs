@@ -18,6 +18,8 @@ import { RiderReviewModule } from './rider_review/rider_review.module';
 import { DriverReviewModule } from './driver_review/driver_review.module';
 import { UserDeviceModule } from './user_device/user_device.module';
 import { TripModule } from './trip/trip.module';
+import { RiderController } from './riders/riders.controller';
+import { DriversController } from './drivers/drivers.controller';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -48,7 +50,7 @@ const isProd = process.env.NODE_ENV === 'production';
     UserDeviceModule,
     TripModule,
   ],
-  controllers: [],
+  controllers: [RiderController, DriversController],
   providers: [],
 })
 export class AppModule {}

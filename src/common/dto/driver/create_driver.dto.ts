@@ -1,5 +1,7 @@
 export class CreateDriverDto {
-  name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   email: string;
   driverLicenseNumber: string;
   vehicleDetails: string;

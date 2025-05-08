@@ -1,5 +1,8 @@
 export class CreateRiderDto {
-  name: string;
+  firebaseId: string;
+  fristName: string;
+  lastName: string;
+  phoneNumber: string;
   email: string;
   paymentMethod: string;
 }
