@@ -6,7 +6,7 @@ import { RiderEntity } from 'src/common/entities/rider.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class RidersService {
+export class RiderService {
   constructor(
     @InjectRepository(RiderEntity)
     private readonly riderRepository: Repository<RiderEntity>,

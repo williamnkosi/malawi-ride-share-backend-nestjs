@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 
 import { RiderEntity } from 'src/common/entities/rider.entity';
-import { RidersService } from './riders.service';
+import { RiderService } from './riders.service';
 
-@Controller('riders')
-export class RidersController {
-  constructor(private readonly riderService: RidersService) {}
+@Controller('rider')
+export class RiderController {
+  constructor(private readonly riderService: RiderService) {}
 
   @Get()
   findAll(): Promise<RiderEntity[]> {
