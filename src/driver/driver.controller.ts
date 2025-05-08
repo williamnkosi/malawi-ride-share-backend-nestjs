@@ -9,17 +9,22 @@ import {
 } from '@nestjs/common';
 import { CreateDriverDto } from 'src/common/dto/driver/create_driver.dto';
 import { UpdateDriverDto } from 'src/common/dto/driver/update_driver.dto';
-import { DriversService } from './drivers.service';
+import { DriverService } from './driver.service';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
-@Controller('drivers')
-export class DriversController {
-  driversService: DriversService;
-  constructor(private readonly driverService: DriversService) {}
+@Controller('driver')
+export class DriverController {
+  driversService: DriverService;
+  constructor(private readonly driverService: DriverService) {}
 
   // Create a new driver
   @Post()
   create(@Body() createDriverDto: CreateDriverDto) {
-    return this.driversService.create(createDriverDto);
+    try {
+      return this.driverService.create(createDriverDto);
+    } catch {
+      throw new CustomError('Error creating driver');
+    }
   }
 
   // Get all drivers

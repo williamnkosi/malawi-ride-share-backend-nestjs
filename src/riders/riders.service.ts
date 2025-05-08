@@ -25,13 +25,11 @@ export class RiderService {
     }
   }
 
-  async create(data: Partial<CreateRiderDto>): Promise<RiderEntity> {
+  create(data: Partial<CreateRiderDto>): Promise<RiderEntity> {
     try {
       const rider = this.riderRepository.create(data);
-      console.log('Creating rider with data:', data);
       return this.riderRepository.save(rider);
     } catch (error) {
-      console.log(error);
       throw new Error('Error creating rider: ' + error);
     }
   }

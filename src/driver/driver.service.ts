@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateDriverDto } from 'src/common/dto/driver/create_driver.dto';
 import { UpdateDriverDto } from 'src/common/dto/driver/update_driver.dto';
 import { DriverEntity } from 'src/common/entities/driver.entity';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class DriversService {
+export class DriverService {
   constructor(
     @InjectRepository(DriverEntity)
     private readonly driverRepository: Repository<DriverEntity>,
@@ -14,8 +15,13 @@ export class DriversService {
 
   // Create a new driver
   async create(createDriverDto: CreateDriverDto): Promise<DriverEntity> {
-    const driver = this.driverRepository.create(createDriverDto);
-    return this.driverRepository.save(driver);
+    try {
+      const driver = this.driverRepository.create(createDriverDto);
+      return this.driverRepository.save(driver);
+    } catch (error) {
+      console.error(error);
+      throw new CustomError('Error creating driver');
+    }
   }
 
   // Get all drivers
