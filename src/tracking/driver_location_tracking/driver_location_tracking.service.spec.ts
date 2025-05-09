@@ -9,7 +9,9 @@ describe('DriverLocationTrackingService', () => {
       providers: [DriverLocationTrackingService],
     }).compile();
 
-    service = module.get<DriverLocationTrackingService>(DriverLocationTrackingService);
+    service = module.get<DriverLocationTrackingService>(
+      DriverLocationTrackingService,
+    );
   });
 
   it('should be defined', () => {

@@ -9,7 +9,9 @@ describe('DriverLocationTrackingGateway', () => {
       providers: [DriverLocationTrackingGateway],
     }).compile();
 
-    gateway = module.get<DriverLocationTrackingGateway>(DriverLocationTrackingGateway);
+    gateway = module.get<DriverLocationTrackingGateway>(
+      DriverLocationTrackingGateway,
+    );
   });
 
   it('should be defined', () => {

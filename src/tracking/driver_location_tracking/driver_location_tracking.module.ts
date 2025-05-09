@@ -6,5 +6,6 @@ import { DriverLocationTrackingController } from './driver_location_tracking.con
 @Module({
   providers: [DriverLocationTrackingGateway, DriverLocationTrackingService],
   controllers: [DriverLocationTrackingController],
+  exports: [DriverLocationTrackingService],
 })
 export class DriverLocationTrackingModule {}

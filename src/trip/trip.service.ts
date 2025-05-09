@@ -11,6 +11,7 @@ import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
+import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
 
 @Injectable()
 export class TripService {
@@ -23,6 +24,8 @@ export class TripService {
 
     @InjectRepository(DriverEntity)
     private driverRepository: Repository<DriverEntity>,
+
+    private driverLocationTrackingRepository: DriverLocationTrackingService,
 
     private googleMapsServiceRepository: GoogleMapsService,
   ) {}
@@ -58,38 +61,42 @@ export class TripService {
     //return this.tripRepository.save(trip);
   }
 
-  async findClosestDriver(
-    tripOrigin: UserLocationDto,
-  ): Promise<DriverEntity | null> {
-    const pickupLocation = `${tripOrigin.latitude},${tripOrigin.longitude}`;
-
-    if (!drivers.length) return null;
-
+  findClosestDriver(tripOrigin: UserLocationDto): {
+    latitude: number;
+    longitude: number;
+    driverId: string;
+  }[] {
     // Construct origin (pickup) and multiple destination strings
-    const destinations = drivers.map(
-      (driver) => `${driver.latitude},${driver.longitude}`,
-    );
+    // const destinations = drivers.map(
+    //   (driver) => `${driver.latitude},${driver.longitude}`,
+    // );
+    // const pickupLocation = `${tripOrigin.latitude},${tripOrigin.longitude}`;
+    const drivers = this.driverLocationTrackingRepository.getAllDrivers();
+    if (!drivers.length) return [];
 
-    const result = await this.googleMapsService.getDistances(
-      pickupLocation,
-      destinations,
-    );
-
-    // Find the closest driver by comparing distance values
-    let closestDriver: DriverEntity | null = null;
-    let shortestDistance = Number.MAX_VALUE;
-
-    result.forEach((element, index) => {
-      if (
-        element.status === 'OK' &&
-        element.distance.value < shortestDistance
-      ) {
-        shortestDistance = element.distance.value;
-        closestDriver = drivers[index];
-      }
+    const d = drivers.filter((driver) => {
+      const distance = this.getDistance(
+        tripOrigin.latitude,
+        tripOrigin.longitude,
+        driver.latitude,
+        driver.longitude,
+      );
+      return distance < 5; // e.g., within 5 km
     });
 
-    return closestDriver;
+    return d;
+  }
+
+  private getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   findAllTrips(): TripEntity[] {

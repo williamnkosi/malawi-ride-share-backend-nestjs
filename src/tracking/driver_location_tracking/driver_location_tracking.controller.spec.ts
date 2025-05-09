@@ -9,7 +9,9 @@ describe('DriverLocationTrackingController', () => {
       controllers: [DriverLocationTrackingController],
     }).compile();
 
-    controller = module.get<DriverLocationTrackingController>(DriverLocationTrackingController);
+    controller = module.get<DriverLocationTrackingController>(
+      DriverLocationTrackingController,
+    );
   });
 
   it('should be defined', () => {
