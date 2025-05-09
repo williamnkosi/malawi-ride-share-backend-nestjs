@@ -30,7 +30,7 @@ export class TrackingService {
 
   handleUpdateDriverLocation(data: DriverLocationDto) {
     try {
-      this.driverLocations[data.userId] = data;
+      this.driverLocations[data.firebaseId] = data;
     } catch {
       throw new CustomError('Error sending recieving driver location', 500);
     }

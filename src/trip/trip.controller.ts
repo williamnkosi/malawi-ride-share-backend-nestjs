@@ -51,13 +51,13 @@ export class TripController {
   //   }
 
   // 🚗 Driver accepts the ride
-  @Post(':id/accept')
-  async acceptRide(
-    @Param('id') tripId: string,
-    @Body() body: { driverId: string },
-  ): Promise<TripEntity> {
-    return this.tripService.assignDriver(tripId, body.driverId);
-  }
+  //   @Post(':id/accept')
+  //   async acceptRide(
+  //     @Param('id') tripId: string,
+  //     @Body() body: { driverId: string },
+  //   ): Promise<TripEntity> {
+  //     return this.tripService.assignDriver(tripId, body.driverId);
+  //   }
 
   // 🚗 Driver updates ride status (e.g., EN_ROUTE, COMPLETED)
   //   @Post(':id/status')

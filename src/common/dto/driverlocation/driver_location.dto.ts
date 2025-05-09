@@ -1,19 +1,14 @@
-import { IsEnum, IsNumber, Min, Max, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { DriverStatus } from './driver_status';
 import { Column } from 'typeorm';
+import { UserLocationDto } from '../location/user_location.dto';
 
 export class DriverLocationDto {
-  @IsString()
-  userId: string;
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  lat: number;
+  @Column()
+  firebaseId: string;
 
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  lng: number;
+  @Column(() => UserLocationDto)
+  driverLocation: UserLocationDto;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   timestamp: Date;

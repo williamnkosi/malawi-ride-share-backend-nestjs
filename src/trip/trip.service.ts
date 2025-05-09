@@ -10,6 +10,7 @@ import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 
 @Injectable()
 export class TripService {
@@ -27,6 +28,7 @@ export class TripService {
   ) {}
 
   currentTrips: TripEntity[] = [];
+  activeDrivers: DriverEntity[] = [];
 
   // Create a new trip request
   async createTrip(createTripDto: CreateTripDto): Promise<TripEntity> {
@@ -45,23 +47,9 @@ export class TripService {
       trip.endRiderLocation = createTripDto.endLocation;
       trip.endRiderLocation = createTripDto.endLocation;
       this.currentTrips.push(trip);
-
-      // Calculate distance and duration using Google Maps API
-      const origin =
-        createTripDto.startLocation.latitude +
-        ',' +
-        createTripDto.startLocation.longitude;
-      const destination =
-        createTripDto.endLocation.latitude +
-        ',' +
-        createTripDto.endLocation.longitude;
-      const distanceDuration =
-        await this.googleMapsServiceRepository.getDistanceAndDuration(
-          origin,
-          destination,
-        );
-      trip.distanceKm = distanceDuration.distanceKm;
-      trip.durationMin = distanceDuration.durationMin;
+      const distanceInfo = await this.getDistances(createTripDto);
+      trip.distanceKm = distanceInfo.distanceKm;
+      trip.durationMin = distanceInfo.durationMin;
       return trip;
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -70,24 +58,39 @@ export class TripService {
     //return this.tripRepository.save(trip);
   }
 
-  // Assign a driver to a trip
-  async assignDriver(tripId: string, driverId: string): Promise<TripEntity> {
-    const trip = await this.tripRepository.findOne({ where: { id: tripId } });
-    if (!trip) {
-      throw new Error('Trip not found');
-    }
+  async findClosestDriver(
+    tripOrigin: UserLocationDto,
+  ): Promise<DriverEntity | null> {
+    const pickupLocation = `${tripOrigin.latitude},${tripOrigin.longitude}`;
+    const drivers = await this.driverRepository.
 
-    const driver = await this.driverRepository.findOne({
-      where: { id: driverId },
+    if (!drivers.length) return null;
+
+    // Construct origin (pickup) and multiple destination strings
+    const destinations = drivers.map(
+      (driver) => `${driver.latitude},${driver.longitude}`,
+    );
+
+    const result = await this.googleMapsService.getDistances(
+      pickupLocation,
+      destinations,
+    );
+
+    // Find the closest driver by comparing distance values
+    let closestDriver: DriverEntity | null = null;
+    let shortestDistance = Number.MAX_VALUE;
+
+    result.forEach((element, index) => {
+      if (
+        element.status === 'OK' &&
+        element.distance.value < shortestDistance
+      ) {
+        shortestDistance = element.distance.value;
+        closestDriver = drivers[index];
+      }
     });
-    if (!driver) {
-      throw new Error('Driver not found');
-    }
 
-    trip.driver = driver;
-    trip.status = TripStatus.ACCEPTED; // Status changes to matched when a driver is assigned
-
-    return this.tripRepository.save(trip);
+    return closestDriver;
   }
 
   findAllTrips(): TripEntity[] {
@@ -152,5 +155,27 @@ export class TripService {
       where: { id: tripId },
       relations: ['rider', 'driver'],
     });
+  }
+
+  private async getDistances(createTripDto: CreateTripDto): Promise<{
+    distanceKm: number;
+    durationMin: number;
+  }> {
+    // Calculate distance and duration using Google Maps API
+    const origin =
+      createTripDto.startLocation.latitude +
+      ',' +
+      createTripDto.startLocation.longitude;
+    const destination =
+      createTripDto.endLocation.latitude +
+      ',' +
+      createTripDto.endLocation.longitude;
+    const tripInfo =
+      await this.googleMapsServiceRepository.getDistanceAndDuration(
+        origin,
+        destination,
+      );
+
+    return tripInfo;
   }
 }
