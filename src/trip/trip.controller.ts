@@ -9,24 +9,26 @@ import { TripService } from './trip.service';
 import { TripEntity } from 'src/common/dto/trip/trip.entity';
 //import { TripStatus } from 'src/common/dto/trip/trip_status';
 import { ApiResponse } from 'src/common/types/api_response';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
-@Controller('trips')
+@Controller('trip')
 export class TripController {
   constructor(private readonly tripService: TripService) {}
 
   // 🧍 Rider requests a ride
   @Post('request')
   async requestRide(
-    @Body() body: { riderId: string },
+    @Body() body: { firebaseId: string },
   ): Promise<ApiResponse<TripEntity>> {
     try {
-      const response = await this.tripService.createTrip(body.riderId);
+      const response = await this.tripService.createTrip(body.firebaseId);
       if (!response) {
         throw new NotFoundException('Rider not found');
       }
       return new ApiResponse(true, 'Trip created successfully', response);
-    } catch {
-      throw new NotFoundException('Rider not found');
+    } catch (error) {
+      console.error('Error creating trip:', error);
+      throw new CustomError('Error creating trip');
     }
   }
 

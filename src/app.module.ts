@@ -20,6 +20,7 @@ import { UserDeviceModule } from './user_device/user_device.module';
 import { TripModule } from './trip/trip.module';
 import { RiderController } from './riders/riders.controller';
 import { DriverController } from './driver/driver.controller';
+import { TripController } from './trip/trip.controller';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -50,7 +51,7 @@ const isProd = process.env.NODE_ENV === 'production';
     UserDeviceModule,
     TripModule,
   ],
-  controllers: [RiderController, DriverController],
+  controllers: [RiderController, DriverController, TripController],
   providers: [],
 })
 export class AppModule {}

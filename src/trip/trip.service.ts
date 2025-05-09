@@ -26,19 +26,20 @@ export class TripService {
   // Create a new trip request
   async createTrip(riderId: string): Promise<TripEntity> {
     try {
+      console.error('Tesint ');
       const rider = await this.riderRepository.findOne({
-        where: { id: riderId },
+        where: { firebaseId: riderId },
       });
       if (!rider) {
         throw new Error('Rider not found');
       }
-
       const trip = new TripEntity();
       trip.rider = rider;
       trip.status = TripStatus.REQUESTED; // Initial status
       this.currentTrips.push(trip);
       return trip;
-    } catch {
+    } catch (error) {
+      console.error('Error creating trip:', error);
       throw new Error('Error creating trip');
     }
     //return this.tripRepository.save(trip);
