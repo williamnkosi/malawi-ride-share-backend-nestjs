@@ -21,6 +21,7 @@ import { TripModule } from './trip/trip.module';
 import { RiderController } from './riders/riders.controller';
 import { DriverController } from './driver/driver.controller';
 import { TripController } from './trip/trip.controller';
+import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -50,6 +51,7 @@ const isProd = process.env.NODE_ENV === 'production';
     DriverReviewModule,
     UserDeviceModule,
     TripModule,
+    GoogleMapsServiceModule,
   ],
   controllers: [RiderController, DriverController, TripController],
   providers: [],
