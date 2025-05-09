@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { TripService } from './trip.service';
-import { TripEntity } from 'src/common/dto/trip/trip.entity';
+import { TripEntity } from 'src/common/entities/trip/trip.entity';
 //import { TripStatus } from 'src/common/dto/trip/trip_status';
 import { ApiResponse } from 'src/common/types/api_response';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';

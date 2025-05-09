@@ -5,8 +5,8 @@ import { Repository } from 'typeorm';
 import { RiderEntity } from 'src/common/entities/rider.entity';
 import { DriverEntity } from 'src/common/entities/driver.entity';
 
-import { TripEntity } from 'src/common/dto/trip/trip.entity';
-import { TripStatus } from 'src/common/dto/trip/trip_status';
+import { TripEntity } from 'src/common/entities/trip/trip.entity';
+import { TripStatus } from 'src/common/entities/trip/trip_status';
 
 @Injectable()
 export class TripService {
