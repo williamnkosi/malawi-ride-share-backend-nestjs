@@ -4,6 +4,7 @@ import {
   Param,
   Body,
   NotFoundException,
+  Get,
 } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
@@ -15,6 +16,16 @@ import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 @Controller('trip')
 export class TripController {
   constructor(private readonly tripService: TripService) {}
+
+  @Get()
+  findAllTrips(): ApiResponse<TripEntity[]> {
+    try {
+      const response = this.tripService.findAllTrips();
+      return new ApiResponse(true, 'Trips fetched successfully', response);
+    } catch {
+      throw new CustomError('Error fetching trips');
+    }
+  }
 
   // 🧍 Rider requests a ride
   @Post('request')

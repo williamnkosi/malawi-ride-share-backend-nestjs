@@ -3,7 +3,8 @@ import { Client, UnitSystem } from '@googlemaps/google-maps-services-js';
 
 @Injectable()
 export class GoogleMapsService {
-  private readonly client: Client;
+  private readonly client: Client = new Client({});
+
   private readonly apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
   constructor() {

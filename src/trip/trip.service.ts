@@ -9,6 +9,7 @@ import { TripEntity } from 'src/common/entities/trip/trip.entity';
 import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
+import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
 @Injectable()
 export class TripService {
@@ -48,18 +49,19 @@ export class TripService {
       // Calculate distance and duration using Google Maps API
       const origin =
         createTripDto.startLocation.latitude +
-        '|' +
+        ',' +
         createTripDto.startLocation.longitude;
       const destination =
         createTripDto.endLocation.latitude +
-        '|' +
+        ',' +
         createTripDto.endLocation.longitude;
       const distanceDuration =
         await this.googleMapsServiceRepository.getDistanceAndDuration(
           origin,
           destination,
         );
-      console.log(distanceDuration);
+      trip.distanceKm = distanceDuration.distanceKm;
+      trip.durationMin = distanceDuration.durationMin;
       return trip;
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -86,6 +88,14 @@ export class TripService {
     trip.status = TripStatus.ACCEPTED; // Status changes to matched when a driver is assigned
 
     return this.tripRepository.save(trip);
+  }
+
+  findAllTrips(): TripEntity[] {
+    try {
+      return this.currentTrips;
+    } catch {
+      throw new CustomError('Error fetching trips');
+    }
   }
 
   // Start the trip (change status to en_route)
