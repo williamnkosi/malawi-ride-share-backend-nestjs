@@ -1,16 +1,13 @@
-import { IsString, IsNumber, Min, Max } from 'class-validator';
+import { IsString } from 'class-validator';
+import { Column } from 'typeorm';
 
-export class RiderLocationDto {
+export class CreateTripDto {
   @IsString()
   firebaseId: string;
 
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  latitude: number;
+  @Column(() => Location)
+  startLocation: Location;
 
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  longitude: number;
+  @Column(() => Location)
+  endLocation: Location;
 }

@@ -9,6 +9,7 @@ import {
 import { TripStatus } from './trip_status';
 import { RiderEntity } from 'src/common/entities/rider.entity';
 import { DriverEntity } from 'src/common/entities/driver.entity';
+import { LocationDto } from 'src/common/dto/location/location';
 
 @Entity()
 export class TripEntity {
@@ -31,13 +32,19 @@ export class TripEntity {
   })
   status: TripStatus;
 
+  @Column(() => LocationDto)
+  startRiderLocation: LocationDto;
+
+  @Column(() => LocationDto)
+  endRiderLocation: LocationDto;
+
   @Column({ type: 'float', nullable: true })
   distanceKm: number;
 
   @Column({ type: 'float', nullable: true })
   durationMin: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ default: Date.now(), type: 'timestamp', nullable: true })
   startedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true })

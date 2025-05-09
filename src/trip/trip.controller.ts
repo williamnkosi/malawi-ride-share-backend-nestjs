@@ -10,6 +10,7 @@ import { TripEntity } from 'src/common/entities/trip/trip.entity';
 //import { TripStatus } from 'src/common/dto/trip/trip_status';
 import { ApiResponse } from 'src/common/types/api_response';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 
 @Controller('trip')
 export class TripController {
@@ -18,10 +19,10 @@ export class TripController {
   // 🧍 Rider requests a ride
   @Post('request')
   async requestRide(
-    @Body() body: { firebaseId: string },
+    @Body() body: CreateTripDto,
   ): Promise<ApiResponse<TripEntity>> {
     try {
-      const response = await this.tripService.createTrip(body.firebaseId);
+      const response = await this.tripService.createTrip(body);
       if (!response) {
         throw new NotFoundException('Rider not found');
       }

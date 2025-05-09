@@ -7,6 +7,7 @@ import { DriverEntity } from 'src/common/entities/driver.entity';
 
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 import { TripStatus } from 'src/common/entities/trip/trip_status';
+import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 
 @Injectable()
 export class TripService {
@@ -24,11 +25,11 @@ export class TripService {
   currentTrips: TripEntity[] = [];
 
   // Create a new trip request
-  async createTrip(riderId: string): Promise<TripEntity> {
+  async createTrip(createTripDto: CreateTripDto): Promise<TripEntity> {
     try {
       console.error('Tesint ');
       const rider = await this.riderRepository.findOne({
-        where: { firebaseId: riderId },
+        where: { firebaseId: createTripDto.firebaseId },
       });
       if (!rider) {
         throw new Error('Rider not found');
