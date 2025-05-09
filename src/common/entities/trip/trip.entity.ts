@@ -1,6 +1,5 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -9,6 +8,7 @@ import {
 import { TripStatus } from './trip_status';
 import { RiderEntity } from 'src/common/entities/rider.entity';
 import { DriverEntity } from 'src/common/entities/driver.entity';
+import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 
 @Entity()
 export class TripEntity {
@@ -31,11 +31,11 @@ export class TripEntity {
   })
   status: TripStatus;
 
-  @Column(() => Location)
-  startRiderLocation: Location;
+  @Column(() => UserLocationDto)
+  startRiderLocation: UserLocationDto;
 
-  @Column(() => Location)
-  endRiderLocation: Location;
+  @Column(() => UserLocationDto)
+  endRiderLocation: UserLocationDto;
 
   @Column({ type: 'float', nullable: true })
   distanceKm: number;
@@ -43,16 +43,16 @@ export class TripEntity {
   @Column({ type: 'float', nullable: true })
   durationMin: number;
 
-  @Column({ default: Date.now(), type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   startedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   endedAt: Date;
 
-  @CreateDateColumn({ default: Date.now() })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @CreateDateColumn({ default: Date.now() })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @UpdateDateColumn()
   updatedAt: Date;
 }

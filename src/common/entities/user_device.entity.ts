@@ -25,9 +25,9 @@ export class UserDevice {
   })
   deviceVersion: string;
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 }

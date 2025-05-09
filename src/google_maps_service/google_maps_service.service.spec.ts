@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GoogleMapsServiceService } from './google_maps_service.service';
+import { GoogleMapsService } from './google_maps_service.service';
 
 describe('GoogleMapsServiceService', () => {
-  let service: GoogleMapsServiceService;
+  let service: GoogleMapsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GoogleMapsServiceService],
+      providers: [GoogleMapsService],
     }).compile();
 
-    service = module.get<GoogleMapsServiceService>(GoogleMapsServiceService);
+    service = module.get<GoogleMapsService>(GoogleMapsService);
   });
 
   it('should be defined', () => {

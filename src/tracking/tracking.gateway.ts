@@ -2,8 +2,9 @@ import { MessageBody } from '@nestjs/websockets/decorators/message-body.decorato
 import { WebSocketGateway } from '@nestjs/websockets/decorators/socket-gateway.decorator';
 import { SubscribeMessage } from '@nestjs/websockets/decorators/subscribe-message.decorator';
 import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
-import { RiderLocationDto } from 'src/common/dto/location/location.dto';
+
 import { TrackingService } from './tracking.service';
+import { RiderLocationDto } from 'src/common/dto/rider/rider_location.dto';
 
 @WebSocketGateway({
   namespace: '/tracking',
@@ -19,12 +20,10 @@ export class TrackingGateway {
     return this.trackingService.handleUpdateRiderLocation(data);
   }
 
-  @SubscribeMessage('getRiderLocation')
-  handleGetRiderLocation(
-    @MessageBody() userId: string,
-  ): RiderLocationDto | null {
-    return this.trackingService.handleGetRiderLocation(userId);
-  }
+  // @SubscribeMessage('getRiderLocation')
+  // handleGetRiderLocation(@MessageBody() userId: string): LocationDto | null {
+  //   return this.trackingService.handleGetRiderLocation(userId);
+  // }
 
   @SubscribeMessage('updateDriverLocation')
   handleDriverLocationUpdate(@MessageBody() data: DriverLocationDto) {

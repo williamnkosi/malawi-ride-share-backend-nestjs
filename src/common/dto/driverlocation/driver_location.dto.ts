@@ -1,5 +1,6 @@
-import { IsEnum, IsNumber, Min, Max, IsString, IsDate } from 'class-validator';
+import { IsEnum, IsNumber, Min, Max, IsString } from 'class-validator';
 import { DriverStatus } from './driver_status';
+import { Column } from 'typeorm';
 
 export class DriverLocationDto {
   @IsString()
@@ -14,8 +15,8 @@ export class DriverLocationDto {
   @Max(180)
   lng: number;
 
-  @IsDate()
-  timestamp: number; // Assume it's a Unix timestamp in milliseconds
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  timestamp: Date;
 
   @IsEnum(DriverStatus)
   status: DriverStatus;

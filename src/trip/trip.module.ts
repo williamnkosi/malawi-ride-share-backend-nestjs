@@ -8,12 +8,14 @@ import { DriverEntity } from 'src/common/entities/driver.entity';
 import { RiderEntity } from 'src/common/entities/rider.entity';
 import { DriversModule } from 'src/driver/driver.module';
 import { RiderModule } from 'src/riders/riders.module';
+import { GoogleMapsServiceModule } from 'src/google_maps_service/google_maps_service.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TripEntity, DriverEntity, RiderEntity]),
     RiderModule,
     DriversModule,
+    GoogleMapsServiceModule,
   ],
   controllers: [TripController],
   providers: [TripService],

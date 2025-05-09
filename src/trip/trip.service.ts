@@ -8,6 +8,7 @@ import { DriverEntity } from 'src/common/entities/driver.entity';
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
+import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 
 @Injectable()
 export class TripService {
@@ -20,6 +21,8 @@ export class TripService {
 
     @InjectRepository(DriverEntity)
     private driverRepository: Repository<DriverEntity>,
+
+    private googleMapsServiceRepository: GoogleMapsService,
   ) {}
 
   currentTrips: TripEntity[] = [];
@@ -41,6 +44,22 @@ export class TripService {
       trip.endRiderLocation = createTripDto.endLocation;
       trip.endRiderLocation = createTripDto.endLocation;
       this.currentTrips.push(trip);
+
+      // Calculate distance and duration using Google Maps API
+      const origin =
+        createTripDto.startLocation.latitude +
+        '|' +
+        createTripDto.startLocation.longitude;
+      const destination =
+        createTripDto.endLocation.latitude +
+        '|' +
+        createTripDto.endLocation.longitude;
+      const distanceDuration =
+        await this.googleMapsServiceRepository.getDistanceAndDuration(
+          origin,
+          destination,
+        );
+      console.log(distanceDuration);
       return trip;
     } catch (error) {
       console.error('Error creating trip:', error);
