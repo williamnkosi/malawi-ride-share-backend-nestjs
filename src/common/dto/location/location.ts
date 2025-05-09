@@ -1,6 +1,8 @@
 import { IsNumber, Min, Max } from 'class-validator';
+import { Entity } from 'typeorm';
 
-export class LocationDto {
+@Entity()
+export class Location {
   @IsNumber()
   @Min(-90)
   @Max(90)

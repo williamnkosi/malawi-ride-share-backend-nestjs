@@ -36,7 +36,10 @@ export class TripService {
       }
       const trip = new TripEntity();
       trip.rider = rider;
-      trip.status = TripStatus.REQUESTED; // Initial status
+      trip.status = TripStatus.REQUESTED;
+      trip.startRiderLocation = createTripDto.startLocation;
+      trip.endRiderLocation = createTripDto.endLocation;
+      trip.endRiderLocation = createTripDto.endLocation;
       this.currentTrips.push(trip);
       return trip;
     } catch (error) {
