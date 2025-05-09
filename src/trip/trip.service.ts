@@ -62,7 +62,6 @@ export class TripService {
     tripOrigin: UserLocationDto,
   ): Promise<DriverEntity | null> {
     const pickupLocation = `${tripOrigin.latitude},${tripOrigin.longitude}`;
-    const drivers = await this.driverRepository.
 
     if (!drivers.length) return null;
 

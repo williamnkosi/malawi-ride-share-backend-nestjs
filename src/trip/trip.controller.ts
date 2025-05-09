@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Param,
-  Body,
-  NotFoundException,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, Body, NotFoundException, Get } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 //import { TripStatus } from 'src/common/dto/trip/trip_status';

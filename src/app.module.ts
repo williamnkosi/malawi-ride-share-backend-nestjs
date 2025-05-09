@@ -9,7 +9,6 @@ import { DriversModule } from './driver/driver.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
-import { TrackingModule } from './tracking/tracking.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RiderModule } from './riders/riders.module';
 //import { RidersController } from './riders/riders.controller';
@@ -22,6 +21,8 @@ import { RiderController } from './riders/riders.controller';
 import { DriverController } from './driver/driver.controller';
 import { TripController } from './trip/trip.controller';
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
+import { DriverLocationTrackingModule } from './tracking/driver_location_tracking/driver_location_tracking.module';
+import { RiderLocationTrackingModule } from './tracking/rider_location_tracking/rider_location_tracking.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -45,13 +46,14 @@ const isProd = process.env.NODE_ENV === 'production';
     DriversModule,
     FirebaseModule,
     ...(!isProd ? [TestingModule] : []),
-    TrackingModule,
     RiderModule,
     RiderReviewModule,
     DriverReviewModule,
     UserDeviceModule,
     TripModule,
     GoogleMapsServiceModule,
+    DriverLocationTrackingModule,
+    RiderLocationTrackingModule,
   ],
   controllers: [RiderController, DriverController, TripController],
   providers: [],
