@@ -36,20 +36,16 @@ export class DriverLocationTrackingGateway
   }
 
   @SubscribeMessage('driver-location-update')
-  //@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   handleDriverLocationUpdate(
     @MessageBody()
     driverLocation: string,
   ) {
     try {
-      console.log(driverLocation);
       const r = JSON.parse(driverLocation) as DriverLocationDto;
-      //console.log(r);
-      console.log(typeof driverLocation);
       this.driverLocationService.updateLocation(r);
     } catch (error) {
       console.log(error);
-      console.error('Error updating driver location');
+
       throw new CustomError('Error updating driver location');
     }
   }
