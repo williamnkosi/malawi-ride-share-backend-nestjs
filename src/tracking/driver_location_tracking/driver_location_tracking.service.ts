@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
+import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
@@ -32,5 +33,33 @@ export class DriverLocationTrackingService {
     } catch {
       throw new CustomError('Error getting driver location', 500);
     }
+  }
+
+  findClosestDriver(tripOrigin: UserLocationDto): DriverLocationDto {
+    const d = Array.from(this.drivers.values()).filter(
+      (driver: DriverLocationDto) => {
+        const distance = this.getDistance(
+          tripOrigin.latitude,
+          tripOrigin.longitude,
+          driver.driverLocation.latitude,
+          driver.driverLocation.longitude,
+        );
+        return distance < 5; // e.g., within 5 km
+      },
+    );
+
+    return d[0];
+  }
+
+  private getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 }

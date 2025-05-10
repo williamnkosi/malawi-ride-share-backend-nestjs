@@ -7,13 +7,15 @@ import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserDeviceService } from 'src/user_device/user_device.service';
+import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
 
 @Controller('trip')
 export class TripController {
   constructor(
     private readonly tripService: TripService,
     private readonly notificationsService: NotificationsService,
-    private readonly UserDeviceService: UserDeviceService,
+    private readonly userDeviceService: UserDeviceService,
+    private readonly driverLocationTrackingService: DriverLocationTrackingService,
   ) {}
 
   @Get()
@@ -33,12 +35,10 @@ export class TripController {
   ): Promise<ApiResponse<TripEntity>> {
     try {
       const trip = await this.tripService.createTrip(body);
-      const drivers = this.tripService.findClosestDriver(
+      const drivers = this.driverLocationTrackingService.findClosestDriver(
         trip.startRiderLocation,
       );
-      const device = await this.UserDeviceService.findOne(
-        drivers[0].firebaseId,
-      );
+      const device = await this.userDeviceService.findOne(drivers.firebaseId);
       const title = 'New Trip Request';
       const bodyMessage = `A new trip request has been made from ${trip.startRiderLocation.latitude}, ${trip.startRiderLocation.longitude} to ${trip.endRiderLocation.latitude}, ${trip.endRiderLocation.longitude}.`;
       await this.notificationsService.sendNotification(

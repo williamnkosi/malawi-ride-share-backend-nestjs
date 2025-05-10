@@ -9,10 +9,7 @@ import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
-import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
-import { DriverStatus } from 'src/common/dto/driverlocation/driver_status';
-
 @Injectable()
 export class TripService {
   constructor(
@@ -21,8 +18,6 @@ export class TripService {
 
     @InjectRepository(RiderEntity)
     private riderRepository: Repository<RiderEntity>,
-
-    private driverLocationTrackingRepository: DriverLocationTrackingService,
 
     private googleMapsServiceRepository: GoogleMapsService,
   ) {}
@@ -55,46 +50,6 @@ export class TripService {
       throw new Error('Error creating trip');
     }
     //return this.tripRepository.save(trip);
-  }
-
-  findClosestDriver(tripOrigin: UserLocationDto): {
-    firebaseId: string;
-    driverLocation: UserLocationDto;
-    timestamp: Date;
-    status: DriverStatus;
-    driverId: string;
-  }[] {
-    // Construct origin (pickup) and multiple destination strings
-    // const destinations = drivers.map(
-    //   (driver) => `${driver.latitude},${driver.longitude}`,
-    // );
-    // const pickupLocation = `${tripOrigin.latitude},${tripOrigin.longitude}`;
-    const drivers = this.driverLocationTrackingRepository.getAllDrivers();
-    if (!drivers.length) return [];
-
-    const d = drivers.filter((driver) => {
-      const distance = this.getDistance(
-        tripOrigin.latitude,
-        tripOrigin.longitude,
-        driver.driverLocation.latitude,
-        driver.driverLocation.longitude,
-      );
-      return distance < 5; // e.g., within 5 km
-    });
-
-    return d;
-  }
-
-  private getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   findAllTrips(): TripEntity[] {
