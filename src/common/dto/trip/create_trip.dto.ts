@@ -1,14 +1,17 @@
-import { IsString } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
 import { Column } from 'typeorm';
 import { UserLocationDto } from '../location/user_location.dto';
+import { Type } from 'class-transformer';
 
 export class CreateTripDto {
   @IsString()
   firebaseId: string;
 
-  @Column(() => UserLocationDto)
+  @ValidateNested()
+  @Type(() => UserLocationDto)
   startLocation: UserLocationDto;
 
-  @Column(() => UserLocationDto)
+  @ValidateNested()
+  @Type(() => UserLocationDto)
   endLocation: UserLocationDto;
 }

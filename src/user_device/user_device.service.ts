@@ -23,9 +23,12 @@ export class UserDeviceService {
     return await this.userDeviceRepository.find();
   }
 
-  async findOne(id: string): Promise<UserDeviceEntity> {
-    const device = await this.userDeviceRepository.findOne({ where: { id } });
-    if (!device) throw new NotFoundException(`UserDevice ${id} not found`);
+  async findOne(firebaseUserId: string): Promise<UserDeviceEntity> {
+    const device = await this.userDeviceRepository.findOne({
+      where: { firebaseUserId },
+    });
+    if (!device)
+      throw new NotFoundException(`UserDevice ${firebaseUserId} not found`);
     return device;
   }
 

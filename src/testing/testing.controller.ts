@@ -6,7 +6,7 @@ import { NotificationsService } from 'src/notifications/notifications.service';
 export class TestingController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Post('send-notification/:token')
+  @Post('send-notification')
   async ping(@Param('token') token: string) {
     try {
       const title = 'Test Notification';

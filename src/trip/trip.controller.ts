@@ -1,14 +1,20 @@
-import { Controller, Post, Body, NotFoundException, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 //import { TripStatus } from 'src/common/dto/trip/trip_status';
 import { ApiResponse } from 'src/common/types/api_response';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { UserDeviceService } from 'src/user_device/user_device.service';
 
 @Controller('trip')
 export class TripController {
-  constructor(private readonly tripService: TripService) {}
+  constructor(
+    private readonly tripService: TripService,
+    private readonly notificationsService: NotificationsService,
+    private readonly UserDeviceService: UserDeviceService,
+  ) {}
 
   @Get()
   findAllTrips(): ApiResponse<TripEntity[]> {
@@ -26,11 +32,21 @@ export class TripController {
     @Body() body: CreateTripDto,
   ): Promise<ApiResponse<TripEntity>> {
     try {
-      const response = await this.tripService.createTrip(body);
-      if (!response) {
-        throw new NotFoundException('Rider not found');
-      }
-      return new ApiResponse(true, 'Trip created successfully', response);
+      const trip = await this.tripService.createTrip(body);
+      const drivers = this.tripService.findClosestDriver(
+        trip.startRiderLocation,
+      );
+      const device = await this.UserDeviceService.findOne(
+        drivers[0].firebaseId,
+      );
+      const title = 'New Trip Request';
+      const bodyMessage = `A new trip request has been made from ${trip.startRiderLocation.latitude}, ${trip.startRiderLocation.longitude} to ${trip.endRiderLocation.latitude}, ${trip.endRiderLocation.longitude}.`;
+      await this.notificationsService.sendNotification(
+        device.fcmToken,
+        title,
+        bodyMessage,
+      );
+      return new ApiResponse(true, 'Trip created successfully', trip);
     } catch (error) {
       console.error('Error creating trip:', error);
       throw new CustomError('Error creating trip');
