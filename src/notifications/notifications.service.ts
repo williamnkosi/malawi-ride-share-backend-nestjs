@@ -26,6 +26,26 @@ export class NotificationsService {
     }
   }
 
+  sendNotificationWithData(
+    token: string,
+    notification: { title: string; body: string },
+    data: Record<string, string>,
+  ) {
+    const payload = {
+      data: {
+        title: notification.title,
+        body: notification.body,
+        data: JSON.stringify(data),
+      },
+    };
+    const message1 = this.firebaseService.getMessaging();
+    const response = message1.send({
+      token,
+      data: payload.data,
+    });
+    return response;
+  }
+
   async registerDevice(dto: CreateUserDeviceDto): Promise<void> {
     try {
       await this.userDeviceRepository.create(dto);

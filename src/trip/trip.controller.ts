@@ -44,10 +44,13 @@ export class TripController {
       const device = await this.userDeviceService.findOne(drivers.firebaseId);
       const title = 'New Trip Request';
       const bodyMessage = `A new trip request has been made from ${trip.startRiderLocation.latitude}, ${trip.startRiderLocation.longitude} to ${trip.endRiderLocation.latitude}, ${trip.endRiderLocation.longitude}.`;
-      await this.notificationsService.sendNotification(
+      await this.notificationsService.sendNotificationWithData(
         device.fcmToken,
-        title,
-        bodyMessage,
+        { title, body: bodyMessage },
+        {
+          tripId: trip.id,
+          driverId: drivers.firebaseId,
+        },
       );
       return new ApiResponse(true, 'Trip created successfully', trip);
     } catch (error) {

@@ -1,5 +1,4 @@
 import { IsString, ValidateNested } from 'class-validator';
-import { Column } from 'typeorm';
 import { UserLocationDto } from '../location/user_location.dto';
 import { Type } from 'class-transformer';
 
