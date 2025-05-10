@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
-import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
+
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
 @Injectable()
 export class DriverLocationTrackingService {
-  private drivers = new Map<string, UserLocationDto>();
+  private drivers = new Map<string, DriverLocationDto>();
 
   updateLocation(driverLocation: DriverLocationDto) {
     try {
-      this.drivers.set(
-        driverLocation.firebaseId,
-        driverLocation.driverLocation,
-      );
+      this.drivers.set(driverLocation.firebaseId, driverLocation);
     } catch {
       throw new CustomError('Error updating driver location', 500);
     }

@@ -1,31 +1,54 @@
 import {
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { DriverLocationTrackingService } from './driver_location_tracking.service';
 import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
-import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway()
-export class DriverLocationTrackingGateway {
+export class DriverLocationTrackingGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly driverLocationService: DriverLocationTrackingService,
   ) {}
+
+  @WebSocketServer()
+  server: Server;
+
+  afterInit(server: Server) {
+    console.log('WebSocket initialized:', server);
+  }
+
+  handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
+  }
 
   @SubscribeMessage('driver-location-update')
   //@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   handleDriverLocationUpdate(
     @MessageBody()
-    driverLocation: DriverLocationDto,
+    driverLocation: string,
   ) {
     try {
       console.log(driverLocation);
-
-      this.driverLocationService.updateLocation(driverLocation);
-    } catch {
+      const r = JSON.parse(driverLocation) as DriverLocationDto;
+      //console.log(r);
+      console.log(typeof driverLocation);
+      this.driverLocationService.updateLocation(r);
+    } catch (error) {
+      console.log(error);
       console.error('Error updating driver location');
       throw new CustomError('Error updating driver location');
     }

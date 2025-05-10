@@ -12,6 +12,7 @@ import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.s
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
+import { DriverStatus } from 'src/common/dto/driverlocation/driver_status';
 
 @Injectable()
 export class TripService {
@@ -62,8 +63,10 @@ export class TripService {
   }
 
   findClosestDriver(tripOrigin: UserLocationDto): {
-    latitude: number;
-    longitude: number;
+    firebaseId: string;
+    driverLocation: UserLocationDto;
+    timestamp: Date;
+    status: DriverStatus;
     driverId: string;
   }[] {
     // Construct origin (pickup) and multiple destination strings
@@ -78,8 +81,8 @@ export class TripService {
       const distance = this.getDistance(
         tripOrigin.latitude,
         tripOrigin.longitude,
-        driver.latitude,
-        driver.longitude,
+        driver.driverLocation.latitude,
+        driver.driverLocation.longitude,
       );
       return distance < 5; // e.g., within 5 km
     });
