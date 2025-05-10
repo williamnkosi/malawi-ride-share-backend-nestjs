@@ -4,12 +4,12 @@ import { DevicePlatform } from '../types/device_platform';
 import { Matches } from 'class-validator';
 
 @Entity()
-export class UserDevice {
+export class UserDeviceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  userId: string;
+  firebaseUserId: string;
 
   @Column()
   fcmToken: string;

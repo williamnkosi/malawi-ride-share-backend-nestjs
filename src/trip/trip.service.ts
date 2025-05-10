@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { RiderEntity } from 'src/common/entities/rider.entity';
-import { DriverEntity } from 'src/common/entities/driver.entity';
 
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 import { TripStatus } from 'src/common/entities/trip/trip_status';
@@ -23,16 +22,12 @@ export class TripService {
     @InjectRepository(RiderEntity)
     private riderRepository: Repository<RiderEntity>,
 
-    @InjectRepository(DriverEntity)
-    private driverRepository: Repository<DriverEntity>,
-
     private driverLocationTrackingRepository: DriverLocationTrackingService,
 
     private googleMapsServiceRepository: GoogleMapsService,
   ) {}
 
   currentTrips: TripEntity[] = [];
-  activeDrivers: DriverEntity[] = [];
 
   // Create a new trip request
   async createTrip(createTripDto: CreateTripDto): Promise<TripEntity> {

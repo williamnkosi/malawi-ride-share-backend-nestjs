@@ -23,8 +23,8 @@ export class DriverLocationTrackingGateway
   @WebSocketServer()
   server: Server;
 
-  afterInit(server: Server) {
-    console.log('WebSocket initialized:', server);
+  afterInit() {
+    console.log('WebSocket initialized:');
   }
 
   handleConnection(client: Socket) {
