@@ -9,7 +9,7 @@ import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
-import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
+
 @Injectable()
 export class TripService {
   constructor(
@@ -25,17 +25,15 @@ export class TripService {
   currentTrips: TripEntity[] = [];
 
   // Create a new trip request
-  async createTrip(createTripDto: CreateTripDto): Promise<TripEntity> {
+  async createTrip(
+    createTripDto: CreateTripDto,
+    rider: RiderEntity | null,
+  ): Promise<TripEntity> {
     try {
       console.error('Tesint ');
-      const rider = await this.riderRepository.findOne({
-        where: { firebaseId: createTripDto.firebaseId },
-      });
-      if (!rider) {
-        throw new Error('Rider not found');
-      }
+
       const trip = new TripEntity();
-      trip.rider = rider;
+      trip.rider = rider!;
       trip.status = TripStatus.REQUESTED;
       trip.startRiderLocation = createTripDto.startLocation;
       trip.endRiderLocation = createTripDto.endLocation;

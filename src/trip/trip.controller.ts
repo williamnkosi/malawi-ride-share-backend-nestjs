@@ -8,6 +8,7 @@ import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserDeviceService } from 'src/user_device/user_device.service';
 import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
+import { RiderService } from 'src/riders/riders.service';
 
 @Controller('trip')
 export class TripController {
@@ -16,6 +17,7 @@ export class TripController {
     private readonly notificationsService: NotificationsService,
     private readonly userDeviceService: UserDeviceService,
     private readonly driverLocationTrackingService: DriverLocationTrackingService,
+    private readonly riderService: RiderService,
   ) {}
 
   @Get()
@@ -34,7 +36,8 @@ export class TripController {
     @Body() body: CreateTripDto,
   ): Promise<ApiResponse<TripEntity>> {
     try {
-      const trip = await this.tripService.createTrip(body);
+      const rider = await this.riderService.findOne(body.firebaseId);
+      const trip = await this.tripService.createTrip(body, rider);
       const drivers = this.driverLocationTrackingService.findClosestDriver(
         trip.startRiderLocation,
       );

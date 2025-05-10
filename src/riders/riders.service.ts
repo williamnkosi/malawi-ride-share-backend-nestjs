@@ -17,9 +17,9 @@ export class RiderService {
     return this.riderRepository.find();
   }
 
-  async findOne(id: string): Promise<RiderEntity | null> {
+  async findOne(firebaseId: string): Promise<RiderEntity | null> {
     try {
-      return this.riderRepository.findOne({ where: { firebaseId: id } });
+      return this.riderRepository.findOne({ where: { firebaseId } });
     } catch {
       throw new Error('Error creating rider: ');
     }
