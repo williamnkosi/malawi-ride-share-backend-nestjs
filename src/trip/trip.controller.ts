@@ -55,7 +55,7 @@ export class TripController {
       return new ApiResponse(true, 'Trip created successfully', trip);
     } catch (error) {
       console.error('Error creating trip:', error);
-      throw new CustomError('Error creating trip');
+      throw new CustomError('Error creating trip', error.message);
     }
   }
 
