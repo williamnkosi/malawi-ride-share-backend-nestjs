@@ -12,7 +12,12 @@ import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*', // Or specify your client origin
+  },
+  transports: ['websocket'], // match your Flutter client
+})
 export class DriverLocationTrackingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -38,11 +43,10 @@ export class DriverLocationTrackingGateway
   @SubscribeMessage('driver-location-update')
   handleDriverLocationUpdate(
     @MessageBody()
-    driverLocation: string,
+    driverLocation: DriverLocationDto,
   ) {
     try {
-      const r = JSON.parse(driverLocation) as DriverLocationDto;
-      this.driverLocationService.updateLocation(r);
+      this.driverLocationService.updateLocation(driverLocation);
     } catch (error) {
       console.log(error);
 

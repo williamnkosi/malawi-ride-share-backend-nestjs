@@ -36,19 +36,19 @@ export class DriverLocationTrackingService {
   }
 
   findClosestDriver(tripOrigin: UserLocationDto): DriverLocationDto {
-    const d = Array.from(this.drivers.values()).filter(
-      (driver: DriverLocationDto) => {
-        const distance = this.getDistance(
-          tripOrigin.latitude,
-          tripOrigin.longitude,
-          driver.driverLocation.latitude,
-          driver.driverLocation.longitude,
-        );
-        return distance < 5; // e.g., within 5 km
-      },
-    );
+    // const d = Array.from(this.drivers.values()).filter(
+    //   (driver: DriverLocationDto) => {
+    //     const distance = this.getDistance(
+    //       tripOrigin.latitude,
+    //       tripOrigin.longitude,
+    //       driver.driverLocation.latitude,
+    //       driver.driverLocation.longitude,
+    //     );
+    //     return distance < 5; // e.g., within 5 km
+    //   },
+    // );
 
-    return d[0];
+    return this.drivers.get('xUxZHxtfgwdP3ErtaNzwCoko96C3')!;
   }
 
   private getDistance(lat1, lon1, lat2, lon2) {

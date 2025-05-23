@@ -16,6 +16,6 @@ async function bootstrap() {
   app.useWebSocketAdapter(new IoAdapter(app));
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();

@@ -1,4 +1,4 @@
-import { Controller, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
@@ -16,5 +16,10 @@ export class TestingController {
     } catch (e) {
       throw new CustomError('Failed', 500);
     }
+  }
+
+  @Get('/ping')
+  getPing(): string {
+    return 'pong';
   }
 }
