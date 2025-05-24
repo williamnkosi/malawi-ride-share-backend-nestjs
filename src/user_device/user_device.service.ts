@@ -19,6 +19,24 @@ export class UserDeviceService {
     return await this.userDeviceRepository.save(userDevice);
   }
 
+  async registerOrUpdateDevice(
+    dto: CreateUserDeviceDto,
+  ): Promise<UserDeviceEntity> {
+    const existing = await this.userDeviceRepository.findOne({
+      where: { firebaseUserId: dto.firebaseUserId },
+    });
+
+    if (existing) {
+      // Update existing entry
+      this.userDeviceRepository.merge(existing, dto);
+      return await this.userDeviceRepository.save(existing);
+    }
+
+    // Create new entry
+    const newDevice = this.userDeviceRepository.create(dto);
+    return await this.userDeviceRepository.save(newDevice);
+  }
+
   async findAll(): Promise<UserDeviceEntity[]> {
     return await this.userDeviceRepository.find();
   }

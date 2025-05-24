@@ -1,5 +1,5 @@
 // user-device.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
 import { DevicePlatform } from '../types/device_platform';
 import { Matches } from 'class-validator';
 
@@ -8,9 +8,11 @@ export class UserDeviceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Unique(['firebaseUserId'])
   @Column()
   firebaseUserId: string;
 
+  @Unique(['fcmToken'])
   @Column()
   fcmToken: string;
 

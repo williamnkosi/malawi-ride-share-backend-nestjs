@@ -3,17 +3,21 @@ import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_devi
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { NotificationsService } from './notifications.service';
 import { ApiResponse } from 'src/common/types/api_response';
+import { UserDeviceService } from 'src/user_device/user_device.service';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationService: NotificationsService) {}
+  constructor(
+    private readonly notificationService: NotificationsService,
+    private readonly userDeviceRepository: UserDeviceService,
+  ) {}
 
   @Post('register-device')
   async registerDevice(
     @Body() dto: CreateUserDeviceDto,
   ): Promise<ApiResponse<boolean>> {
     try {
-      await this.notificationService.registerDevice(dto);
+      await this.userDeviceRepository.registerOrUpdateDevice(dto);
       return new ApiResponse(true, 'Device registered successfully', true);
     } catch {
       throw new CustomError('Error registering device', 500);
