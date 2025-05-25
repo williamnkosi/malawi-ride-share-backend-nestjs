@@ -11,7 +11,11 @@ export class TestingController {
     try {
       const title = 'Test Notification';
       const body = 'This is a test notification';
-      await this.notificationsService.sendNotification(token, title, body);
+      await this.notificationsService.sendNotification(
+        token,
+        { title, body },
+        { body },
+      );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       throw new CustomError('Failed', 500);

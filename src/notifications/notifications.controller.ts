@@ -23,4 +23,19 @@ export class NotificationsController {
       throw new CustomError('Error registering device', 500);
     }
   }
+
+  @Post('get-device')
+  async getDevice(
+    @Body('firebaseUserId') firebaseUserId: string,
+  ): Promise<ApiResponse<any>> {
+    try {
+      const device = await this.userDeviceRepository.findOne(firebaseUserId);
+      if (!device) {
+        return new ApiResponse(false, 'Device not found', null);
+      }
+      return new ApiResponse(true, 'Device retrieved successfully', device);
+    } catch {
+      throw new CustomError('Error retrieving device', 500);
+    }
+  }
 }

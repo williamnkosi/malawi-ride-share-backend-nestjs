@@ -9,6 +9,7 @@ import { TripStatus } from 'src/common/entities/trip/trip_status';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { TripDriverResponseDto } from 'src/common/dto/trip/trip_driver_response.dto';
 
 @Injectable()
 export class TripService {
@@ -28,7 +29,7 @@ export class TripService {
   async createTrip(
     createTripDto: CreateTripDto,
     rider: RiderEntity | null,
-  ): Promise<TripEntity> {
+  ): Promise<TripDriverResponseDto> {
     try {
       console.error('Tesint ');
 
@@ -42,7 +43,7 @@ export class TripService {
       const distanceInfo = await this.getDistances(createTripDto);
       trip.distanceKm = distanceInfo.distanceKm;
       trip.durationMin = distanceInfo.durationMin;
-      return trip;
+      return TripDriverResponseDto.fromTripEntity(trip);
     } catch (error) {
       console.error('Error creating trip:', error);
       throw new Error('Error creating trip');
@@ -134,5 +135,9 @@ export class TripService {
       );
 
     return tripInfo;
+  }
+
+  clearCurrentTrips(): void {
+    this.currentTrips = [];
   }
 }

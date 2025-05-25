@@ -32,54 +32,34 @@ export class TripController {
 
   // 🧍 Rider requests a ride
   @Post('request')
-  async requestRide(
-    @Body() body: CreateTripDto,
-  ): Promise<ApiResponse<TripEntity>> {
+  async requestRide(@Body() body: CreateTripDto): Promise<ApiResponse<null>> {
     try {
       const rider = await this.riderService.findOne(body.firebaseId);
       const trip = await this.tripService.createTrip(body, rider);
       const drivers = this.driverLocationTrackingService.findClosestDriver(
-        trip.startRiderLocation,
+        trip.startLocation,
       );
       const device = await this.userDeviceService.findOne(drivers.firebaseId);
       const title = 'New Trip Request';
-      const bodyMessage = `A new trip request has been made from ${trip.startRiderLocation.latitude}, ${trip.startRiderLocation.longitude} to ${trip.endRiderLocation.latitude}, ${trip.endRiderLocation.longitude}.`;
+      const bodyMessage = `A new trip request has been made from ${trip.riderfirstName} ${trip.riderlastName}.`;
       await this.notificationsService.sendNotificationWithData(
         device.fcmToken,
         { title, body: bodyMessage },
-        {
-          tripId: trip.id,
-          driverId: drivers.firebaseId,
-        },
+        trip.toRecordFirebaseMessage(),
       );
-      return new ApiResponse(true, 'Trip created successfully', trip);
+      return new ApiResponse(true, 'Trip created successfully', null);
     } catch (error) {
-      console.error('Error creating trip:', error);
       throw new CustomError('Error creating trip', error.message);
     }
   }
 
-  // 🧍 Rider cancels the ride
-  //   @Post(':id/cancel')
-  //   cancelRide(@Param('id') tripId: string): Promise<TripEntity> {
-  //     return this.tripService.updateStatus(tripId, TripStatus.CANCELED);
-  //   }
-
-  // 🚗 Driver accepts the ride
-  //   @Post(':id/accept')
-  //   async acceptRide(
-  //     @Param('id') tripId: string,
-  //     @Body() body: { driverId: string },
-  //   ): Promise<TripEntity> {
-  //     return this.tripService.assignDriver(tripId, body.driverId);
-  //   }
-
-  // 🚗 Driver updates ride status (e.g., EN_ROUTE, COMPLETED)
-  //   @Post(':id/status')
-  //   async updateRideStatus(
-  //     @Param('id') tripId: string,
-  //     @Body() body: { status: TripStatus },
-  //   ): Promise<TripEntity> {
-  //     return this.tripService.updateStatus(tripId, body.status);
-  //   }
+  @Post('delete-all')
+  deleteAllTrips(): ApiResponse<null> {
+    try {
+      this.tripService.clearCurrentTrips();
+      return new ApiResponse(true, 'All trips deleted successfully', null);
+    } catch (error) {
+      throw new CustomError('Error deleting all trips', error.message);
+    }
+  }
 }
