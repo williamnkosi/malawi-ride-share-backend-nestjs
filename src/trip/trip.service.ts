@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,6 +10,9 @@ import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { TripDriverResponseDto } from 'src/common/dto/trip/trip_driver_response.dto';
+import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
+import { UserDeviceService } from 'src/user_device/user_device.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class TripService {
@@ -21,9 +24,15 @@ export class TripService {
     private riderRepository: Repository<RiderEntity>,
 
     private googleMapsServiceRepository: GoogleMapsService,
+
+    private readonly driverLocationTrackingService: DriverLocationTrackingService,
+    private readonly userDeviceService: UserDeviceService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
+  logger = new Logger('TripService');
   currentTrips: TripEntity[] = [];
+  requestedDriver = [];
 
   // Create a new trip request
   async createTrip(
@@ -31,8 +40,6 @@ export class TripService {
     rider: RiderEntity | null,
   ): Promise<TripDriverResponseDto> {
     try {
-      console.error('Tesint ');
-
       const trip = new TripEntity();
       trip.rider = rider!;
       trip.status = TripStatus.REQUESTED;
@@ -43,7 +50,10 @@ export class TripService {
       const distanceInfo = await this.getDistances(createTripDto);
       trip.distanceKm = distanceInfo.distanceKm;
       trip.durationMin = distanceInfo.durationMin;
-      return TripDriverResponseDto.fromTripEntity(trip);
+      this.logger.log('Trip created');
+      const tripDto = TripDriverResponseDto.fromTripEntity(trip);
+      await this.informDriver(tripDto);
+      return tripDto;
     } catch (error) {
       console.error('Error creating trip:', error);
       throw new Error('Error creating trip');
@@ -135,6 +145,22 @@ export class TripService {
       );
 
     return tripInfo;
+  }
+
+  private async informDriver(tripDto: TripDriverResponseDto) {
+    const drivers = this.driverLocationTrackingService.findClosestDriver(
+      tripDto.startLocation,
+    );
+    const device = await this.userDeviceService.findOne(drivers.firebaseId);
+    const title = 'New Trip Request';
+
+    const bodyMessage = `A new trip request has been made from ${tripDto.riderfirstName} ${tripDto.riderlastName}.`;
+
+    await this.notificationsService.sendNotificationWithData(
+      device.fcmToken,
+      { title, body: bodyMessage },
+      tripDto.toRecordFirebaseMessage(),
+    );
   }
 
   clearCurrentTrips(): void {
