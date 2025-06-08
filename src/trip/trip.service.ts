@@ -13,6 +13,8 @@ import { TripDriverResponseDto } from 'src/common/dto/trip/trip_driver_response.
 import { DriverLocationTrackingService } from 'src/tracking/driver_location_tracking/driver_location_tracking.service';
 import { UserDeviceService } from 'src/user_device/user_device.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { DriverService } from 'src/driver/driver.service';
+import { DriverEntity } from 'src/common/entities/driver.entity';
 
 @Injectable()
 export class TripService {
@@ -28,11 +30,12 @@ export class TripService {
     private readonly driverLocationTrackingService: DriverLocationTrackingService,
     private readonly userDeviceService: UserDeviceService,
     private readonly notificationsService: NotificationsService,
+    private readonly driverService: DriverService,
   ) {}
 
   logger = new Logger('TripService');
   currentTrips: TripEntity[] = [];
-  requestedDriver = [];
+  requestedDriver: DriverEntity[] = [];
 
   // Create a new trip request
   async createTrip(
@@ -151,6 +154,11 @@ export class TripService {
     const drivers = this.driverLocationTrackingService.findClosestDriver(
       tripDto.startLocation,
     );
+    const driverEntity = await this.driverService.findOne(drivers.firebaseId);
+    if (driverEntity != null) {
+      this.requestedDriver.push(driverEntity);
+    }
+
     const device = await this.userDeviceService.findOne(drivers.firebaseId);
     const title = 'New Trip Request';
 

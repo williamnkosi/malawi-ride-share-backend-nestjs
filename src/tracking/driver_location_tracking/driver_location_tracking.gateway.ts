@@ -11,6 +11,8 @@ import { DriverLocationTrackingService } from './driver_location_tracking.servic
 import { DriverLocationDto } from 'src/common/dto/driverlocation/driver_location.dto';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { Server, Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
+import { DriverTripLocationDto } from 'src/common/dto/driverlocation/driver_trip_location.dto';
 
 @WebSocketGateway({
   cors: {
@@ -25,19 +27,18 @@ export class DriverLocationTrackingGateway
     private readonly driverLocationService: DriverLocationTrackingService,
   ) {}
 
+  logger = new Logger('DriverLocatoinTrackingGateway');
   @WebSocketServer()
   server: Server;
 
-  afterInit() {
-    console.log('WebSocket initialized:');
-  }
+  afterInit() {}
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('driver-location-update')
@@ -47,6 +48,23 @@ export class DriverLocationTrackingGateway
   ) {
     try {
       this.driverLocationService.updateLocation(driverLocation);
+    } catch (error) {
+      console.log(error);
+
+      throw new CustomError('Error updating driver location');
+    }
+  }
+
+  @SubscribeMessage('driver-trip-location-update')
+  handleDriverTripLocationUpdate(
+    @MessageBody()
+    driverTripLocation: DriverTripLocationDto,
+  ) {
+    try {
+      this.driverLocationService.updateLocation(driverTripLocation);
+      this.server
+        .to(`trip-${driverTripLocation.tripId}`)
+        .emit('driverLocationUpdate', driverTripLocation.driverLocation);
     } catch (error) {
       console.log(error);
 
