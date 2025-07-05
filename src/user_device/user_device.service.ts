@@ -29,6 +29,7 @@ export class UserDeviceService {
     if (existing) {
       // Update existing entry
       this.userDeviceRepository.merge(existing, dto);
+      existing.updatedAt = new Date();
       return await this.userDeviceRepository.save(existing);
     }
 

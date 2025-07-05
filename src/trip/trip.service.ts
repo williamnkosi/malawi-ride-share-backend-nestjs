@@ -25,6 +25,9 @@ export class TripService {
     @InjectRepository(RiderEntity)
     private riderRepository: Repository<RiderEntity>,
 
+    @InjectRepository(DriverEntity)
+    private readonly driverRepository: Repository<DriverEntity>,
+
     private googleMapsServiceRepository: GoogleMapsService,
 
     private readonly driverLocationTrackingService: DriverLocationTrackingService,
@@ -40,7 +43,7 @@ export class TripService {
   // Create a new trip request
   async createTrip(
     createTripDto: CreateTripDto,
-    rider: RiderEntity | null,
+    rider: RiderEntity,
   ): Promise<TripDriverResponseDto> {
     try {
       const trip = new TripEntity();
@@ -58,8 +61,8 @@ export class TripService {
       await this.informDriver(tripDto);
       return tripDto;
     } catch (error) {
-      console.error('Error creating trip:', error);
-      throw new Error('Error creating trip');
+      this.logger.error('Error creating trip:', error);
+      throw new Error('TripeService: Error creating trip');
     }
     //return this.tripRepository.save(trip);
   }
@@ -151,24 +154,31 @@ export class TripService {
   }
 
   private async informDriver(tripDto: TripDriverResponseDto) {
-    const drivers = this.driverLocationTrackingService.findClosestDriver(
-      tripDto.startLocation,
-    );
-    const driverEntity = await this.driverService.findOne(drivers.firebaseId);
-    if (driverEntity != null) {
-      this.requestedDriver.push(driverEntity);
+    try {
+      const drivers = this.driverLocationTrackingService.findClosestDriver(
+        tripDto.startLocation,
+      );
+
+      const driverEntity = await this.driverRepository.findOne({
+        where: { firebaseId: drivers.firebaseId },
+      });
+      if (driverEntity != null) {
+        this.requestedDriver.push(driverEntity);
+      }
+
+      const device = await this.userDeviceService.findOne(drivers.firebaseId);
+      const title = 'New Trip Request';
+
+      const bodyMessage = `A new trip request has been made from ${tripDto.riderfirstName} ${tripDto.riderlastName}.`;
+
+      await this.notificationsService.sendNotificationWithData(
+        device.fcmToken,
+        { title, body: bodyMessage },
+        tripDto.toRecordFirebaseMessage(),
+      );
+    } catch (error) {
+      this.logger.error('Failed to inform driver', error);
     }
-
-    const device = await this.userDeviceService.findOne(drivers.firebaseId);
-    const title = 'New Trip Request';
-
-    const bodyMessage = `A new trip request has been made from ${tripDto.riderfirstName} ${tripDto.riderlastName}.`;
-
-    await this.notificationsService.sendNotificationWithData(
-      device.fcmToken,
-      { title, body: bodyMessage },
-      tripDto.toRecordFirebaseMessage(),
-    );
   }
 
   clearCurrentTrips(): void {

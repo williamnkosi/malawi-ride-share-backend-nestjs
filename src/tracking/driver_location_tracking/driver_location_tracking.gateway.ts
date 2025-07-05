@@ -34,11 +34,11 @@ export class DriverLocationTrackingGateway
   afterInit() {}
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    // this.logger.log(`Driver client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
+    // this.logger.log(`Driver client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('driver-location-update')
@@ -48,6 +48,7 @@ export class DriverLocationTrackingGateway
   ) {
     try {
       this.driverLocationService.updateLocation(driverLocation);
+      this.logger.log(`Driver client connected: ${driverLocation.firebaseId}`);
     } catch (error) {
       console.log(error);
 

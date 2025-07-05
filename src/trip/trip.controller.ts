@@ -29,13 +29,19 @@ export class TripController {
   @Post('request')
   async requestRide(@Body() body: CreateTripDto): Promise<ApiResponse<null>> {
     try {
+      this.logger.log(body);
       const rider = await this.riderService.findOne(body.firebaseId);
+      if (rider === null) {
+        throw new CustomError('Error creating trip: could not find irder', 500);
+      }
       await this.tripService.createTrip(body, rider);
 
       return new ApiResponse(true, 'Trip created successfully', null);
     } catch (error: unknown) {
-      this.logger.error('Error createing trip:');
-      throw new CustomError('Error creating trip', 500);
+      this.logger.error('Error createing trip:', error);
+      throw new CustomError('Error creating trip', 500, {
+        issue: error as string,
+      });
     }
   }
 
