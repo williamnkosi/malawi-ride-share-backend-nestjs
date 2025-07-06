@@ -1,10 +1,11 @@
-import { Controller, Post, Body, Get, Logger, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Logger } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripEntity } from 'src/common/entities/trip/trip.entity';
 import { ApiResponse } from 'src/common/types/api_response';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { CreateTripDto } from 'src/common/dto/trip/create_trip.dto';
 import { RiderService } from 'src/riders/riders.service';
+import { AcceptTripDto } from 'src/common/dto/trip/accept_trip.dto';
 
 @Controller('trip')
 export class TripController {
@@ -45,10 +46,10 @@ export class TripController {
     }
   }
 
-  @Post('driver-accept-trip/:id')
-  async driverAcceptTrip(@Param('id') id: string) {
+  @Post('driver-accept-trip')
+  async driverAcceptTrip(@Body() body: AcceptTripDto) {
     try {
-      await this.tripService.startTrip(id);
+      await this.tripService.startTrip(body);
     } catch (e) {
       console.log(e);
     }

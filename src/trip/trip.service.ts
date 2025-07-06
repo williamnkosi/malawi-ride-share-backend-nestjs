@@ -15,6 +15,7 @@ import { UserDeviceService } from 'src/user_device/user_device.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { DriverService } from 'src/driver/driver.service';
 import { DriverEntity } from 'src/common/entities/driver.entity';
+import { AcceptTripDto } from 'src/common/dto/trip/accept_trip.dto';
 
 @Injectable()
 export class TripService {
@@ -76,12 +77,21 @@ export class TripService {
   }
 
   // Start the trip (change status to en_route)
-  async startTrip(tripId: string): Promise<TripEntity> {
-    const trip = await this.tripRepository.findOne({ where: { id: tripId } });
+  async startTrip(acceptTripDto: AcceptTripDto): Promise<TripEntity> {
+    const trip = this.currentTrips.find((t) => t.id === acceptTripDto.tripId);
     if (!trip) {
       throw new Error('Trip not found');
     }
 
+    const driverEntity = await this.driverRepository.findOne({
+      where: { firebaseId: acceptTripDto.driverId },
+    });
+
+    if (!driverEntity) {
+      throw new Error('Driver not found');
+    }
+
+    trip.driver = driverEntity;
     trip.status = TripStatus.IN_PROGRESS;
     trip.startedAt = new Date();
 
