@@ -26,18 +26,18 @@ export class LocationDto {
   longitude: number;
 }
 
-export class DriverLocationDto extends LocationDto {
+export class DriverLocationDto {
   @IsString()
   firebaseId: string;
 
   @IsEnum(DriverStatus)
   status: DriverStatus;
+
+  @IsOptional()
+  location?: LocationDto;
 }
 
 export class UpdateDriverLocationDto extends LocationDto {
-  @IsString()
-  driverId: string;
-
   @IsString()
   firebaseId: string;
 
@@ -56,9 +56,6 @@ export class FindNearbyDriversDto {
 }
 
 export class DriverConnectionDto {
-  @IsString()
-  driverId: string;
-
   @IsString()
   firebaseId: string;
 

@@ -14,6 +14,27 @@ export class LocationTrackingService {
   private driverSockets = new Map<string, string>(); // driverId -> socketId
   private socketDrivers = new Map<string, string>(); // socketId -> driverId
 
+  registerDriver(
+    firebaseId: string,
+    socketId: string,
+    initialLocation?: LocationDto,
+  ): void {
+    this.logger.log(`Registering driver ${firebaseId} for real-time tracking`);
+
+    this.driverSockets.set(firebaseId, socketId);
+    this.socketDrivers.set(socketId, firebaseId);
+
+    if (initialLocation) {
+      const location: DriverLocationDto = {
+        firebaseId,
+        location: initialLocation,
+        status: DriverStatus.ONLINE,
+      };
+
+      this.onlineDrivers.set(firebaseId, location);
+    }
+  }
+
   /**
    * Find nearby available drivers
    */
@@ -24,14 +45,22 @@ export class LocationTrackingService {
     this.logger.log(`Finding drivers within ${radiusKm}km of rider location`);
 
     const availableDrivers = Array.from(this.onlineDrivers.values()).filter(
-      (driver) => driver.status === DriverStatus.ONLINE,
+      (driver) =>
+        driver.status === DriverStatus.ONLINE && driver.location !== undefined,
     );
 
+    if (availableDrivers === undefined || availableDrivers.length === 0) {
+      this.logger.warn('No available drivers found');
+      return [];
+    }
     // Pair each driver with its distance, but keep the original object for return
     const driversWithDistance = availableDrivers
       .map((driverLocation) => ({
         driver: driverLocation,
-        distance: this.calculateDistance(riderLocation, driverLocation),
+        distance: this.calculateDistance(
+          riderLocation,
+          driverLocation.location as LocationDto,
+        ),
       }))
       .filter((item) => item.distance <= radiusKm)
       .sort((a, b) => a.distance - b.distance)
@@ -43,6 +72,23 @@ export class LocationTrackingService {
 
     this.logger.log(`Found ${nearbyDrivers.length} nearby drivers`);
     return nearbyDrivers;
+  }
+
+  unregisterDriver(socketId: string): void {
+    const driverId = this.socketDrivers.get(socketId);
+    if (!driverId) return;
+
+    this.logger.log(`Unregistering driver ${driverId} from tracking`);
+
+    // Mark as offline before removing
+    const driver = this.onlineDrivers.get(driverId);
+    if (driver) {
+      driver.status = DriverStatus.OFFLINE; // ← Using enum
+    }
+
+    this.onlineDrivers.delete(driverId);
+    this.driverSockets.delete(driverId);
+    this.socketDrivers.delete(socketId);
   }
 
   private calculateDistance(point1: LocationDto, point2: LocationDto): number {
