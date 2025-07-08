@@ -13,7 +13,7 @@ export enum Gender {
 
 // src/users/entities/base-user.entity.ts
 @Entity()
-export abstract class BaseUserEntity {
+export abstract class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
