@@ -49,7 +49,9 @@ export class TripController {
   @Post('driver-accept-trip')
   async driverAcceptTrip(@Body() body: AcceptTripDto) {
     try {
-      await this.tripService.startTrip(body);
+      console.log('Driver accepting trip:', body);
+      const trip = await this.tripService.startTrip(body);
+      return trip;
     } catch (e) {
       console.log(e);
     }

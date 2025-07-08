@@ -78,24 +78,29 @@ export class TripService {
 
   // Start the trip (change status to en_route)
   async startTrip(acceptTripDto: AcceptTripDto): Promise<TripEntity> {
-    const trip = this.currentTrips.find((t) => t.id === acceptTripDto.tripId);
-    if (!trip) {
-      throw new Error('Trip not found');
+    try {
+      const trip = this.currentTrips.find((t) => t.id === acceptTripDto.tripId);
+      if (!trip) {
+        throw new Error('Trip not found');
+      }
+
+      const driverEntity = await this.driverRepository.findOne({
+        where: { firebaseId: acceptTripDto.driverId },
+      });
+
+      if (!driverEntity) {
+        throw new Error('Driver not found');
+      }
+
+      trip.driver = driverEntity;
+      trip.status = TripStatus.IN_PROGRESS;
+      trip.startedAt = new Date();
+
+      return trip;
+    } catch (e) {
+      this.logger.error('Error accepting trip:', e);
+      throw new Error('TripService: Error accepting trip');
     }
-
-    const driverEntity = await this.driverRepository.findOne({
-      where: { firebaseId: acceptTripDto.driverId },
-    });
-
-    if (!driverEntity) {
-      throw new Error('Driver not found');
-    }
-
-    trip.driver = driverEntity;
-    trip.status = TripStatus.IN_PROGRESS;
-    trip.startedAt = new Date();
-
-    return this.tripRepository.save(trip);
   }
 
   // Complete the trip (change status to completed)
