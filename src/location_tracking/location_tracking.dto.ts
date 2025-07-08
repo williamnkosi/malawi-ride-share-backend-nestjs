@@ -31,15 +31,17 @@ export class DriverLocationDto {
   firebaseId: string;
 
   @IsEnum(DriverStatus)
-  status: DriverStatus;
+  status?: DriverStatus;
 
   @IsOptional()
   location?: LocationDto;
 }
 
-export class UpdateDriverLocationDto extends LocationDto {
+export class UpdateDriverLocationDto {
   @IsString()
   firebaseId: string;
+
+  location: LocationDto;
 
   @IsEnum(DriverStatus)
   status: DriverStatus;

@@ -83,46 +83,40 @@ export class LocationTrackingGateway
     }
   }
 
-  // /**
-  //  * Real-time location updates from driver
-  //  */
-  // @SubscribeMessage('driver:location_update')
-  // async handleLocationUpdate(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() payload: UpdateDriverLocationDto,
-  // ) {
-  //   try {
-  //     const updatedLocation =
-  //       await this.locationService.updateDriverLocation(payload);
+  /**
+   * Real-time location updates from driver
+   */
+  @SubscribeMessage('driver:location_update')
+  handleLocationUpdate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: UpdateDriverLocationDto,
+  ) {
+    try {
+      const updatedLocation =
+        this.locationService.updateDriverLocation(payload);
 
-  //     // Broadcast to riders tracking this driver
-  //     this.server
-  //       .to(`tracking:${payload.driverId}`)
-  //       .emit('driver:location_changed', {
-  //         driverId: payload.driverId,
-  //         location: {
-  //           latitude: updatedLocation.latitude,
-  //           longitude: updatedLocation.longitude,
-  //         },
-  //         isAvailable: updatedLocation.isAvailable,
-  //         status: updatedLocation.status,
-  //         heading: updatedLocation.heading,
-  //         speed: updatedLocation.speed,
-  //         timestamp: updatedLocation.lastUpdate,
-  //       });
+      // Broadcast to riders tracking this driver
+      this.server
+        .to(`tracking:${payload.firebaseId}`)
+        .emit('driver:location_changed', {
+          driverId: payload.firebaseId,
+          location: {
+            latitude: updatedLocation.location?.latitude ?? '',
+            longitude: updatedLocation.location?.longitude ?? '',
+          },
+        });
 
-  //     return {
-  //       status: 'success',
-  //       timestamp: updatedLocation.lastUpdate,
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(`Failed to update location:`, error);
-  //     return {
-  //       status: 'error',
-  //       message: 'Failed to update location',
-  //     };
-  //   }
-  // }
+      return {
+        status: 'success',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to update location:`, error);
+      return {
+        status: 'error',
+        message: 'Failed to update location',
+      };
+    }
+  }
 
   // /**
   //  * Update driver availability status

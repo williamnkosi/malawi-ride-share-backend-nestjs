@@ -3,6 +3,7 @@ import {
   DriverLocationDto,
   DriverStatus,
   LocationDto,
+  UpdateDriverLocationDto,
 } from './location_tracking.dto';
 
 @Injectable()
@@ -72,6 +73,25 @@ export class LocationTrackingService {
 
     this.logger.log(`Found ${nearbyDrivers.length} nearby drivers`);
     return nearbyDrivers;
+  }
+
+  updateDriverLocation(updateDto: UpdateDriverLocationDto): DriverLocationDto {
+    const { firebaseId, location } = updateDto;
+
+    const updatedLocation: DriverLocationDto = {
+      firebaseId,
+      location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    };
+
+    this.onlineDrivers.set(firebaseId, updatedLocation);
+
+    this.logger.debug(
+      `Updated location for driver ${firebaseId} (memory only)`,
+    );
+    return updatedLocation;
   }
 
   unregisterDriver(socketId: string): void {
