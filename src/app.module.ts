@@ -8,8 +8,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { RiderReviewModule } from './rider_review/rider_review.module';
-import { DriverReviewModule } from './driver_review/driver_review.module';
 import { UserDeviceModule } from './user_device/user_device.module';
 
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
@@ -37,8 +35,6 @@ const isProd = process.env.NODE_ENV === 'production';
     FirebaseModule,
     ...(!isProd ? [TestingModule] : []),
 
-    RiderReviewModule,
-    DriverReviewModule,
     UserDeviceModule,
     GoogleMapsServiceModule,
     LocationTrackingModule,
