@@ -105,6 +105,17 @@ export class LocationTrackingService {
     return this.onlineDrivers.get(firebaseId) || null;
   }
 
+  getAllOnlineDrivers(): DriverLocationDto[] {
+    return Array.from(this.onlineDrivers.values()).filter(
+      (driver) => driver.status === DriverStatus.ONLINE,
+    );
+  }
+
+  isDriverOnline(firebaseId: string): boolean {
+    const driver = this.onlineDrivers.get(firebaseId);
+    return driver ? driver.status === DriverStatus.ONLINE : false;
+  }
+
   unregisterDriver(socketId: string): void {
     const driverId = this.socketDrivers.get(socketId);
     if (!driverId) return;
