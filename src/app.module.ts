@@ -12,6 +12,7 @@ import { UserDeviceModule } from './user_device/user_device.module';
 
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 import { LocationTrackingModule } from './location_tracking/location_tracking.module';
+import { UsersModule } from './users/users.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -38,6 +39,7 @@ const isProd = process.env.NODE_ENV === 'production';
     UserDeviceModule,
     GoogleMapsServiceModule,
     LocationTrackingModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],
