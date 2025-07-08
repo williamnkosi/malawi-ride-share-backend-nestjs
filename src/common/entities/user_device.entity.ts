@@ -1,20 +1,29 @@
 // user-device.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { DevicePlatform } from '../types/device_platform';
 import { Matches } from 'class-validator';
 
 @Entity()
-export class UserDevice {
+export class UserDeviceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  userId: string;
+  @Unique(['firebaseUserId'])
+  @Column({ nullable: false })
+  firebaseUserId: string;
 
-  @Column()
+  @Unique(['fcmToken'])
+  @Column({ nullable: false })
   fcmToken: string;
 
   @Column({
+    nullable: false,
     type: 'enum',
     enum: DevicePlatform,
   })
@@ -25,9 +34,9 @@ export class UserDevice {
   })
   deviceVersion: string;
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ nullable: true })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 }

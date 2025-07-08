@@ -2,35 +2,59 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
 import { UpdateUserDeviceDto } from 'src/common/dto/user_device/update_user_device.dto';
-import { UserDevice } from 'src/common/entities/user_device.entity';
+import { UserDeviceEntity } from 'src/common/entities/user_device.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserDeviceService {
   constructor(
-    @InjectRepository(UserDevice)
-    private userDeviceRepository: Repository<UserDevice>,
+    @InjectRepository(UserDeviceEntity)
+    private userDeviceRepository: Repository<UserDeviceEntity>,
   ) {}
 
-  async create(createUserDeviceDto: CreateUserDeviceDto): Promise<UserDevice> {
+  async create(
+    createUserDeviceDto: CreateUserDeviceDto,
+  ): Promise<UserDeviceEntity> {
     const userDevice = this.userDeviceRepository.create(createUserDeviceDto);
     return await this.userDeviceRepository.save(userDevice);
   }
 
-  async findAll(): Promise<UserDevice[]> {
+  async registerOrUpdateDevice(
+    dto: CreateUserDeviceDto,
+  ): Promise<UserDeviceEntity> {
+    const existing = await this.userDeviceRepository.findOne({
+      where: { firebaseUserId: dto.firebaseUserId },
+    });
+
+    if (existing) {
+      // Update existing entry
+      this.userDeviceRepository.merge(existing, dto);
+      existing.updatedAt = new Date();
+      return await this.userDeviceRepository.save(existing);
+    }
+
+    // Create new entry
+    const newDevice = this.userDeviceRepository.create(dto);
+    return await this.userDeviceRepository.save(newDevice);
+  }
+
+  async findAll(): Promise<UserDeviceEntity[]> {
     return await this.userDeviceRepository.find();
   }
 
-  async findOne(id: string): Promise<UserDevice> {
-    const device = await this.userDeviceRepository.findOne({ where: { id } });
-    if (!device) throw new NotFoundException(`UserDevice ${id} not found`);
+  async findOne(firebaseUserId: string): Promise<UserDeviceEntity> {
+    const device = await this.userDeviceRepository.findOne({
+      where: { firebaseUserId },
+    });
+    if (!device)
+      throw new NotFoundException(`UserDevice ${firebaseUserId} not found`);
     return device;
   }
 
   async update(
     id: string,
     updateUserDeviceDto: UpdateUserDeviceDto,
-  ): Promise<UserDevice> {
+  ): Promise<UserDeviceEntity> {
     const device = await this.findOne(id);
     Object.assign(device, updateUserDeviceDto);
     device.updatedAt = new Date();

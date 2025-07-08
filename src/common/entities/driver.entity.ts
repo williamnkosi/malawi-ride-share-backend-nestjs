@@ -6,8 +6,23 @@ export class DriverEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ unique: true })
+  firebaseId: string;
+
   @Column()
-  name: string;
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column({ unique: true })
+  phoneNumber: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column({ unique: true })
+  driverLicenseNumber: string;
 
   @OneToMany(() => DriverReviewEntity, (review) => review.driver)
   reviews: DriverReviewEntity[]; // Relationship to DriverReview

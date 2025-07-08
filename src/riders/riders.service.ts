@@ -1,30 +1,43 @@
 // rider.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Rider } from 'src/common/entities/rider.entity';
+import { CreateRiderDto } from 'src/common/dto/rider/create_driver.dto';
+import { RiderEntity } from 'src/common/entities/rider.entity';
+
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class RidersService {
+export class RiderService {
   constructor(
-    @InjectRepository(Rider)
-    private readonly riderRepository: Repository<Rider>,
+    @InjectRepository(RiderEntity)
+    private readonly riderRepository: Repository<RiderEntity>,
   ) {}
 
-  async findAll(): Promise<Rider[]> {
+  async findAll(): Promise<RiderEntity[]> {
     return this.riderRepository.find();
   }
 
-  async findOne(id: string): Promise<Rider | null> {
-    return this.riderRepository.findOne({ where: { id } });
+  async findOne(firebaseId: string): Promise<RiderEntity | null> {
+    try {
+      return this.riderRepository.findOne({ where: { firebaseId } });
+    } catch {
+      throw new Error('Error creating rider: ');
+    }
   }
 
-  async create(data: Partial<Rider>): Promise<Rider> {
-    const rider = this.riderRepository.create(data);
-    return this.riderRepository.save(rider);
+  create(data: Partial<CreateRiderDto>): Promise<RiderEntity> {
+    try {
+      const rider = this.riderRepository.create(data);
+      return this.riderRepository.save(rider);
+    } catch (error) {
+      throw new Error('Error creating rider: ' + error);
+    }
   }
 
-  async update(id: string, data: Partial<Rider>): Promise<Rider | null> {
+  async update(
+    id: string,
+    data: Partial<RiderEntity>,
+  ): Promise<RiderEntity | null> {
     await this.riderRepository.update(id, data);
     return this.findOne(id);
   }
