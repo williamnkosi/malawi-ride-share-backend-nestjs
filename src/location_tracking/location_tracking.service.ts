@@ -101,6 +101,10 @@ export class LocationTrackingService {
     }
   }
 
+  getDriverLocation(firebaseId: string): DriverLocationDto | null {
+    return this.onlineDrivers.get(firebaseId) || null;
+  }
+
   unregisterDriver(socketId: string): void {
     const driverId = this.socketDrivers.get(socketId);
     if (!driverId) return;

@@ -147,69 +147,64 @@ export class LocationTrackingGateway
     }
   }
 
-  // /**
-  //  * Rider starts tracking a driver during trip
-  //  */
-  // @SubscribeMessage('rider:track_driver')
-  // async trackDriver(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() payload: { tripId: string; driverId: string },
-  // ) {
-  //   try {
-  //     const { tripId, driverId } = payload;
+  /**
+   * Rider starts tracking a driver during trip
+   */
+  @SubscribeMessage('rider:track_driver')
+  async trackDriver(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { tripId: string; driverId: string },
+  ) {
+    try {
+      const { tripId, driverId } = payload;
 
-  //     // Join tracking room
-  //     client.join(`tracking:${driverId}`);
+      // Join tracking room
+      await client.join(`tracking:${driverId}`);
 
-  //     // Send current driver location
-  //     const currentLocation =
-  //       await this.locationService.getDriverLocation(driverId);
-  //     if (currentLocation) {
-  //       client.emit('driver:current_location', {
-  //         driverId,
-  //         location: {
-  //           latitude: currentLocation.latitude,
-  //           longitude: currentLocation.longitude,
-  //         },
-  //         isAvailable: currentLocation.isAvailable,
-  //         status: currentLocation.status,
-  //         heading: currentLocation.heading,
-  //         speed: currentLocation.speed,
-  //         timestamp: currentLocation.lastUpdate,
-  //       });
-  //     }
+      // Send current driver location
+      const currentLocation = this.locationService.getDriverLocation(driverId);
+      if (currentLocation) {
+        client.emit('driver:current_location', {
+          driverId,
+          location: {
+            latitude: currentLocation.location?.latitude || '',
+            longitude: currentLocation.location?.longitude || '',
+          },
+          status: currentLocation.status,
+        });
+      }
 
-  //     this.logger.log(
-  //       `Rider started tracking driver ${driverId} for trip ${tripId}`,
-  //     );
+      this.logger.log(
+        `Rider started tracking driver ${driverId} for trip ${tripId}`,
+      );
 
-  //     return {
-  //       status: 'success',
-  //       message: 'Started tracking driver',
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(`Failed to start tracking:`, error);
-  //     return {
-  //       status: 'error',
-  //       message: 'Failed to start tracking',
-  //     };
-  //   }
-  // }
+      return {
+        status: 'success',
+        message: 'Started tracking driver',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to start tracking:`, error);
+      return {
+        status: 'error',
+        message: 'Failed to start tracking',
+      };
+    }
+  }
 
-  // /**
-  //  * Stop tracking driver
-  //  */
-  // @SubscribeMessage('rider:stop_tracking')
-  // async stopTracking(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() payload: { driverId: string },
-  // ) {
-  //   const { driverId } = payload;
-  //   client.leave(`tracking:${driverId}`);
+  /**
+   * Stop tracking driver
+   */
+  @SubscribeMessage('rider:stop_tracking')
+  async stopTracking(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { driverId: string },
+  ) {
+    const { driverId } = payload;
+    await client.leave(`tracking:${driverId}`);
 
-  //   return {
-  //     status: 'success',
-  //     message: 'Stopped tracking driver',
-  //   };
-  // }
+    return {
+      status: 'success',
+      message: 'Stopped tracking driver',
+    };
+  }
 }
