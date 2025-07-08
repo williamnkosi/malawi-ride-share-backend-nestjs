@@ -22,7 +22,8 @@ import { DriverController } from './driver/driver.controller';
 import { TripController } from './trip/trip.controller';
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 import { DriverLocationTrackingModule } from './tracking/driver_location_tracking/driver_location_tracking.module';
-import { RiderLocationTrackingModule } from './tracking/rider_location_tracking/rider_location_tracking.module';
+import { TrackingModule } from './tracking/tracking.module';
+import { LocationTrackingModule } from './location_tracking/location_tracking.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -54,7 +55,8 @@ const isProd = process.env.NODE_ENV === 'production';
     TripModule,
     GoogleMapsServiceModule,
     DriverLocationTrackingModule,
-    RiderLocationTrackingModule,
+    TrackingModule,
+    LocationTrackingModule,
   ],
   controllers: [RiderController, DriverController, TripController],
   providers: [],
