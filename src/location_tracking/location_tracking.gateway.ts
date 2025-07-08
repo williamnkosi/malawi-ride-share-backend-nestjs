@@ -118,43 +118,34 @@ export class LocationTrackingGateway
     }
   }
 
-  // /**
-  //  * Update driver availability status
-  //  */
-  // @SubscribeMessage('driver:status_update')
-  // async updateDriverStatus(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody()
-  //   payload: {
-  //     driverId: string;
-  //     status: 'online' | 'offline' | 'busy' | 'on_trip';
-  //     isAvailable: boolean;
-  //   },
-  // ) {
-  //   try {
-  //     const { driverId, status, isAvailable } = payload;
+  /**
+   * Update driver availability status
+   */
+  @SubscribeMessage('driver:status_update')
+  updateDriverStatus(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload: UpdateDriverLocationDto,
+  ) {
+    try {
+      const { firebaseId, status } = payload;
 
-  //     await this.locationService.updateDriverStatus(
-  //       driverId,
-  //       status,
-  //       isAvailable,
-  //     );
+      this.locationService.updateDriverStatus(firebaseId, status);
 
-  //     this.logger.log(`Driver ${driverId} status updated: ${status}`);
+      this.logger.log(`Driver ${firebaseId} status updated: ${status}`);
 
-  //     return {
-  //       status: 'success',
-  //       driverStatus: status,
-  //       isAvailable,
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(`Failed to update driver status:`, error);
-  //     return {
-  //       status: 'error',
-  //       message: 'Failed to update status',
-  //     };
-  //   }
-  // }
+      return {
+        status: 'success',
+        driverStatus: status,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to update driver status:`, error);
+      return {
+        status: 'error',
+        message: 'Failed to update status',
+      };
+    }
+  }
 
   // /**
   //  * Rider starts tracking a driver during trip

@@ -94,6 +94,13 @@ export class LocationTrackingService {
     return updatedLocation;
   }
 
+  updateDriverStatus(firebaseId: string, status: DriverStatus): void {
+    const driver = this.onlineDrivers.get(firebaseId);
+    if (driver) {
+      driver.status = status; // ← Type-safe enum usage
+    }
+  }
+
   unregisterDriver(socketId: string): void {
     const driverId = this.socketDrivers.get(socketId);
     if (!driverId) return;
