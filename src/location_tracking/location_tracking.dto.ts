@@ -1,11 +1,18 @@
 import {
   IsNumber,
-  IsBoolean,
   IsString,
   IsOptional,
   Min,
   Max,
+  IsEnum,
 } from 'class-validator';
+
+export enum DriverStatus {
+  ONLINE = 'online',
+  OFFLINE = 'offline',
+  BUSY = 'busy',
+  ON_TRIP = 'on_trip',
+}
 
 export class LocationDto {
   @IsNumber()
@@ -21,54 +28,21 @@ export class LocationDto {
 
 export class DriverLocationDto extends LocationDto {
   @IsString()
-  driverId: string;
-
-  @IsString()
   firebaseId: string;
 
-  @IsBoolean()
-  isAvailable: boolean;
-
-  @IsString()
-  status: 'online' | 'offline' | 'busy' | 'on_trip';
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(360)
-  heading?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  speed?: number;
-
-  lastUpdate: Date;
+  @IsEnum(DriverStatus)
+  status: DriverStatus;
 }
 
-export class UpdateDriverLocationDto {
+export class UpdateDriverLocationDto extends LocationDto {
   @IsString()
   driverId: string;
 
   @IsString()
   firebaseId: string;
 
-  location: LocationDto;
-
-  @IsBoolean()
-  isAvailable: boolean;
-
-  @IsOptional()
-  @IsString()
-  status?: 'online' | 'offline' | 'busy' | 'on_trip';
-
-  @IsOptional()
-  @IsNumber()
-  heading?: number;
-
-  @IsOptional()
-  @IsNumber()
-  speed?: number;
+  @IsEnum(DriverStatus)
+  status: DriverStatus;
 }
 
 export class FindNearbyDriversDto {
