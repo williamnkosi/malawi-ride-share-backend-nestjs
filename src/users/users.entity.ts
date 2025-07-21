@@ -32,9 +32,6 @@ export abstract class UserEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  gender: 'male' | 'female';
-
   @IsEnum(Gender)
   status: Gender;
 
