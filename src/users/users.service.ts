@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { Repository } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export abstract class UsersService {
+export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly repository: Repository<UserEntity>,
