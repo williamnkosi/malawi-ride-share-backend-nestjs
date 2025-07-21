@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -17,39 +19,35 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   async getAllUsers() {
-    try {
-      return this.usersService.findAll();
-    } catch (e) {}
+    return await this.usersService.findAll();
   }
 
   @Get(':firebaseId')
+  @HttpCode(HttpStatus.OK)
   async getUserData(@Param('firebaseId') firebaseId: string) {
-    try {
-      return this.usersService.findById(firebaseId);
-    } catch (e) {}
+    return await this.usersService.findById(firebaseId);
   }
 
   @Post()
-  async createUserData(@Body() createUserDto: CreateUserDto) {
-    try {
-      return this.usersService.create(createUserDto);
-    } catch (e) {}
+  @HttpCode(HttpStatus.CREATED)
+  createUserData(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
   }
 
   @Patch(':firebaseId')
+  @HttpCode(HttpStatus.OK)
   async updateUser(
     @Param('firebaseId') firebaseId: string,
     @Body() updateUserDto: Partial<UpdateUserDto>,
   ) {
-    // PATCH updates only provided fields
-    return this.usersService.update(firebaseId, updateUserDto);
+    return await this.usersService.update(firebaseId, updateUserDto);
   }
 
-  @Delete()
-  async deletUserData(@Query('firebaseId') firebaseId: string) {
-    try {
-      return this.usersService.remove(firebaseId);
-    } catch (e) {}
+  @Delete(':firebaseId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUserData(@Param('firebaseId') firebaseId: string) {
+    return await this.usersService.remove(firebaseId);
   }
 }
