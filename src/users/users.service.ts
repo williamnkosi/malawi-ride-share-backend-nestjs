@@ -4,10 +4,10 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './users.entity';
 
 @Injectable()
-export abstract class UsersService<T extends UserEntity> {
-  constructor(protected repository: Repository<T>) {}
+export abstract class UsersService {
+  constructor(protected repository: Repository<UserEntity>) {}
 
-  async findAll(): Promise<T[]> {
+  async findAll(): Promise<UserEntity[]> {
     try {
       return await this.repository.find();
     } catch {
@@ -15,27 +15,30 @@ export abstract class UsersService<T extends UserEntity> {
     }
   }
 
-  async findOne(firebaseId: string): Promise<T | null> {
+  async findOne(firebaseId: string): Promise<UserEntity | null> {
     try {
       return await this.repository.findOne({
-        where: { firebaseId } as FindOptionsWhere<T>,
+        where: { firebaseId },
       });
     } catch {
       throw new CustomError('Error finding user', 500);
     }
   }
-  async findById(firebaseId: string): Promise<T | null> {
+  async findById(firebaseId: string): Promise<UserEntity | null> {
     try {
       return await this.repository.findOne({
-        where: { firebaseId } as FindOptionsWhere<T>,
+        where: { firebaseId },
       });
     } catch {
       throw new CustomError('Error finding user', 500);
     }
   }
-  async update(firebaseId: string, data: Partial<T>): Promise<T | null> {
+  async update(
+    firebaseId: string,
+    data: Partial<UserEntity>,
+  ): Promise<UserEntity | null> {
     try {
-      await this.repository.update(firebaseId, data as any);
+      await this.repository.update(firebaseId, data);
       return this.findById(firebaseId);
     } catch {
       throw new CustomError('Error updating user', 500);
