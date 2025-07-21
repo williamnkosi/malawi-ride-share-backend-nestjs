@@ -1,56 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dtos/create_user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export abstract class UsersService {
-  constructor(protected repository: Repository<UserEntity>) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly repository: Repository<UserEntity>,
+  ) {}
 
   async findAll(): Promise<UserEntity[]> {
-    try {
-      return await this.repository.find();
-    } catch {
-      throw new CustomError('Error fetching users', 500);
-    }
+    return await this.repository.find();
   }
 
-  async findById(firebaseId: string): Promise<UserEntity | null> {
-    try {
-      return await this.repository.findOne({
-        where: { firebaseId },
-      });
-    } catch {
-      throw new CustomError('Error finding user', 500);
+  async findById(firebaseId: string): Promise<UserEntity> {
+    const user = await this.repository.findOne({
+      where: { firebaseId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        `User with firebaseId ${firebaseId} not found`,
+      );
     }
+
+    return user;
   }
 
-  create(createUserDto: CreateUserDto): UserEntity {
-    try {
-      const user = this.repository.create(createUserDto);
-      return user;
-    } catch {
-      throw new CustomError('Failed to create a user', 500);
-    }
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const user = this.repository.create(createUserDto);
+    return await this.repository.save(user);
   }
 
   async update(
     firebaseId: string,
     data: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
-    try {
-      await this.repository.update(firebaseId, data);
-      return this.findById(firebaseId);
-    } catch {
-      throw new CustomError('Error updating user', 500);
+  ): Promise<UserEntity> {
+    const result = await this.repository.update({ firebaseId }, data);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `User with firebaseId ${firebaseId} not found`,
+      );
     }
+
+    return await this.findById(firebaseId);
   }
   async remove(firebaseId: string): Promise<void> {
-    try {
-      await this.repository.delete(firebaseId);
-    } catch {
-      throw new CustomError('Error deleting user', 500);
+    const result = await this.repository.delete({ firebaseId });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `User with firebaseId ${firebaseId} not found`,
+      );
     }
   }
 }
