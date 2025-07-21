@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { DriverEntity } from './drivers/driver_entity';
+import { RiderEntity } from './riders/rider_entity';
 
 export enum Gender {
   male,
@@ -44,4 +47,12 @@ export abstract class UserEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => DriverEntity, (driver) => driver.user, {
+    nullable: true,
+  })
+  driverProfile?: DriverEntity;
+
+  @OneToOne(() => RiderEntity, (rider) => rider.user, { nullable: true })
+  riderProfile?: RiderEntity;
 }

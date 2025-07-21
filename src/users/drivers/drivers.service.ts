@@ -6,13 +6,11 @@ import { Repository } from 'typeorm';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 
 @Injectable()
-export class DriversService extends UsersService<DriverEntity> {
+export class DriversService {
   constructor(
     @InjectRepository(DriverEntity)
     private readonly driverRepository: Repository<DriverEntity>,
-  ) {
-    super(driverRepository);
-  }
+  ) {}
 
   async create(createDriverDto: Partial<DriverEntity>): Promise<DriverEntity> {
     try {
@@ -20,6 +18,13 @@ export class DriversService extends UsersService<DriverEntity> {
       return this.driverRepository.save(driver);
     } catch {
       throw new CustomError('Error creating driver', 500);
+    }
+  }
+
+  async getDriverData(): Promise<DriverEntity> {
+    try {
+    } catch {
+      throw new CustomError('Could not find driver, 500');
     }
   }
 
