@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './users.entity';
+import { CreateUserDto } from './dtos/create_user.dto';
 
 @Injectable()
 export abstract class UsersService {
@@ -15,15 +16,6 @@ export abstract class UsersService {
     }
   }
 
-  async findOne(firebaseId: string): Promise<UserEntity | null> {
-    try {
-      return await this.repository.findOne({
-        where: { firebaseId },
-      });
-    } catch {
-      throw new CustomError('Error finding user', 500);
-    }
-  }
   async findById(firebaseId: string): Promise<UserEntity | null> {
     try {
       return await this.repository.findOne({
@@ -33,6 +25,16 @@ export abstract class UsersService {
       throw new CustomError('Error finding user', 500);
     }
   }
+
+  create(createUserDto: CreateUserDto): UserEntity {
+    try {
+      const user = this.repository.create(createUserDto);
+      return user;
+    } catch {
+      throw new CustomError('Failed to create a user', 500);
+    }
+  }
+
   async update(
     firebaseId: string,
     data: Partial<UserEntity>,
