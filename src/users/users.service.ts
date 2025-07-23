@@ -3,12 +3,14 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly repository: Repository<UserEntity>,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
@@ -29,8 +31,12 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(
+    createUserDto: CreateUserDto,
+    profileImage?: Express.Multer.File,
+  ): Promise<UserEntity> {
     const user = this.repository.create(createUserDto);
+    this.firebaseService.
     return await this.repository.save(user);
   }
 

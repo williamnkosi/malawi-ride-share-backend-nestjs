@@ -8,7 +8,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update_user.dto';
@@ -32,8 +32,11 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createUserData(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  createUserData(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() profileImage?: Express.Multer.File,
+  ) {
+    return this.usersService.create(createUserDto, profileImage);
   }
 
   @Patch(':firebaseId')
