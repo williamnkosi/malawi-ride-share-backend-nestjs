@@ -31,12 +31,8 @@ export class UsersService {
     return user;
   }
 
-  async create(
-    createUserDto: CreateUserDto,
-    profileImage?: Express.Multer.File,
-  ): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     const user = this.repository.create(createUserDto);
-    this.firebaseService.
     return await this.repository.save(user);
   }
 

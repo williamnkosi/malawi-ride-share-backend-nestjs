@@ -30,12 +30,9 @@ const isProd = process.env.NODE_ENV === 'production';
       //dropSchema: !isProd, // Drop schema in development
     }),
     AuthModule,
-
     NotificationsModule,
-
     FirebaseModule,
     ...(!isProd ? [TestingModule] : []),
-
     UserDeviceModule,
     GoogleMapsServiceModule,
     LocationTrackingModule,
