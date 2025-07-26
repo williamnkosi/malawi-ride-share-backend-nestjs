@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  DriverConnectionDto,
   DriverLocationDto,
   DriverStatus,
   LocationDto,
@@ -16,23 +17,23 @@ export class LocationTrackingService {
   private socketDrivers = new Map<string, string>(); // socketId -> driverId
 
   registerDriver(
-    firebaseId: string,
     socketId: string,
-    initialLocation?: LocationDto,
+    driverConnectionDto: DriverConnectionDto,
   ): void {
+    const { firebaseId, initialLocation } = driverConnectionDto;
     this.logger.log(`Registering driver ${firebaseId} for real-time tracking`);
 
     this.driverSockets.set(firebaseId, socketId);
     this.socketDrivers.set(socketId, firebaseId);
 
     if (initialLocation) {
-      const location: DriverLocationDto = {
+      const driverInfo: DriverLocationDto = {
         firebaseId,
         location: initialLocation,
         status: DriverStatus.ONLINE,
       };
 
-      this.onlineDrivers.set(firebaseId, location);
+      this.onlineDrivers.set(firebaseId, driverInfo);
     }
   }
 

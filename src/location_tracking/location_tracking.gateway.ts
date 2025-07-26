@@ -56,13 +56,9 @@ export class LocationTrackingGateway
     @MessageBody() payload: DriverConnectionDto,
   ) {
     try {
-      const { firebaseId, initialLocation } = payload;
+      const { firebaseId } = payload;
 
-      this.locationService.registerDriver(
-        firebaseId,
-        client.id,
-        initialLocation,
-      );
+      this.locationService.registerDriver(client.id, payload);
 
       // Join driver-specific room
       await client.join(`driver:${firebaseId}`);
