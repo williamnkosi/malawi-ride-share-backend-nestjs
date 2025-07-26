@@ -50,7 +50,7 @@ export class LocationTrackingGateway
   /**
    * Register driver for location tracking
    */
-  @SubscribeMessage('driver:register')
+  @SubscribeMessage('driver:connect')
   async registerDriverForTracking(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: DriverConnectionDto,

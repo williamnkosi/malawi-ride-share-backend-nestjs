@@ -8,6 +8,7 @@ import {
   IsPhoneNumber,
 } from 'class-validator';
 import { Gender } from '../users.entity';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -23,7 +24,7 @@ export class CreateUserDto {
   lastName: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber('MW') // Malawi phone number validation
+  @IsPhoneNumber('US') // Malawi phone number validation
   phoneNumber: string;
 
   @IsNotEmpty()
@@ -35,6 +36,16 @@ export class CreateUserDto {
   gender: Gender;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      // Handle MM/DD/YYYY format
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+    return typeof value === 'string' ? value : undefined;
+  })
   @IsDateString()
   dateOfBirth?: Date;
 
