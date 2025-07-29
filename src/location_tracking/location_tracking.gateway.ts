@@ -13,11 +13,11 @@ import { LocationTrackingService } from './location_tracking.service';
 import {
   DriverConnectionDto,
   UpdateDriverLocationDto,
+  LocationDto,
 } from './location_tracking.dto';
 
 @WebSocketGateway({
   cors: { origin: '*' },
-  namespace: '/location-tracking',
 })
 export class LocationTrackingGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -30,15 +30,27 @@ export class LocationTrackingGateway
   constructor(private readonly locationService: LocationTrackingService) {}
 
   async handleConnection(client: Socket) {
+    console.log('=== WEBSOCKET CONNECTION ===');
+    console.log(`Client connected: ${client.id}`);
     this.logger.log(`Client connected: ${client.id}`);
 
     // Auto-register driver if credentials provided
     const firebaseId: string | undefined = client.handshake.auth?.firebaseId as
       | string
       | undefined;
+    const initialPosition = client.handshake.auth?.initialPosition as
+      | LocationDto
+      | undefined;
+
+    console.log('FirebaseId from auth:', firebaseId);
+    console.log('Initial location from auth:', initialPosition);
 
     if (firebaseId) {
-      await this.registerDriverForTracking(client, { firebaseId });
+      console.log('Auto-registering driver with location...');
+      await this.registerDriverForTracking(client, {
+        firebaseId,
+        initialLocation: initialPosition,
+      });
     }
   }
 
