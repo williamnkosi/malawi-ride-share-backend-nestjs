@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { DriverEntity } from './drivers/driver_entity';
-import { RiderEntity } from './riders/rider_entity';
+import { DriverEntity } from './drivers/driver.entity';
+import { RiderEntity } from './riders/rider.entity';
 
 export enum Gender {
   male,
@@ -16,7 +16,7 @@ export enum Gender {
 
 // src/users/entities/base-user.entity.ts
 @Entity()
-export abstract class UserEntity {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -36,7 +36,7 @@ export abstract class UserEntity {
   email: string;
 
   @IsEnum(Gender)
-  status: Gender;
+  gender: Gender;
 
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date;
@@ -51,8 +51,8 @@ export abstract class UserEntity {
   @OneToOne(() => DriverEntity, (driver) => driver.user, {
     nullable: true,
   })
-  driverProfile?: DriverEntity;
+  driver?: DriverEntity;
 
   @OneToOne(() => RiderEntity, (rider) => rider.user, { nullable: true })
-  riderProfile?: RiderEntity;
+  rider?: RiderEntity;
 }
