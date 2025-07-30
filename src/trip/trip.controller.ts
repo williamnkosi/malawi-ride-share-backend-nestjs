@@ -8,13 +8,14 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
+import { RequestTripDto } from './dtos/request_trip.dto';
 
 @Controller('trips')
 export class TripController {
   // === RIDER ENDPOINTS ===
 
   @Post('request')
-  async requestTrip(@Body() requestTripDto: any) {
+  async requestTrip(@Body() requestTripDto: RequestTripDto) {
     // Create a new trip request
     // - Pickup location
     // - Destination

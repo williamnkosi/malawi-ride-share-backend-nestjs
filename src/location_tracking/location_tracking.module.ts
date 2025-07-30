@@ -6,5 +6,6 @@ import { LocationTrackingGateway } from './location_tracking.gateway';
 @Module({
   controllers: [LocationTrackingController],
   providers: [LocationTrackingService, LocationTrackingGateway],
+  exports: [LocationTrackingService, LocationTrackingGateway], ,
 })
 export class LocationTrackingModule {}
