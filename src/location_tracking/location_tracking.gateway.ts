@@ -56,6 +56,8 @@ export class LocationTrackingGateway
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+
+    // Clean up driver data (service handles the logic)
     this.locationService.unregisterDriver(client.id);
   }
 

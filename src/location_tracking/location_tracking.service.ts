@@ -77,10 +77,11 @@ export class LocationTrackingService {
   }
 
   updateDriverLocation(updateDto: UpdateDriverLocationDto): DriverLocationDto {
-    const { firebaseId, location } = updateDto;
+    const { firebaseId, location, status } = updateDto;
 
     const updatedLocation: DriverLocationDto = {
       firebaseId,
+      status,
       location: {
         latitude: location.latitude,
         longitude: location.longitude,
@@ -90,7 +91,7 @@ export class LocationTrackingService {
     this.onlineDrivers.set(firebaseId, updatedLocation);
 
     this.logger.debug(
-      `Updated location for driver ${firebaseId} (memory only)`,
+      `Updated location for driver ${firebaseId} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude}`,
     );
     return updatedLocation;
   }
