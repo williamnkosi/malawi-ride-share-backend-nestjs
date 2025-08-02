@@ -14,6 +14,7 @@ import { GoogleMapsServiceModule } from './google_maps_service/google_maps_servi
 import { LocationTrackingModule } from './location_tracking/location_tracking.module';
 import { UsersModule } from './users/users.module';
 import { TripModule } from './trip/trip.module';
+import { DriverTripManagerModule } from './driver_trip_manager/driver_trip_manager.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -39,6 +40,7 @@ const isProd = process.env.NODE_ENV === 'production';
     LocationTrackingModule,
     UsersModule,
     TripModule,
+    DriverTripManagerModule,
   ],
   controllers: [],
   providers: [],
