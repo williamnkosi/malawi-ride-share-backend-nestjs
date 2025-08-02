@@ -6,6 +6,7 @@ import {
   LocationDto,
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
+import { TripEntity } from 'src/trip/entities/trip_entity';
 
 @Injectable()
 export class LocationTrackingService {
@@ -41,7 +42,7 @@ export class LocationTrackingService {
    * Find nearby available drivers
    */
   findNearbyDrivers(
-    riderLocation: LocationDto,
+    trip: TripEntity,
     radiusKm: number = 5,
   ): DriverLocationDto[] {
     this.logger.log(`Finding drivers within ${radiusKm}km of rider location`);
@@ -55,12 +56,17 @@ export class LocationTrackingService {
       this.logger.warn('No available drivers found');
       return [];
     }
+
+    const pickupLocation: LocationDto = {
+      latitude: trip.pickupLatitude,
+      longitude: trip.pickupLongitude,
+    };
     // Pair each driver with its distance, but keep the original object for return
     const driversWithDistance = availableDrivers
       .map((driverLocation) => ({
         driver: driverLocation,
         distance: this.calculateDistance(
-          riderLocation,
+          pickupLocation,
           driverLocation.location as LocationDto,
         ),
       }))
