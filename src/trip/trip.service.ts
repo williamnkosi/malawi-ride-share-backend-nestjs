@@ -7,7 +7,6 @@ import { LocationTrackingGateway } from 'src/location_tracking/location_tracking
 import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
 import { RequestTripDto } from './dtos/request_trip.dto';
 import { UsersService } from 'src/users/users.service';
-import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
 
 @Injectable()
 export class TripService {
@@ -49,12 +48,6 @@ export class TripService {
       const savedTrip = await this.tripRepository.save(trip);
 
       // 4. Find nearby drivers
-      const nearbyDrivers: DriverLocationDto[] =
-        this.locationTrackingService.findNearbyDrivers(savedTrip);
-      if (nearbyDrivers.length === 0) {
-        this.logger.warn('No nearby drivers found for trip request');
-        return { message: 'No nearby drivers available' };
-      }
 
       return savedTrip;
     } catch (error) {
