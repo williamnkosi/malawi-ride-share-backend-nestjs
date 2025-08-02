@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TripEntity } from './entities/trip_entity';
+import { TripEntity, TripStatus } from './entities/trip_entity';
 import { Repository } from 'typeorm';
 import { TripGateway } from './trip.gateway';
 import { LocationTrackingGateway } from 'src/location_tracking/location_tracking.gateway';
 import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
 import { RequestTripDto } from './dtos/request_trip.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class TripService {
@@ -14,20 +15,39 @@ export class TripService {
   constructor(
     @InjectRepository(TripEntity)
     private readonly tripRepository: Repository<TripEntity>,
+    private readonly userService: UsersService,
     private readonly tripGateway: TripGateway,
     private readonly locationTrackingService: LocationTrackingService,
     private readonly locationTrackingGateway: LocationTrackingGateway,
   ) {}
 
-  requestTrip(requestTripDto: RequestTripDto, userId: string) {
-    console.log('Requesting trip with data:', requestTripDto);
-    console.log('User ID:', userId);
-    // Validate and create trip request
-    // const trip = this.tripRepository.create();
-    // await this.tripRepository.save(trip);
+  async requestTrip(requestTripDto: RequestTripDto, FirebaseId: string) {
+    // 1. Find the database user by Firebase UID
+    const user = await this.userService.findByFirebaseId(FirebaseId);
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-    // Notify drivers about the new trip request
-    //this.locationTrackingGateway.notifyNewTripRequest(trip);
+    // 2. Create trip entity
+    const trip = this.tripRepository.create({
+      riderId: user.id, // Use database user ID
+      pickupAddress: requestTripDto.pickupLocation.address,
+      dropoffAddress: requestTripDto.dropoffLocation.address,
+      pickupLatitude: requestTripDto.pickupLocation.latitude,
+      pickupLongitude: requestTripDto.pickupLocation.longitude,
+      dropoffLatitude: requestTripDto.dropoffLocation.latitude,
+      dropoffLongitude: requestTripDto.dropoffLocation.longitude,
+      passengerCount: requestTripDto.passengerCount,
+      notes: requestTripDto.notes,
+      status: TripStatus.REQUESTED,
+      scheduledTime: requestTripDto.scheduledTime,
+    });
+
+    // 3. Save trip to database
+    const savedTrip = await this.tripRepository.save(trip);
+
+    // 4. Find nearby drivers
+    await this.locationTrackingService.findNearbyDrivers(savedTrip);
   }
 
   async createTrip(tripData: Partial<TripEntity>): Promise<TripEntity> {

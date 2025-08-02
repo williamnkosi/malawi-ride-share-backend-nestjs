@@ -10,6 +10,9 @@ import {
 import { UserEntity } from '../../users/users.entity';
 
 export enum TripStatus {
+  REQUESTED = 'requested',
+  ACCEPTED = 'accepted',
+  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
@@ -76,4 +79,11 @@ export class TripEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // === OPTIONAL FIELDS ===
+  @Column({ type: 'text', nullable: true })
+  notes?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  scheduledTime?: Date;
 }

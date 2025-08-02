@@ -17,15 +17,25 @@ export class UsersService {
     return await this.repository.find();
   }
 
-  async findById(firebaseId: string): Promise<UserEntity> {
+  async findByFirebaseId(firebaseId: string): Promise<UserEntity> {
     const user = await this.repository.findOne({
       where: { firebaseId },
     });
-
     if (!user) {
       throw new NotFoundException(
         `User with firebaseId ${firebaseId} not found`,
       );
+    }
+    return user;
+  }
+
+  async findById(id: string): Promise<UserEntity> {
+    const user = await this.repository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with firebaseId ${id} not found`);
     }
 
     return user;
