@@ -8,7 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { LocationTrackingService } from './location_tracking.service';
 import {
   DriverConnectionDto,
@@ -16,9 +16,13 @@ import {
   LocationDto,
 } from './location_tracking.dto';
 
+import { WsFirebaseAuthGuard } from 'src/common/guards/firebas_auth_websocket_guard';
+import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
+
 @WebSocketGateway({
   cors: { origin: '*' },
 })
+@UseGuards(WsFirebaseAuthGuard)
 export class LocationTrackingGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -29,28 +33,31 @@ export class LocationTrackingGateway
 
   constructor(private readonly locationService: LocationTrackingService) {}
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: AuthenticatedSocket) {
     console.log('=== WEBSOCKET CONNECTION ===');
     console.log(`Client connected: ${client.id}`);
     this.logger.log(`Client connected: ${client.id}`);
 
-    // Auto-register driver if credentials provided
-    const firebaseId: string | undefined = client.handshake.auth?.firebaseId as
-      | string
-      | undefined;
+    // Get Firebase ID from authenticated user (set by WsFirebaseAuthGuard)
+    const firebaseId = client.firebaseId; // This is set by the guard after token verification
+
+    // Get initial position from auth (this is OK as additional data)
     const initialPosition = client.handshake.auth?.initialPosition as
       | LocationDto
       | undefined;
 
-    console.log('FirebaseId from auth:', firebaseId);
+    console.log('Authenticated Firebase ID:', firebaseId);
     console.log('Initial location from auth:', initialPosition);
 
     if (firebaseId) {
-      console.log('Auto-registering driver with location...');
+      console.log('Auto-registering authenticated driver with location...');
       await this.registerDriverForTracking(client, {
-        firebaseId,
         initialLocation: initialPosition,
       });
+    } else {
+      this.logger.warn(
+        'No authenticated Firebase ID found - connection should have been rejected by guard',
+      );
     }
   }
 
@@ -66,23 +73,21 @@ export class LocationTrackingGateway
    */
   @SubscribeMessage('driver:connect')
   async registerDriverForTracking(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: DriverConnectionDto,
   ) {
     try {
-      const { firebaseId } = payload;
-
-      this.locationService.registerDriver(client.id, payload);
+      await this.locationService.registerDriver(client, payload);
 
       // Join driver-specific room
-      await client.join(`driver:${firebaseId}`);
+      await client.join(`driver:${client.firebaseId}`);
 
-      this.logger.log(`Driver ${firebaseId} registered for tracking`);
+      this.logger.log(`Driver ${client.firebaseId} registered for tracking`);
 
       return {
         status: 'success',
         message: 'Driver registered for location tracking',
-        firebaseId,
+        firebaseId: client.firebaseId,
       };
     } catch (error) {
       this.logger.error(`Failed to register driver:`, error);
@@ -97,19 +102,21 @@ export class LocationTrackingGateway
    * Real-time location updates from driver
    */
   @SubscribeMessage('driver:location_update')
-  handleLocationUpdate(
-    @ConnectedSocket() client: Socket,
+  async handleLocationUpdate(
+    @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: UpdateDriverLocationDto,
   ) {
     try {
-      const updatedLocation =
-        this.locationService.updateDriverLocation(payload);
+      const updatedLocation = await this.locationService.updateDriverLocation(
+        client.firebaseId,
+        payload,
+      );
 
       // Broadcast to riders tracking this driver
       this.server
-        .to(`tracking:${payload.firebaseId}`)
+        .to(`tracking:${client.firebaseId}`)
         .emit('driver:location_changed', {
-          driverId: payload.firebaseId,
+          driverId: client.firebaseId,
           location: {
             latitude: updatedLocation.location?.latitude ?? '',
             longitude: updatedLocation.location?.longitude ?? '',
@@ -133,16 +140,16 @@ export class LocationTrackingGateway
    */
   @SubscribeMessage('driver:status_update')
   updateDriverStatus(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody()
     payload: UpdateDriverLocationDto,
   ) {
     try {
-      const { firebaseId, status } = payload;
+      const { status } = payload;
 
-      this.locationService.updateDriverStatus(firebaseId, status);
+      this.locationService.updateDriverStatus(client.firebaseId, status);
 
-      this.logger.log(`Driver ${firebaseId} status updated: ${status}`);
+      this.logger.log(`Driver ${client.firebaseId} status updated: ${status}`);
 
       return {
         status: 'success',

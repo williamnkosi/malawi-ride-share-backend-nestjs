@@ -1,11 +1,4 @@
-import {
-  IsNumber,
-  IsString,
-  IsOptional,
-  Min,
-  Max,
-  IsEnum,
-} from 'class-validator';
+import { IsNumber, IsOptional, Min, Max, IsEnum } from 'class-validator';
 
 export enum DriverStatus {
   ONLINE = 'online',
@@ -27,9 +20,6 @@ export class LocationDto {
 }
 
 export class DriverLocationDto {
-  @IsString()
-  firebaseId: string;
-
   @IsEnum(DriverStatus)
   status?: DriverStatus;
 
@@ -38,9 +28,6 @@ export class DriverLocationDto {
 }
 
 export class UpdateDriverLocationDto {
-  @IsString()
-  firebaseId: string;
-
   location: LocationDto;
 
   @IsEnum(DriverStatus)
@@ -58,9 +45,6 @@ export class FindNearbyDriversDto {
 }
 
 export class DriverConnectionDto {
-  @IsString()
-  firebaseId: string;
-
   @IsOptional()
   initialLocation?: LocationDto;
 }

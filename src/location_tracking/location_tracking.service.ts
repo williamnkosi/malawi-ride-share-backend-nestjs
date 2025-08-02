@@ -7,34 +7,46 @@ import {
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
 import { TripEntity } from 'src/trip/entities/trip_entity';
+import { UserEntity } from 'src/users/users.entity';
+import { UsersService } from 'src/users/users.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 
 @Injectable()
 export class LocationTrackingService {
   private readonly logger = new Logger(LocationTrackingService.name);
 
   // In-memory store for real-time tracking
-  private onlineDrivers = new Map<string, DriverLocationDto>(); // driverId -> location
-  private driverSockets = new Map<string, string>(); // driverId -> socketId
-  private socketDrivers = new Map<string, string>(); // socketId -> driverId
+  private onlineDrivers = new Map<string, DriverLocationDto>(); // userId -> location
+  private driverSockets = new Map<string, string>(); // userId -> socketId
+  private socketDrivers = new Map<string, string>(); // socketId -> userId
 
-  registerDriver(
-    socketId: string,
+  constructor(
+    @InjectRepository(UserEntity) private userService: UsersService,
+  ) {}
+
+  async registerDriver(
+    client: AuthenticatedSocket,
     driverConnectionDto: DriverConnectionDto,
-  ): void {
-    const { firebaseId, initialLocation } = driverConnectionDto;
-    this.logger.log(`Registering driver ${firebaseId} for real-time tracking`);
+  ): Promise<void> {
+    const { initialLocation } = driverConnectionDto;
+    this.logger.log(
+      `Registering driver ${client.firebaseId} for real-time tracking`,
+    );
+    const driverUserEntity = await this.userService.findByFirebaseId(
+      client.firebaseId,
+    );
 
-    this.driverSockets.set(firebaseId, socketId);
-    this.socketDrivers.set(socketId, firebaseId);
+    this.driverSockets.set(driverUserEntity.id, client.id);
+    this.socketDrivers.set(client.id, driverUserEntity.id);
 
     if (initialLocation) {
       const driverInfo: DriverLocationDto = {
-        firebaseId,
         location: initialLocation,
         status: DriverStatus.ONLINE,
       };
 
-      this.onlineDrivers.set(firebaseId, driverInfo);
+      this.onlineDrivers.set(driverUserEntity.id, driverInfo);
     }
   }
 
@@ -82,11 +94,15 @@ export class LocationTrackingService {
     return nearbyDrivers;
   }
 
-  updateDriverLocation(updateDto: UpdateDriverLocationDto): DriverLocationDto {
-    const { firebaseId, location, status } = updateDto;
+  async updateDriverLocation(
+    firebaseId: string,
+    updateDto: UpdateDriverLocationDto,
+  ): Promise<DriverLocationDto> {
+    const { location, status } = updateDto;
+    const driverUserEntity =
+      await this.userService.findByFirebaseId(firebaseId);
 
     const updatedLocation: DriverLocationDto = {
-      firebaseId,
       status,
       location: {
         latitude: location.latitude,
@@ -94,10 +110,10 @@ export class LocationTrackingService {
       },
     };
 
-    this.onlineDrivers.set(firebaseId, updatedLocation);
+    this.onlineDrivers.set(driverUserEntity.id, updatedLocation);
 
     this.logger.debug(
-      `Updated location for driver ${firebaseId} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude}`,
+      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude}`,
     );
     return updatedLocation;
   }
