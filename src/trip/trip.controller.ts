@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { RequestTripDto } from './dtos/request_trip.dto';
 import { FirebaseAuthGuard } from 'src/common/guards/firebase_auth_guard';
 import { TripService } from './trip.service';
@@ -21,14 +11,14 @@ export class TripController {
 
   @Post('request')
   @UseGuards(FirebaseAuthGuard)
-  requestTrip(
+  async requestTrip(
     @Req() request: AuthenticatedRequest,
     @Body() requestTripDto: RequestTripDto,
   ) {
     if (!request.user) {
       throw new Error('User not authenticated');
     }
-    this.tripService.requestTrip(requestTripDto, request.user);
+    await this.tripService.requestTrip(requestTripDto, request.user);
     // Create a new trip request
     // - Pickup location
     // - Destination
