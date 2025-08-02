@@ -52,8 +52,4 @@ export class RequestTripDto {
   @IsOptional()
   @IsString()
   readonly notes?: string;
-
-  @IsNotEmpty({ message: 'Rider ID is required' })
-  @IsString()
-  readonly riderId: string;
 }
