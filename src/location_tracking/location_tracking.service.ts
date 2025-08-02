@@ -3,10 +3,8 @@ import {
   DriverConnectionDto,
   DriverLocationDto,
   DriverStatus,
-  LocationDto,
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
-import { TripEntity } from 'src/trip/entities/trip_entity';
 import { UserEntity } from 'src/users/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -48,50 +46,6 @@ export class LocationTrackingService {
 
       this.onlineDrivers.set(driverUserEntity.id, driverInfo);
     }
-  }
-
-  /**
-   * Find nearby available drivers
-   */
-  findNearbyDrivers(
-    trip: TripEntity,
-    radiusKm: number = 5,
-  ): DriverLocationDto[] {
-    this.logger.log(`Finding drivers within ${radiusKm}km of rider location`);
-
-    const availableDrivers = Array.from(this.onlineDrivers.values()).filter(
-      (driver) =>
-        driver.status === DriverStatus.ONLINE && driver.location !== undefined,
-    );
-
-    if (availableDrivers === undefined || availableDrivers.length === 0) {
-      this.logger.warn('No available drivers found');
-      return [];
-    }
-
-    const pickupLocation: LocationDto = {
-      latitude: trip.pickupLatitude,
-      longitude: trip.pickupLongitude,
-    };
-    // Pair each driver with its distance, but keep the original object for return
-    const driversWithDistance = availableDrivers
-      .map((driverLocation) => ({
-        driver: driverLocation,
-        distance: this.calculateDistance(
-          pickupLocation,
-          driverLocation.location as LocationDto,
-        ),
-      }))
-      .filter((item) => item.distance <= radiusKm)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 10); // Top 10 closest drivers
-
-    const nearbyDrivers: DriverLocationDto[] = driversWithDistance.map(
-      (item) => item.driver,
-    );
-
-    this.logger.log(`Found ${nearbyDrivers.length} nearby drivers`);
-    return nearbyDrivers;
   }
 
   async updateDriverLocation(
@@ -155,25 +109,5 @@ export class LocationTrackingService {
     this.onlineDrivers.delete(driverId);
     this.driverSockets.delete(driverId);
     this.socketDrivers.delete(socketId);
-  }
-
-  private calculateDistance(point1: LocationDto, point2: LocationDto): number {
-    const R = 6371; // Earth's radius in km
-    const dLat = this.degreesToRadians(point2.latitude - point1.latitude);
-    const dLon = this.degreesToRadians(point2.longitude - point1.longitude);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.degreesToRadians(point1.latitude)) *
-        Math.cos(this.degreesToRadians(point2.latitude)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  private degreesToRadians(degrees: number): number {
-    return degrees * (Math.PI / 180);
   }
 }
