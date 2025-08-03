@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TripEntity } from './entities/trip_entity';
 import { FirebaseModule } from 'src/firebase/firebase.module';
 import { UsersModule } from 'src/users/users.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UsersModule } from 'src/users/users.module';
     LocationTrackingModule,
     FirebaseModule,
     UsersModule,
+    NotificationsModule,
   ],
   controllers: [TripController],
   providers: [

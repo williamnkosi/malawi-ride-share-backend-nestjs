@@ -3,7 +3,7 @@ import { NotificationEventEmitters } from '../models/notification_event_emitters
 import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
 
 export interface TripNotificationEvents {
-  [NotificationEventEmitters.TRIP_REQUESTED]: { trip: TripEntity; rider: any };
+  [NotificationEventEmitters.TRIP_REQUESTED]: { trip: TripEntity };
   [NotificationEventEmitters.TRIP_ACCEPTED]: {
     trip: TripEntity;
     driverId: string;
