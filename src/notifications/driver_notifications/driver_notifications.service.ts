@@ -8,7 +8,10 @@ import {
   LocationDto,
 } from 'src/location_tracking/location_tracking.dto';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
-import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
+import {
+  LocationTrackingService,
+  NearbyDriverResult,
+} from 'src/location_tracking/location_tracking.service';
 import { TripGateway } from 'src/trip/trip.gateway';
 
 @Injectable()
@@ -30,7 +33,7 @@ export class DriverNotificationsService {
         latitude: payload.trip.pickupLatitude,
         longitude: payload.trip.pickupLongitude,
       } as LocationDto;
-      const nearbyDrivers =
+      const nearbyDrivers: NearbyDriverResult[] =
         this.locationTrackingService.findNearbyDrivers(location);
 
       //TODO: Notify drivers about the trip request
