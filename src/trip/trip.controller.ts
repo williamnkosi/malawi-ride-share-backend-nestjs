@@ -18,7 +18,7 @@ export class TripController {
     if (!request.user) {
       throw new Error('User not authenticated');
     }
-    await this.tripService.requestTrip(requestTripDto, request.user);
+    await this.tripService.requestTrip(requestTripDto, request.userId);
     // Create a new trip request
     // - Pickup location
     // - Destination

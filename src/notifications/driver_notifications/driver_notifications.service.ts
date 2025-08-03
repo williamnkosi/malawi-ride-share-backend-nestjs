@@ -68,24 +68,24 @@ export class DriverNotificationsService {
         );
 
         // 📡 WebSocket Notification
-        await this.tripGateway.notifyDriverOfTripRequest(driver.userId, {
-          tripId: payload.trip.id,
-          pickupLocation: {
-            address: payload.trip.pickupAddress,
-            latitude: payload.trip.pickupLatitude,
-            longitude: payload.trip.pickupLongitude,
-          },
-          dropoffLocation: {
-            address: payload.trip.dropoffAddress,
-            latitude: payload.trip.dropoffLatitude,
-            longitude: payload.trip.dropoffLongitude,
-          },
-          estimatedFare: payload.trip.estimatedFare || 0,
-          estimatedDistance: driver.distance,
-          passengerCount: payload.trip.passengerCount,
-          riderName: payload.rider.firstName || 'Rider',
-          expiresAt: new Date(Date.now() + 60000), // 1 minute to respond
-        });
+        // await this.tripGateway.notifyDriverOfTripRequest(driver.userId, {
+        //   tripId: payload.trip.id,
+        //   pickupLocation: {
+        //     address: payload.trip.pickupAddress,
+        //     latitude: payload.trip.pickupLatitude,
+        //     longitude: payload.trip.pickupLongitude,
+        //   },
+        //   dropoffLocation: {
+        //     address: payload.trip.dropoffAddress,
+        //     latitude: payload.trip.dropoffLatitude,
+        //     longitude: payload.trip.dropoffLongitude,
+        //   },
+        //   estimatedFare: payload.trip.estimatedFare || 0,
+        //   estimatedDistance: driver.distance,
+        //   passengerCount: payload.trip.passengerCount,
+        //   riderName: payload.rider.firstName || 'Rider',
+        //   expiresAt: new Date(Date.now() + 60000), // 1 minute to respond
+        // });
       }
     } catch (error) {}
   }

@@ -47,17 +47,11 @@ export class TripService {
     }
   }
 
-  async requestTrip(requestTripDto: RequestTripDto, FirebaseId: string) {
+  async requestTrip(requestTripDto: RequestTripDto, userId: string) {
     try {
-      // 1. Find the database user by Firebase UID
-      const user = await this.userService.findByFirebaseId(FirebaseId);
-      if (!user) {
-        throw new Error('User not found');
-      }
-
       // 2. Create trip entity
       const trip = this.tripRepository.create({
-        riderId: user.id, // Use database user ID
+        riderId: userId, // Use database user ID
         pickupAddress: requestTripDto.pickupLocation.address,
         dropoffAddress: requestTripDto.dropoffLocation.address,
         pickupLatitude: requestTripDto.pickupLocation.latitude,

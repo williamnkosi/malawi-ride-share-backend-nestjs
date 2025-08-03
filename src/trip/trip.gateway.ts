@@ -89,14 +89,6 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Verify the driver ID matches the authenticated user
-      if (client.firebaseId !== data.driverId) {
-        client.emit(DriverTripResponse.ERROR, {
-          message: 'Driver ID mismatch',
-        });
-        return;
-      }
-
       // Accept the trip (this would update the trip status in database)
       // const updatedTrip = await this.tripService.acceptTrip(data.tripId, data.driverId);
 
