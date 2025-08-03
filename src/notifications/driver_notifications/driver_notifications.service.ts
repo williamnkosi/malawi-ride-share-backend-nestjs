@@ -3,10 +3,7 @@ import { LocationTrackingGateway } from 'src/location_tracking/location_tracking
 import { NotificationsService } from '../notifications.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { TripEntity } from 'src/trip/entities/trip_entity';
-import {
-  DriverLocationDto,
-  LocationDto,
-} from 'src/location_tracking/location_tracking.dto';
+import { LocationDto } from 'src/location_tracking/location_tracking.dto';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import {
   LocationTrackingService,
@@ -62,14 +59,10 @@ export class DriverNotificationsService {
           {
             type: 'trip_request',
             tripId: payload.trip.id,
-            pickupAddress: {
-              latitude: payload.trip.pickupLatitude.toString(),
-              longitude: payload.trip.pickupLongitude.toString(),
-            },
-            dropoffAddress: {
-              latitude: payload.trip.dropoffLatitude.toString(),
-              longitude: payload.trip.dropoffLongitude.toString(),
-            },
+            pickupLatitude: payload.trip.pickupLatitude.toString(),
+            pickupLongitude: payload.trip.pickupLongitude.toString(),
+            dropoffLatitude: payload.trip.dropoffLatitude.toString(),
+            dropoffLongitude: payload.trip.dropoffLongitude.toString(),
             distance: driver.distance.toString(),
           },
         );

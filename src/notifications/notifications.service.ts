@@ -38,14 +38,14 @@ export class NotificationsService {
     }
   }
 
-  sendNotificationWithData(
+  async sendNotificationWithData(
     userId: string,
     notification: { title: string; body: string },
     data: Record<string, string>,
   ) {
-    const token = this.userDeviceRepository.getTokenByUserId(userId);
+    const userDeviceEntity = await this.userDeviceRepository.findOne(userId);
     const message: TokenMessage = {
-      token,
+      token: userDeviceEntity?.fcmToken || '',
       data,
       notification: {
         title: notification.title,
@@ -55,8 +55,7 @@ export class NotificationsService {
         priority: 'high',
       },
     };
-    const message1 = this.firebaseService.getMessaging();
-    const response = message1.send(message);
+    const response = await this.firebaseService.getMessaging().send(message);
     return response;
   }
 

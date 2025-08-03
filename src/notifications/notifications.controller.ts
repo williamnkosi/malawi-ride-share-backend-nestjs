@@ -20,7 +20,7 @@ export class NotificationsController {
   ): Promise<ApiResponse<boolean>> {
     try {
       await this.userDeviceRepository.registerOrUpdateDevice(
-        request.firebaseId,
+        request.userId,
         dto,
       );
       return new ApiResponse(true, 'Device registered successfully', true);
