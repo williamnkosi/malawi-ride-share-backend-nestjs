@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Inject,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { FirebaseService } from 'src/firebase/firebase.service';
@@ -11,9 +6,7 @@ import { AuthenticatedSocket, UserType } from './firebase_auth_guard_types';
 
 @Injectable()
 export class WsFirebaseAuthGuard implements CanActivate {
-  constructor(
-    @Inject('FirebaseService') private firebaseService: FirebaseService,
-  ) {}
+  constructor(private readonly firebaseService: FirebaseService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<AuthenticatedSocket>();

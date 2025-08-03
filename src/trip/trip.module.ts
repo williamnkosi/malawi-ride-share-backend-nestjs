@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TripController } from './trip.controller';
 import { TripService } from './trip.service';
 import { TripGateway } from './trip.gateway';
@@ -17,7 +17,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     LocationTrackingModule,
     FirebaseModule,
     UsersModule,
-    NotificationsModule,
+    forwardRef(() => NotificationsModule), // Use forwardRef to break circular dependency
   ],
   controllers: [TripController],
   providers: [
@@ -26,5 +26,6 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     LocationTrackingGateway,
     LocationTrackingService,
   ],
+  exports: [TripService, TripGateway], // Export services for use in other modules
 })
 export class TripModule {}

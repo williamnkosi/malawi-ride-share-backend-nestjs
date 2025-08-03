@@ -7,6 +7,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 import { LocationTrackingModule } from './location_tracking/location_tracking.module';
@@ -18,6 +19,7 @@ const isProd = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(), // Initialize EventEmitter globally
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,

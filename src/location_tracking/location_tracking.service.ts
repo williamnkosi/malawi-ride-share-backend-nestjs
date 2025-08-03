@@ -5,9 +5,7 @@ import {
   DriverStatus,
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
-import { UserEntity } from 'src/users/users.entity';
 import { UsersService } from 'src/users/users.service';
-import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 
@@ -27,9 +25,7 @@ export class LocationTrackingService {
   private driverSockets = new Map<string, string>(); // userId -> socketId
   private socketDrivers = new Map<string, string>(); // socketId -> userId
 
-  constructor(
-    @InjectRepository(UserEntity) private userService: UsersService,
-  ) {}
+  constructor(private readonly userService: UsersService) {}
 
   async registerDriver(
     client: AuthenticatedSocket,

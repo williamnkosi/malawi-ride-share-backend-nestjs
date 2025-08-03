@@ -36,7 +36,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with firebaseId ${id} not found`);
+      throw new NotFoundException(`User with id ${id} not found`);
     }
 
     return user;
@@ -59,7 +59,7 @@ export class UsersService {
       );
     }
 
-    return await this.findById(firebaseId);
+    return await this.findByFirebaseId(firebaseId);
   }
   async remove(firebaseId: string): Promise<void> {
     const result = await this.repository.delete({ firebaseId });
