@@ -9,6 +9,7 @@ import {
   AuthenticatedSocket,
   UserType,
 } from 'src/common/guards/firebase_auth_guard_types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TripService {
@@ -21,6 +22,7 @@ export class TripService {
     @InjectRepository(TripEntity)
     private readonly tripRepository: Repository<TripEntity>,
     private readonly userService: UsersService,
+    private readonly eventEmitter: EventEmitter2, // ✅ Add EventEmitter2
   ) {}
 
   registerUserSocket(client: AuthenticatedSocket) {
@@ -71,7 +73,11 @@ export class TripService {
       // 3. Save trip to database
       const savedTrip = await this.tripRepository.save(trip);
 
-      // 4. Find nearby drivers
+      // 4. Offline trip request handling
+      this.eventEmitter.emit('trip.requested', {
+        trip: savedTrip,
+        rider: user,
+      });
 
       return savedTrip;
     } catch (error) {
