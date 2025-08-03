@@ -1,9 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { NotificationsService } from './notifications.service';
 import { ApiResponse } from 'src/common/types/api_response';
 import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
+import { AuthenticatedRequest } from 'src/common/guards/firebase_auth_guard_types';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -14,10 +15,14 @@ export class NotificationsController {
 
   @Post('register-device')
   async registerDevice(
+    @Req() request: AuthenticatedRequest,
     @Body() dto: CreateUserDeviceDto,
   ): Promise<ApiResponse<boolean>> {
     try {
-      await this.userDeviceRepository.registerOrUpdateDevice(dto);
+      await this.userDeviceRepository.registerOrUpdateDevice(
+        request.firebaseId,
+        dto,
+      );
       return new ApiResponse(true, 'Device registered successfully', true);
     } catch {
       throw new CustomError('Error registering device', 500);

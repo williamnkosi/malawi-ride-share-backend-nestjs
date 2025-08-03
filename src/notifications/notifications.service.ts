@@ -39,10 +39,11 @@ export class NotificationsService {
   }
 
   sendNotificationWithData(
-    driverId: string,
+    userId: string,
     notification: { title: string; body: string },
     data: Record<string, string>,
   ) {
+    const token = this.userDeviceRepository.getTokenByUserId(userId);
     const message: TokenMessage = {
       token,
       data,

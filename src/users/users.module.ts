@@ -9,5 +9,6 @@ import { FirebaseService } from 'src/firebase/firebase.service';
   imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [UsersController],
   providers: [UsersService, FirebaseService],
+  exports: [UsersService], // Export UsersService for use in other modules
 })
 export class UsersModule {}

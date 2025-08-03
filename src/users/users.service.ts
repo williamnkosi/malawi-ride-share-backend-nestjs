@@ -20,6 +20,7 @@ export class UsersService {
   async findByFirebaseId(firebaseId: string): Promise<UserEntity> {
     const user = await this.repository.findOne({
       where: { firebaseId },
+      relations: ['driver', 'rider'], // Include relationships to determine user type
     });
     if (!user) {
       throw new NotFoundException(
