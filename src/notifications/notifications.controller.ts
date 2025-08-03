@@ -3,7 +3,7 @@ import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_devi
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { NotificationsService } from './notifications.service';
 import { ApiResponse } from 'src/common/types/api_response';
-import { UserDeviceService } from 'src/user_device/user_device.service';
+import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
 
 @Controller('notifications')
 export class NotificationsController {

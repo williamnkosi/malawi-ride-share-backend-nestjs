@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UserDeviceModule } from './user_device/user_device.module';
+import { UserDeviceModule } from './notifications/user_device/user_device.module';
 
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 import { LocationTrackingModule } from './location_tracking/location_tracking.module';
