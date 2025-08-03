@@ -5,6 +5,8 @@ import {
   Column,
   Unique,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { DevicePlatform } from '../types/device_platform';
 import { Matches } from 'class-validator';
@@ -14,9 +16,15 @@ export class UserDeviceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Unique(['firebaseUserId'])
-  @Column({ nullable: false })
-  firebaseUserId: string;
+  @OneToOne('UserEntity', 'device', {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn()
+  user: any;
+
+  @Column({ unique: true })
+  userId: string;
 
   @Unique(['fcmToken'])
   @Column({ nullable: false })
@@ -29,6 +37,7 @@ export class UserDeviceEntity {
   })
   platform: DevicePlatform;
 
+  @Column()
   @Matches(/^\d+\.\d+\.\d+$/, {
     message: 'deviceVersion must be a semantic version (e.g. 1.2.3)',
   })

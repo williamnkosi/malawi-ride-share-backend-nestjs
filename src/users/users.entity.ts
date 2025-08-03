@@ -55,4 +55,10 @@ export class UserEntity {
 
   @OneToOne(() => RiderEntity, (rider) => rider.user, { nullable: true })
   rider?: RiderEntity;
+
+  @OneToOne('UserDeviceEntity', 'user', {
+    nullable: true,
+    cascade: true,
+  })
+  device?: any;
 }

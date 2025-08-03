@@ -26,7 +26,7 @@ export class DriverNotificationsService {
   ) {}
   // ✅ 1. NEW TRIP REQUESTS
   @OnEvent(NotificationEventEmitters.TRIP_REQUESTED)
-  handleTripRequest(payload: { trip: TripEntity }) {
+  async handleTripRequest(payload: { trip: TripEntity }) {
     try {
       // Notify drivers about the new trip request
       const location = {
@@ -53,18 +53,26 @@ export class DriverNotificationsService {
       // ✅ Send notifications to each nearby driver
       for (const driver of nearbyDrivers) {
         // 🔥 Firebase Push Notification
-        await this.notificationsService.sendNotification(driver.userId, {
-          title: 'New Trip Request',
-          body: `Trip request ${Math.round(driver.distance)}km away`,
-          data: {
+        await this.notificationsService.sendNotificationWithData(
+          driver.userId,
+          {
+            title: 'New Trip Request',
+            body: `Trip request ${Math.round(driver.distance)}km away`,
+          },
+          {
             type: 'trip_request',
             tripId: payload.trip.id,
-            pickupAddress: payload.trip.pickupAddress,
-            dropoffAddress: payload.trip.dropoffAddress,
-            estimatedFare: payload.trip.estimatedFare?.toString(),
+            pickupAddress: {
+              latitude: payload.trip.pickupLatitude.toString(),
+              longitude: payload.trip.pickupLongitude.toString(),
+            },
+            dropoffAddress: {
+              latitude: payload.trip.dropoffLatitude.toString(),
+              longitude: payload.trip.dropoffLongitude.toString(),
+            },
             distance: driver.distance.toString(),
           },
-        });
+        );
 
         // 📡 WebSocket Notification
         await this.tripGateway.notifyDriverOfTripRequest(driver.userId, {

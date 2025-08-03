@@ -39,7 +39,7 @@ export class NotificationsService {
   }
 
   sendNotificationWithData(
-    token: string,
+    driverId: string,
     notification: { title: string; body: string },
     data: Record<string, string>,
   ) {
