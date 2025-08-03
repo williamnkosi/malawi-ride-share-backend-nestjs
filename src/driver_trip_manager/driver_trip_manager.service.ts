@@ -18,7 +18,7 @@ export class DriverTripManagerService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  @OnEvent('driver.trip.requested')
+  @OnEvent('trip.requested')
   handleDriverTripRequested(payload: { trip: TripEntity }) {
     try {
       // Implementation for handling driver trip requests
@@ -34,9 +34,34 @@ export class DriverTripManagerService {
         return;
       }
 
-      this.findNearbyDrivers(payload.trip, availableDrivers);
+      const nearbyDrivers = this.findNearbyDrivers(
+        payload.trip,
+        availableDrivers,
+      );
 
-      // Your business logic here
+      if (nearbyDrivers.length === 0) {
+        this.logger.warn(`No nearby drivers found for trip ${payload.trip.id}`);
+
+        // ✅ Emit event for no drivers found
+        this.eventEmitter.emit('trip.no_drivers_found', {
+          trip: payload.trip,
+          searchRadius: 5,
+          reason: 'no_drivers_in_range',
+          availableDrivers: availableDrivers.length,
+          timestamp: new Date(),
+        });
+        return;
+      }
+
+      this.logger.log(
+        `Found ${nearbyDrivers.length} suitable drivers for trip ${payload.trip.id}`,
+      );
+
+      // ✅ Emit event with found drivers for DriverNotificationService
+      this.eventEmitter.emit('trip.drivers_found', {
+        trip: payload.trip,
+        drivers: nearbyDrivers,
+      });
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : JSON.stringify(error);

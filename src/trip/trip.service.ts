@@ -2,24 +2,48 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TripEntity, TripStatus } from './entities/trip_entity';
 import { Repository } from 'typeorm';
-import { TripGateway } from './trip.gateway';
-import { LocationTrackingGateway } from 'src/location_tracking/location_tracking.gateway';
-import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
+
 import { RequestTripDto } from './dtos/request_trip.dto';
 import { UsersService } from 'src/users/users.service';
+import {
+  AuthenticatedSocket,
+  UserType,
+} from 'src/common/guards/firebase_auth_guard_types';
 
 @Injectable()
 export class TripService {
   private readonly logger = new Logger(TripService.name);
 
+  private driverSockets = new Map<string, string>(); // driverId → socketId
+  private riderSockets = new Map<string, string>();
+
   constructor(
     @InjectRepository(TripEntity)
     private readonly tripRepository: Repository<TripEntity>,
     private readonly userService: UsersService,
-    private readonly tripGateway: TripGateway,
-    private readonly locationTrackingService: LocationTrackingService,
-    private readonly locationTrackingGateway: LocationTrackingGateway,
   ) {}
+
+  registerUserSocket(client: AuthenticatedSocket) {
+    const userType = client.userType;
+    const userId = client.firebaseId;
+
+    if (userType === UserType.DRIVER) {
+      this.driverSockets.set(userId, client.id);
+    } else if (userType === UserType.RIDER) {
+      this.riderSockets.set(userId, client.id);
+    }
+  }
+
+  unregisterUserSocket(client: AuthenticatedSocket) {
+    const userType = client.userType;
+    const userId = client.firebaseId;
+
+    if (userType === UserType.DRIVER) {
+      this.driverSockets.delete(userId);
+    } else if (userType === UserType.RIDER) {
+      this.riderSockets.delete(userId);
+    }
+  }
 
   async requestTrip(requestTripDto: RequestTripDto, FirebaseId: string) {
     try {
