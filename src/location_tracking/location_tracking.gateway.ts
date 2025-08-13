@@ -20,6 +20,7 @@ import { WsFirebaseAuthGuard } from 'src/common/guards/firebas_auth_websocket_gu
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 
 @WebSocketGateway({
+  namespace: 'location-tracking',
   cors: { origin: '*' },
 })
 @UseGuards(WsFirebaseAuthGuard)
@@ -38,18 +39,15 @@ export class LocationTrackingGateway
     console.log(`Client connected: ${client.id}`);
     this.logger.log(`Client connected: ${client.id}`);
 
-    // Get Firebase ID from authenticated user (set by WsFirebaseAuthGuard)
-    const firebaseId = client.firebaseId; // This is set by the guard after token verification
-
     // Get initial position from auth (this is OK as additional data)
     const initialPosition = client.handshake.auth?.initialPosition as
       | LocationDto
       | undefined;
 
-    console.log('Authenticated Firebase ID:', firebaseId);
+    console.log('Authenticated Firebase ID:', client.firebaseId);
     console.log('Initial location from auth:', initialPosition);
 
-    if (firebaseId) {
+    if (client.firebaseId) {
       console.log('Auto-registering authenticated driver with location...');
       await this.registerDriverForTracking(client, {
         initialLocation: initialPosition,

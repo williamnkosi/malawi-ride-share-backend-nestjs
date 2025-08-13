@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { FirebaseService } from 'src/firebase/firebase.service';
@@ -6,10 +11,17 @@ import { AuthenticatedSocket, UserType } from './firebase_auth_guard_types';
 
 @Injectable()
 export class WsFirebaseAuthGuard implements CanActivate {
+  private readonly logger = new Logger(WsFirebaseAuthGuard.name);
   constructor(private readonly firebaseService: FirebaseService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<AuthenticatedSocket>();
+
+    // ✅ Log every connection attempt here
+    this.logger.log('=== WEBSOCKET AUTH ATTEMPT ===');
+    this.logger.log(`Client ID: ${client.id}`);
+    this.logger.log(`Client IP: ${client.handshake.address}`);
+    this.logger.log(`Namespace: ${client.nsp.name}`);
 
     if (!client.handshake?.auth?.token) {
       throw new WsException('No token provided');
@@ -27,10 +39,13 @@ export class WsFirebaseAuthGuard implements CanActivate {
       const userType = this.extractUserType(client);
       client.userType = userType;
 
-      client.firebaseId = decodedToken.uid;
+      client.firebaseId = client.handshake.auth?.firebaseId as string;
 
       return true;
     } catch (error: unknown) {
+      this.logger.error(
+        `WebSocket authentication failed for client ${client.id}: ${error}`,
+      );
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
       throw new WsException(`Authentication failed: ${errorMessage}`);

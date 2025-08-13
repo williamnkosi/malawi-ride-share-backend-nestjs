@@ -21,7 +21,7 @@ import {
   RiderTripNotification,
 } from './models/driver_trip_message';
 @WebSocketGateway({
-  namespace: '/trips', // ✅ Correct namespace for trip-related communication
+  namespace: 'trips',
   cors: { origin: '*' },
 })
 export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
