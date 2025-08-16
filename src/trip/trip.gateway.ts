@@ -20,6 +20,7 @@ import {
   DriverTripResponse,
   RiderTripNotification,
 } from './models/driver_trip_message';
+import { FirebaseService } from 'src/firebase/firebase.service';
 @WebSocketGateway({
   namespace: 'trips',
   cors: { origin: '*' },
@@ -29,7 +30,10 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
   private readonly logger = new Logger(TripGateway.name);
 
-  constructor(private readonly tripService: TripService) {}
+  constructor(
+    private readonly tripService: TripService,
+    private readonly firebaseService: FirebaseService,
+  ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
     this.logger.log(`Trip Gateway - Client connected: ${client.id}`);

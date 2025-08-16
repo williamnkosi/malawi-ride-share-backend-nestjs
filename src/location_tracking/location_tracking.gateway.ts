@@ -6,9 +6,10 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketServer,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { LocationTrackingService } from './location_tracking.service';
 import {
   DriverConnectionDto,
@@ -16,23 +17,52 @@ import {
   LocationDto,
 } from './location_tracking.dto';
 
-import { WsFirebaseAuthGuard } from 'src/common/guards/firebas_auth_websocket_guard';
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @WebSocketGateway({
-  namespace: 'location-tracking',
   cors: { origin: '*' },
 })
-@UseGuards(WsFirebaseAuthGuard)
 export class LocationTrackingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(LocationTrackingGateway.name);
 
-  constructor(private readonly locationService: LocationTrackingService) {}
+  constructor(
+    private readonly locationService: LocationTrackingService,
+    private readonly firebaseService: FirebaseService,
+  ) {}
+
+  afterInit(server: Server) {
+    server.use((socket, next) => {
+      void (async () => {
+        try {
+          const token = socket.handshake.auth?.token as string;
+          if (!token) {
+            this.logger.warn('No token provided - disconnecting');
+            return next(new Error('Authentication error: No token provided'));
+          }
+
+          const decodedToken = await this.firebaseService
+            .getAuth()
+            .verifyIdToken(token);
+
+          console.log(`✅ Token verified for user: ${decodedToken.uid}`);
+
+          // ✅ THIS WAS MISSING: Set the firebaseId on the socket
+          (socket as AuthenticatedSocket).firebaseId = decodedToken.uid;
+          (socket as AuthenticatedSocket).user = decodedToken;
+          next();
+        } catch (error) {
+          this.logger.error('Error during authentication', error);
+          return next(new Error('Authentication error'));
+        }
+      })();
+    });
+  }
 
   async handleConnection(client: AuthenticatedSocket) {
     console.log('=== WEBSOCKET CONNECTION ===');
@@ -40,12 +70,17 @@ export class LocationTrackingGateway
     this.logger.log(`Client connected: ${client.id}`);
 
     // Get initial position from auth (this is OK as additional data)
+    const firebaseId = client.handshake.auth?.firebaseId as string;
+    if (!firebaseId) {
+      this.logger.warn('No authenticated Firebase ID found - disconnecting');
+      return client.disconnect();
+    }
     const initialPosition = client.handshake.auth?.initialPosition as
       | LocationDto
       | undefined;
 
-    console.log('Authenticated Firebase ID:', client.firebaseId);
-    console.log('Initial location from auth:', initialPosition);
+    this.logger.log('Authenticated Firebase ID:', firebaseId);
+    this.logger.log('Initial location from auth:', initialPosition);
 
     if (client.firebaseId) {
       console.log('Auto-registering authenticated driver with location...');
