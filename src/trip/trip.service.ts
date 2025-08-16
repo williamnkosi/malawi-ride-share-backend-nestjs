@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TripEntity, TripStatus } from './entities/trip_entity';
+import { TripEntity, TripStatus } from './entities/trip.entity';
 import { Repository } from 'typeorm';
 
 import { RequestTripDto } from './dtos/request_trip.dto';

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LocationTrackingGateway } from 'src/location_tracking/location_tracking.gateway';
 import { NotificationsService } from '../notifications.service';
 import { OnEvent } from '@nestjs/event-emitter';
-import { TripEntity } from 'src/trip/entities/trip_entity';
+import { TripEntity } from 'src/trip/entities/trip.entity';
 import { LocationDto } from 'src/location_tracking/location_tracking.dto';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import {

@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UserEntity } from '../../users/users.entity';
+import { IsOptional } from 'class-validator';
 
 export enum TripStatus {
   REQUESTED = 'requested',
@@ -49,11 +50,13 @@ export class TripEntity {
   status: TripStatus;
 
   // Simple location strings for now
-  @Column()
-  pickupAddress: string;
+  @Column({ nullable: true })
+  @IsOptional()
+  pickupAddress?: string;
 
-  @Column()
-  dropoffAddress: string;
+  @Column({ nullable: true })
+  @IsOptional()
+  dropoffAddress?: string;
 
   pickUpLocation: Location;
 

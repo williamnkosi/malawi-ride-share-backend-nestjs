@@ -1,4 +1,4 @@
-import { TripEntity } from 'src/trip/entities/trip_entity';
+import { TripEntity } from 'src/trip/entities/trip.entity';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
 

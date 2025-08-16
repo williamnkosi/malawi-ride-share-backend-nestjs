@@ -7,7 +7,7 @@ import {
   DriverStatus,
   LocationDto,
 } from 'src/location_tracking/location_tracking.dto';
-import { TripEntity } from 'src/trip/entities/trip_entity';
+import { TripEntity } from 'src/trip/entities/trip.entity';
 
 @Injectable()
 export class DriverTripManagerService {

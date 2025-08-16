@@ -145,6 +145,12 @@ export class LocationTrackingGateway
         payload,
       );
 
+      this.logger.log('received driver location update', {
+        driverId: client.firebaseId,
+        latitude: updatedLocation.location?.latitude,
+        longitude: updatedLocation.location?.longitude,
+      });
+
       // Broadcast to riders tracking this driver
       this.server
         .to(`tracking:${client.firebaseId}`)

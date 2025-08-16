@@ -6,10 +6,11 @@ import { LocationTrackingModule } from 'src/location_tracking/location_tracking.
 import { LocationTrackingGateway } from 'src/location_tracking/location_tracking.gateway';
 import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TripEntity } from './entities/trip_entity';
+
 import { FirebaseModule } from 'src/firebase/firebase.module';
 import { UsersModule } from 'src/users/users.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { TripEntity } from './entities/trip.entity';
 
 @Module({
   imports: [
