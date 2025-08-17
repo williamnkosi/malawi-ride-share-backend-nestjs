@@ -50,6 +50,9 @@ export class DriverNotificationsService {
       // ✅ Send notifications to each nearby driver
       for (const driver of nearbyDrivers) {
         // 🔥 Firebase Push Notification
+        this.logger.log(
+          `Notifying driver ${driver.userId} about trip request ${payload.trip.id}`,
+        );
         await this.notificationsService.sendNotificationWithData(
           driver.userId,
           {

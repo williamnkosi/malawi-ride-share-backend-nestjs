@@ -88,6 +88,8 @@ export class LocationTrackingService {
   }
 
   getAllOnlineDrivers(): DriverLocationDto[] {
+    this.logger.log('Retrieving all online drivers');
+    this.logger.log(this.onlineDrivers);
     return Array.from(this.onlineDrivers.values()).filter(
       (driver) => driver.status === DriverStatus.ONLINE,
     );
