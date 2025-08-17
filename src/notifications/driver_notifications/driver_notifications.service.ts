@@ -10,12 +10,18 @@ import {
   NearbyDriverResult,
 } from 'src/location_tracking/location_tracking.service';
 import { TripGateway } from 'src/trip/trip.gateway';
+import { TripRequestNotification } from './driver_trip_notification';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/users/users.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class DriverNotificationsService {
   private readonly logger = new Logger(DriverNotificationsService.name);
 
   constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
     private readonly notificationsService: NotificationsService,
     private readonly locationTrackingService: LocationTrackingService,
     private readonly locationTrackingGateway: LocationTrackingGateway,
@@ -47,6 +53,12 @@ export class DriverNotificationsService {
       //     return;
       //   }
 
+      // Get rider details
+      const rider = await this.userRepository.findOne({
+        where: { id: payload.trip.riderId },
+        select: ['firstName', 'lastName'],
+      });
+
       // ✅ Send notifications to each nearby driver
       for (const driver of nearbyDrivers) {
         // 🔥 Firebase Push Notification
@@ -70,26 +82,27 @@ export class DriverNotificationsService {
           },
         );
 
-        // 📡 WebSocket Notification
-        // await this.tripGateway.notifyDriverOfTripRequest(driver.userId, {
-        //   tripId: payload.trip.id,
-        //   pickupLocation: {
-        //     address: payload.trip.pickupAddress,
-        //     latitude: payload.trip.pickupLatitude,
-        //     longitude: payload.trip.pickupLongitude,
-        //   },
-        //   dropoffLocation: {
-        //     address: payload.trip.dropoffAddress,
-        //     latitude: payload.trip.dropoffLatitude,
-        //     longitude: payload.trip.dropoffLongitude,
-        //   },
-        //   estimatedFare: payload.trip.estimatedFare || 0,
-        //   estimatedDistance: driver.distance,
-        //   passengerCount: payload.trip.passengerCount,
-        //   riderName: payload.rider.firstName || 'Rider',
-        //   expiresAt: new Date(Date.now() + 60000), // 1 minute to respond
-        // });
+        //📡 WebSocket Notification
+        const tripRequest: TripRequestNotification = {
+          tripId: payload.trip.id,
+          pickupLocation: {
+            latitude: payload.trip.pickupLatitude,
+            longitude: payload.trip.pickupLongitude,
+          },
+          dropoffLocation: {
+            latitude: payload.trip.dropoffLatitude,
+            longitude: payload.trip.dropoffLongitude,
+          },
+          passengerCount: payload.trip.passengerCount,
+          riderFirstName: rider?.firstName ?? '',
+          riderLastName: rider?.lastName ?? '',
+
+          // 1 minute to respond
+        };
+        this.tripGateway.notifyDriverOfTripRequest(driver.userId, tripRequest);
       }
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error('Failed to Handle the trip request', error);
+    }
   }
 }

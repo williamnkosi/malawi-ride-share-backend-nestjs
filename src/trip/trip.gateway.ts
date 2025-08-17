@@ -21,6 +21,7 @@ import {
   RiderTripNotification,
 } from './models/driver_trip_message';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { TripRequestNotification } from 'src/notifications/driver_notifications/driver_trip_notification';
 @WebSocketGateway({
   namespace: 'trips',
   cors: { origin: '*' },
@@ -365,6 +366,24 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit(DriverTripResponse.ERROR, {
         message: 'Failed to update arrival status',
       });
+    }
+  }
+
+  notifyDriverOfTripRequest(
+    driverUserId: string,
+    tripRequestData: TripRequestNotification,
+  ) {
+    try {
+      this.logger.log('Sending Websocket trip request to driver ');
+      this.server
+        .to(`driver:${driverUserId}`)
+        .emit('trip:new_request', tripRequestData);
+      this.logger.log(`Trip request sent to driver ${driverUserId}`);
+    } catch (e) {
+      this.logger.error(
+        `Failed to notify driver ${driverUserId} via WebSocket:`,
+        e,
+      );
     }
   }
 }

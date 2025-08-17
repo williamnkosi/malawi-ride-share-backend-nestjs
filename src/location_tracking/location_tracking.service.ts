@@ -124,7 +124,7 @@ export class LocationTrackingService {
    */
   findNearbyDrivers(
     pickupLocation: UserLocationDto,
-    radius: number = 2,
+    radius: number = 10,
   ): NearbyDriverResult[] {
     this.logger.log(
       `Finding nearby drivers for pickup location: ${pickupLocation.latitude}, ${pickupLocation.longitude}`,
@@ -132,9 +132,10 @@ export class LocationTrackingService {
 
     const nearbyDrivers: NearbyDriverResult[] = [];
 
+    this.logger.log(`number of online drivers: ${this.onlineDrivers.size}`);
+
     // Get all online drivers
     for (const [userId, driverData] of this.onlineDrivers.entries()) {
-      // Skip if driver not available
       if (driverData.status !== DriverStatus.ONLINE) {
         continue;
       }
@@ -149,7 +150,6 @@ export class LocationTrackingService {
         pickupLocation,
         driverData.location,
       );
-
       if (distance <= radius) {
         nearbyDrivers.push({
           userId,

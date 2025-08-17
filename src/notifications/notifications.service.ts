@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
 import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
@@ -9,6 +9,7 @@ import { UserDeviceService } from 'src/notifications/user_device/user_device.ser
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
   constructor(
     @InjectRepository(UserDeviceEntity)
     private readonly firebaseService: FirebaseService,
@@ -58,6 +59,7 @@ export class NotificationsService {
       },
     };
     const response = await this.firebaseService.getMessaging().send(message);
+    this.logger.log(`Notification sent: ${response}`);
     return response;
   }
 

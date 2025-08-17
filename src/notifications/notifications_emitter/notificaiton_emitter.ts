@@ -11,6 +11,7 @@ export class NotificationEventEmitter {
   emitTripRequested(
     data: TripNotificationEvents[NotificationEventEmitters.TRIP_REQUESTED],
   ): void {
+    console.log('Emitting trip requested event:', data);
     this.eventEmitter.emit(NotificationEventEmitters.TRIP_REQUESTED, data);
   }
 
