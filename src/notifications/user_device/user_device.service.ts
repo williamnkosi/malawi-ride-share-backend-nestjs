@@ -34,8 +34,11 @@ export class UserDeviceService {
       return await this.userDeviceRepository.save(existing);
     }
 
-    // Create new entry
-    const newDevice = this.userDeviceRepository.create(dto);
+    const newDevice = this.userDeviceRepository.create({
+      user: { id: userId },
+      ...dto,
+    });
+
     return await this.userDeviceRepository.save(newDevice);
   }
 
