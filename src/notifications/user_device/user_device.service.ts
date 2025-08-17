@@ -24,7 +24,7 @@ export class UserDeviceService {
     dto: CreateUserDeviceDto,
   ): Promise<UserDeviceEntity> {
     const existing = await this.userDeviceRepository.findOne({
-      where: { userId },
+      where: { user: { id: userId } },
     });
 
     if (existing) {
@@ -45,7 +45,7 @@ export class UserDeviceService {
 
   async findOne(userId: string): Promise<UserDeviceEntity> {
     const device = await this.userDeviceRepository.findOne({
-      where: { userId },
+      where: { user: { id: userId } },
     });
     if (!device) throw new NotFoundException(`UserDevice ${userId} not found`);
     return device;

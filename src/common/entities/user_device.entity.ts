@@ -10,21 +10,21 @@ import {
 } from 'typeorm';
 import { DevicePlatform } from '../types/device_platform';
 import { Matches } from 'class-validator';
+import { UserEntity } from '../../users/users.entity'; // ✅ Import actual class
 
 @Entity()
 export class UserDeviceEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne('UserEntity', 'device', {
+  @OneToOne(() => UserEntity, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
-  user: any;
+  @JoinColumn({ name: 'user_id' }) // ✅ Specify column name
+  user: UserEntity;
 
-  @Column({ unique: true })
-  userId: string;
+  // ✅ Remove redundant userId column since @JoinColumn creates it
 
   @Unique(['fcmToken'])
   @Column({ nullable: false })

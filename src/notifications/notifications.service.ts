@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
 import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
+import { UserDeviceEntity } from 'src/common/entities/user_device.entity';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
@@ -8,8 +10,8 @@ import { UserDeviceService } from 'src/notifications/user_device/user_device.ser
 @Injectable()
 export class NotificationsService {
   constructor(
+    @InjectRepository(UserDeviceEntity)
     private readonly firebaseService: FirebaseService,
-
     private readonly userDeviceRepository: UserDeviceService,
   ) {}
   async sendNotification(

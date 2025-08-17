@@ -10,6 +10,7 @@ import { RiderNotificationsService } from './rider_notifications/rider_notificat
 import { NotificationEventEmitter } from './notifications_emitter/notificaiton_emitter';
 import { LocationTrackingModule } from 'src/location_tracking/location_tracking.module';
 import { TripModule } from 'src/trip/trip.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   providers: [
@@ -21,6 +22,7 @@ import { TripModule } from 'src/trip/trip.module';
   ],
   imports: [
     FirebaseModule,
+    UsersModule, // ✅ Add UsersModule to provide UsersService
     TypeOrmModule.forFeature([UserDeviceEntity]),
     LocationTrackingModule,
     forwardRef(() => TripModule), // Use forwardRef to break circular dependency
