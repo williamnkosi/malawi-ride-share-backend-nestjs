@@ -71,7 +71,7 @@ export class LocationTrackingService {
     this.onlineDrivers.set(driverUserEntity.id, updatedLocation);
 
     this.logger.debug(
-      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude}`,
+      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude} and stateus: ${updatedLocation.status}`,
     );
     return updatedLocation;
   }

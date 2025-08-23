@@ -149,6 +149,7 @@ export class LocationTrackingGateway
         driverId: client.firebaseId,
         latitude: updatedLocation.location?.latitude,
         longitude: updatedLocation.location?.longitude,
+        status: updatedLocation.status,
       });
 
       // Broadcast to riders tracking this driver
