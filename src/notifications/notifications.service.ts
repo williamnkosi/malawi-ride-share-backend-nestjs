@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
 import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
-import { UserDeviceEntity } from 'src/common/entities/user_device.entity';
 import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
@@ -11,9 +9,9 @@ import { UserDeviceService } from 'src/notifications/user_device/user_device.ser
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
   constructor(
-    @InjectRepository(UserDeviceEntity)
     private readonly firebaseService: FirebaseService,
-    private readonly userDeviceRepository: UserDeviceService,
+
+    private readonly userDeviceService: UserDeviceService,
   ) {}
   async sendNotification(
     token: string,
@@ -46,7 +44,7 @@ export class NotificationsService {
     notification: { title: string; body: string },
     data: Record<string, string>,
   ) {
-    const userDeviceEntity = await this.userDeviceRepository.findOne(userId);
+    const userDeviceEntity = await this.userDeviceService.findOne(userId);
     const message: TokenMessage = {
       token: userDeviceEntity?.fcmToken || '',
       data,
@@ -65,7 +63,7 @@ export class NotificationsService {
 
   async registerDevice(dto: CreateUserDeviceDto): Promise<void> {
     try {
-      await this.userDeviceRepository.create(dto);
+      await this.userDeviceService.create(dto);
     } catch (error) {
       console.error(error);
       throw new CustomError('Error registering device', 500);
