@@ -113,7 +113,7 @@ export class LocationTrackingGateway
       await this.locationService.registerDriver(client, payload);
 
       // Join driver-specific room
-      await client.join(`driver:${client.firebaseId}`);
+      await client.join(`driver:${client.id}`);
 
       this.logger.log(`Driver ${client.firebaseId} registered for tracking`);
 
@@ -154,7 +154,7 @@ export class LocationTrackingGateway
 
       // Broadcast to riders tracking this driver
       this.server
-        .to(`tracking:${client.firebaseId}`)
+        .to(`driver:${client.firebaseId}`)
         .emit('driver:location_changed', {
           driverId: client.firebaseId,
           location: {
@@ -215,8 +215,8 @@ export class LocationTrackingGateway
     try {
       const { tripId, driverId } = payload;
 
-      // Join tracking room
-      await client.join(`tracking:${driverId}`);
+      // Join driver room
+      await client.join(`driver:${driverId}`);
 
       // Send current driver location
       const currentLocation = this.locationService.getDriverLocation(driverId);
@@ -257,7 +257,7 @@ export class LocationTrackingGateway
     @MessageBody() payload: { driverId: string },
   ) {
     const { driverId } = payload;
-    await client.leave(`tracking:${driverId}`);
+    await client.leave(`driver:${driverId}`);
 
     return {
       status: 'success',

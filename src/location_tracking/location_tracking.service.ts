@@ -124,7 +124,7 @@ export class LocationTrackingService {
    */
   findNearbyDrivers(
     pickupLocation: UserLocationDto,
-    radius: number = 10,
+    radius: number = 20,
   ): NearbyDriverResult[] {
     this.logger.log(
       `Finding nearby drivers for pickup location: ${pickupLocation.latitude}, ${pickupLocation.longitude}`,
