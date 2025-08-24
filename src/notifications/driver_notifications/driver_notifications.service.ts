@@ -3,7 +3,6 @@ import { LocationTrackingGateway } from 'src/location_tracking/location_tracking
 import { NotificationsService } from '../notifications.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { TripEntity } from 'src/trip/entities/trip.entity';
-import { LocationDto } from 'src/location_tracking/location_tracking.dto';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import {
   LocationTrackingService,
@@ -29,30 +28,11 @@ export class DriverNotificationsService {
   ) {}
   // ✅ 1. NEW TRIP REQUESTS
   @OnEvent(NotificationEventEmitters.TRIP_REQUESTED)
-  async handleTripRequest(payload: { trip: TripEntity }) {
+  async handleTripRequest(payload: {
+    trip: TripEntity;
+    drivers: NearbyDriverResult[];
+  }) {
     try {
-      // Notify drivers about the new trip request
-      const location = {
-        latitude: payload.trip.pickupLatitude,
-        longitude: payload.trip.pickupLongitude,
-      } as LocationDto;
-      const nearbyDrivers: NearbyDriverResult[] =
-        this.locationTrackingService.findNearbyDrivers(location);
-
-      //TODO: Notify drivers about the trip request
-      //   if (nearbyDrivers.length === 0) {
-      //     this.logger.warn(
-      //       `No drivers found near pickup location for trip ${payload.trip.id}`,
-      //     );
-
-      //     await this.tripGateway.notifyRiderNoDriversAvailable(
-      //       payload.trip.id,
-      //       payload.trip.riderId,
-      //       15, // 15km search radius
-      //     );
-      //     return;
-      //   }
-
       // Get rider details
       const rider = await this.userRepository.findOne({
         where: { id: payload.trip.riderId },
@@ -60,7 +40,7 @@ export class DriverNotificationsService {
       });
 
       // ✅ Send notifications to each nearby driver
-      for (const driver of nearbyDrivers) {
+      for (const driver of payload.drivers) {
         // 🔥 Firebase Push Notification
         this.logger.log(
           `Notifying driver ${driver.userId} about trip request ${payload.trip.id}`,

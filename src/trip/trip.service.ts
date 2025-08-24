@@ -10,6 +10,8 @@ import {
   UserType,
 } from 'src/common/guards/firebase_auth_guard_types';
 import { NotificationEventEmitter } from 'src/notifications/notifications_emitter/notificaiton_emitter';
+import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
+import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 
 @Injectable()
 export class TripService {
@@ -22,6 +24,7 @@ export class TripService {
     @InjectRepository(TripEntity)
     private readonly tripRepository: Repository<TripEntity>,
     private readonly userService: UsersService,
+    private readonly locationTrackingService: LocationTrackingService,
     private readonly notificationEmitter: NotificationEventEmitter,
   ) {}
 
@@ -66,9 +69,24 @@ export class TripService {
 
       // 3. Save trip to database
       const savedTrip = await this.tripRepository.save(trip);
+      const userLocation: UserLocationDto = {
+        latitude: requestTripDto.pickupLocation.latitude,
+        longitude: requestTripDto.pickupLocation.longitude,
+      };
+      const nearbyDrivers =
+        this.locationTrackingService.findNearbyDrivers(userLocation);
 
+      if (nearbyDrivers.length === 0) {
+        this.logger.warn(
+          `No drivers found near pickup location for trip ${savedTrip.id}`,
+        );
+        throw new Error('No drivers available nearby');
+      }
       // 4. Offline trip request handling
-      this.notificationEmitter.emitTripRequested({ trip: savedTrip });
+      this.notificationEmitter.emitTripRequested({
+        trip: savedTrip,
+        drivers: nearbyDrivers,
+      });
 
       return savedTrip;
     } catch (error) {

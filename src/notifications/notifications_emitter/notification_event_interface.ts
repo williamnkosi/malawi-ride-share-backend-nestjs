@@ -1,9 +1,13 @@
 import { TripEntity } from 'src/trip/entities/trip.entity';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
+import { NearbyDriverResult } from 'src/location_tracking/location_tracking.service';
 
 export interface TripNotificationEvents {
-  [NotificationEventEmitters.TRIP_REQUESTED]: { trip: TripEntity };
+  [NotificationEventEmitters.TRIP_REQUESTED]: {
+    trip: TripEntity;
+    drivers: NearbyDriverResult[];
+  };
   [NotificationEventEmitters.TRIP_ACCEPTED]: {
     trip: TripEntity;
     driverId: string;
