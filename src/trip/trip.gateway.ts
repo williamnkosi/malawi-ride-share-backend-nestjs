@@ -23,7 +23,6 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { TripRequestNotification } from 'src/notifications/driver_notifications/driver_trip_notification';
 @WebSocketGateway({
-  namespace: 'trips',
   cors: { origin: '*' },
 })
 export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -377,7 +376,7 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log('Sending Websocket trip request to driver ');
       this.server
         .to(`driver:${driverUserId}`)
-        .emit('trip:new_request', tripRequestData);
+        .emit('driver:trip_request_received', tripRequestData);
       this.logger.log(`Trip request sent to driver ${driverUserId}`);
     } catch (e) {
       this.logger.error(

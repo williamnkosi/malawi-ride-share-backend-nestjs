@@ -8,17 +8,14 @@ import {
   WebSocketServer,
   OnGatewayInit,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { LocationTrackingService } from './location_tracking.service';
-import {
-  DriverConnectionDto,
-  UpdateDriverLocationDto,
-  LocationDto,
-} from './location_tracking.dto';
+import { UpdateDriverLocationDto } from './location_tracking.dto';
 
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -34,6 +31,7 @@ export class LocationTrackingGateway
   constructor(
     private readonly locationService: LocationTrackingService,
     private readonly firebaseService: FirebaseService,
+    private readonly usersService: UsersService,
   ) {}
 
   afterInit(server: Server) {
@@ -49,12 +47,16 @@ export class LocationTrackingGateway
           const decodedToken = await this.firebaseService
             .getAuth()
             .verifyIdToken(token);
+          const user = await this.usersService.findByFirebaseId(
+            decodedToken.uid,
+          );
 
           console.log(`✅ Token verified for user: ${decodedToken.uid}`);
 
           // ✅ THIS WAS MISSING: Set the firebaseId on the socket
           (socket as AuthenticatedSocket).firebaseId = decodedToken.uid;
           (socket as AuthenticatedSocket).user = decodedToken;
+          (socket as AuthenticatedSocket).userId = user.id; // Database user ID
           next();
         } catch (error) {
           this.logger.error('Error during authentication', error);
@@ -66,69 +68,27 @@ export class LocationTrackingGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     console.log('=== WEBSOCKET CONNECTION ===');
-    console.log(`Client connected: ${client.id}`);
-    this.logger.log(`Client connected: ${client.id}`);
+    console.log(`Client connected: ${client.userId}`);
+    this.logger.log(`Client connected: ${client.userId}`);
 
-    // Get initial position from auth (this is OK as additional data)
-    const firebaseId = client.handshake.auth?.firebaseId as string;
-    if (!firebaseId) {
-      this.logger.warn('No authenticated Firebase ID found - disconnecting');
-      return client.disconnect();
-    }
-    const initialPosition = client.handshake.auth?.initialPosition as
-      | LocationDto
-      | undefined;
+    try {
+      this.logger.log(`Setting up driver ${client.userId}`);
+      await client.join(`driver:${client.userId}`);
 
-    this.logger.log('Authenticated Firebase ID:', firebaseId);
-    this.logger.log('Initial location from auth:', initialPosition);
-
-    if (client.firebaseId) {
-      console.log('Auto-registering authenticated driver with location...');
-      await this.registerDriverForTracking(client, {
-        initialLocation: initialPosition,
-      });
-    } else {
-      this.logger.warn(
-        'No authenticated Firebase ID found - connection should have been rejected by guard',
+      this.logger.log(
+        `Driver ${client.userId} registered and ready for tracking`,
       );
+    } catch (error) {
+      this.logger.error(`Failed to setup driver ${client.userId}:`, error);
+      client.disconnect();
     }
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
+  handleDisconnect(client: AuthenticatedSocket) {
+    this.logger.log(`Client disconnected: ${client.userId}`);
 
     // Clean up driver data (service handles the logic)
-    this.locationService.unregisterDriver(client.id);
-  }
-
-  /**
-   * Register driver for location tracking
-   */
-  @SubscribeMessage('driver:connect')
-  async registerDriverForTracking(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: DriverConnectionDto,
-  ) {
-    try {
-      await this.locationService.registerDriver(client, payload);
-
-      // Join driver-specific room
-      await client.join(`driver:${client.id}`);
-
-      this.logger.log(`Driver ${client.firebaseId} registered for tracking`);
-
-      return {
-        status: 'success',
-        message: 'Driver registered for location tracking',
-        firebaseId: client.firebaseId,
-      };
-    } catch (error) {
-      this.logger.error(`Failed to register driver:`, error);
-      return {
-        status: 'error',
-        message: 'Failed to register for tracking',
-      };
-    }
+    this.locationService.unregisterDriver(client.userId);
   }
 
   /**
@@ -140,26 +100,33 @@ export class LocationTrackingGateway
     @MessageBody() payload: UpdateDriverLocationDto,
   ) {
     try {
+      this.logger.debug(`Location update from driver ${client.userId}`, {
+        latitude: payload.location.latitude,
+        longitude: payload.location.longitude,
+        status: payload.status,
+      });
       const updatedLocation = await this.locationService.updateDriverLocation(
-        client.firebaseId,
+        client,
         payload,
       );
 
       this.logger.log('received driver location update', {
-        driverId: client.firebaseId,
+        driverId: client.userId,
         latitude: updatedLocation.location?.latitude,
         longitude: updatedLocation.location?.longitude,
         status: updatedLocation.status,
       });
 
       // Broadcast to riders tracking this driver
-      this.server.to(`driver:${client.id}`).emit('driver:location_changed', {
-        driverId: client.firebaseId,
-        location: {
-          latitude: updatedLocation.location?.latitude ?? '',
-          longitude: updatedLocation.location?.longitude ?? '',
-        },
-      });
+      this.server
+        .to(`driver:${client.userId}`)
+        .emit('driver:location_changed', {
+          driverId: client.userId,
+          location: {
+            latitude: updatedLocation.location?.latitude ?? '',
+            longitude: updatedLocation.location?.longitude ?? '',
+          },
+        });
 
       return {
         status: 'success',
@@ -185,9 +152,9 @@ export class LocationTrackingGateway
     try {
       const { status } = payload;
 
-      this.locationService.updateDriverStatus(client.firebaseId, status);
+      this.locationService.updateDriverStatus(client.userId, status);
 
-      this.logger.log(`Driver ${client.firebaseId} status updated: ${status}`);
+      this.logger.log(`Driver ${client.userId} status updated: ${status}`);
 
       return {
         status: 'success',
@@ -200,66 +167,5 @@ export class LocationTrackingGateway
         message: 'Failed to update status',
       };
     }
-  }
-
-  /**
-   * Rider starts tracking a driver during trip
-   */
-  @SubscribeMessage('rider:track_driver')
-  async trackDriver(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { tripId: string; driverId: string },
-  ) {
-    try {
-      const { tripId, driverId } = payload;
-
-      // Join driver room
-      await client.join(`driver:${driverId}`);
-
-      // Send current driver location
-      const currentLocation = this.locationService.getDriverLocation(driverId);
-      if (currentLocation) {
-        client.emit('driver:current_location', {
-          driverId,
-          location: {
-            latitude: currentLocation.location?.latitude || '',
-            longitude: currentLocation.location?.longitude || '',
-          },
-          status: currentLocation.status,
-        });
-      }
-
-      this.logger.log(
-        `Rider started tracking driver ${driverId} for trip ${tripId}`,
-      );
-
-      return {
-        status: 'success',
-        message: 'Started tracking driver',
-      };
-    } catch (error) {
-      this.logger.error(`Failed to start tracking:`, error);
-      return {
-        status: 'error',
-        message: 'Failed to start tracking',
-      };
-    }
-  }
-
-  /**
-   * Stop tracking driver
-   */
-  @SubscribeMessage('rider:stop_tracking')
-  async stopTracking(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { driverId: string },
-  ) {
-    const { driverId } = payload;
-    await client.leave(`driver:${driverId}`);
-
-    return {
-      status: 'success',
-      message: 'Stopped tracking driver',
-    };
   }
 }

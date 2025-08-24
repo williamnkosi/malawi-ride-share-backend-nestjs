@@ -16,4 +16,5 @@ export interface AuthenticatedSocket extends Socket {
   user: DecodedIdToken; // Firebase UID or database ID
   firebaseId: string;
   userType: UserType;
+  userId: string; // Database user ID
 }

@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  DriverConnectionDto,
   DriverLocationDto,
   DriverStatus,
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
 import { UsersService } from 'src/users/users.service';
-import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
+
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
+import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 
 export interface NearbyDriverResult {
   userId: string;
@@ -27,38 +27,23 @@ export class LocationTrackingService {
 
   constructor(private readonly userService: UsersService) {}
 
-  async registerDriver(
-    client: AuthenticatedSocket,
-    driverConnectionDto: DriverConnectionDto,
-  ): Promise<void> {
-    const { initialLocation } = driverConnectionDto;
-    this.logger.log(
-      `Registering driver ${client.firebaseId} for real-time tracking`,
-    );
-    const driverUserEntity = await this.userService.findByFirebaseId(
-      client.firebaseId,
-    );
-
-    this.driverSockets.set(driverUserEntity.id, client.id);
-    this.socketDrivers.set(client.id, driverUserEntity.id);
-
-    if (initialLocation) {
-      const driverInfo: DriverLocationDto = {
-        location: initialLocation,
-        status: DriverStatus.ONLINE,
-      };
-
-      this.onlineDrivers.set(driverUserEntity.id, driverInfo);
-    }
-  }
-
   async updateDriverLocation(
-    firebaseId: string,
+    client: AuthenticatedSocket,
     updateDto: UpdateDriverLocationDto,
   ): Promise<DriverLocationDto> {
     const { location, status } = updateDto;
-    const driverUserEntity =
-      await this.userService.findByFirebaseId(firebaseId);
+    const driverUserEntity = await this.userService.findById(client.userId);
+
+    // ✅ Check if driver is already registered, if not register them
+    if (!this.onlineDrivers.has(client.userId)) {
+      this.logger.log(
+        `Auto-registering driver ${driverUserEntity.id} during location update`,
+      );
+
+      // Register driver mappings
+      this.driverSockets.set(client.userId, client.id);
+      this.socketDrivers.set(client.id, driverUserEntity.id);
+    }
 
     const updatedLocation: DriverLocationDto = {
       status,
@@ -71,7 +56,7 @@ export class LocationTrackingService {
     this.onlineDrivers.set(driverUserEntity.id, updatedLocation);
 
     this.logger.debug(
-      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude} and stateus: ${updatedLocation.status}`,
+      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude} and status: ${updatedLocation.status}`,
     );
     return updatedLocation;
   }
