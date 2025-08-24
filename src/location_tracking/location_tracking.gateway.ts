@@ -153,15 +153,13 @@ export class LocationTrackingGateway
       });
 
       // Broadcast to riders tracking this driver
-      this.server
-        .to(`driver:${client.firebaseId}`)
-        .emit('driver:location_changed', {
-          driverId: client.firebaseId,
-          location: {
-            latitude: updatedLocation.location?.latitude ?? '',
-            longitude: updatedLocation.location?.longitude ?? '',
-          },
-        });
+      this.server.to(`driver:${client.id}`).emit('driver:location_changed', {
+        driverId: client.firebaseId,
+        location: {
+          latitude: updatedLocation.location?.latitude ?? '',
+          longitude: updatedLocation.location?.longitude ?? '',
+        },
+      });
 
       return {
         status: 'success',
