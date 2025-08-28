@@ -18,6 +18,7 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({
+  namespace: '/driver',
   cors: { origin: '*' },
 })
 export class LocationTrackingGateway
@@ -67,16 +68,17 @@ export class LocationTrackingGateway
   }
 
   async handleConnection(client: AuthenticatedSocket) {
-    console.log('=== WEBSOCKET CONNECTION ===');
-    console.log(`Client connected: ${client.userId}`);
-    this.logger.log(`Client connected: ${client.userId}`);
+    this.logger.log(`Location Gateway - Client connected: ${client.userId}`);
 
     try {
-      this.logger.log(`Setting up driver ${client.userId}`);
+      // This gateway is specifically for drivers only
+      this.logger.log(
+        `Setting up driver ${client.userId} for location tracking`,
+      );
       await client.join(`driver:${client.userId}`);
 
       this.logger.log(
-        `Driver ${client.userId} registered and ready for tracking`,
+        `Driver ${client.userId} registered and ready for location tracking`,
       );
     } catch (error) {
       this.logger.error(`Failed to setup driver ${client.userId}:`, error);
@@ -166,6 +168,29 @@ export class LocationTrackingGateway
         status: 'error',
         message: 'Failed to update status',
       };
+    }
+  }
+
+  /**
+   * Notify a driver about a trip request via the location namespace
+   * This ensures drivers connected only to /location namespace receive trip notifications
+   */
+  notifyDriverOfTripRequest(driverUserId: string, tripRequestData: any) {
+    try {
+      this.logger.log(
+        `Sending trip request to driver ${driverUserId} via location namespace`,
+      );
+      this.server
+        .to(`driver:${driverUserId}`)
+        .emit('driver:trip_request_received', tripRequestData);
+      this.logger.log(
+        `Trip request sent to driver ${driverUserId} via location namespace`,
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to notify driver ${driverUserId} via location namespace:`,
+        e,
+      );
     }
   }
 }

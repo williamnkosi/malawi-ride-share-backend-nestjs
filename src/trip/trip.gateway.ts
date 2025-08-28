@@ -7,6 +7,7 @@ import {
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import {
@@ -22,10 +23,14 @@ import {
 } from './models/driver_trip_message';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { TripRequestNotification } from 'src/notifications/driver_notifications/driver_trip_notification';
+import { UsersService } from 'src/users/users.service';
 @WebSocketGateway({
+  namespace: '/trips',
   cors: { origin: '*' },
 })
-export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class TripGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
   @WebSocketServer()
   server: Server;
   private readonly logger = new Logger(TripGateway.name);
@@ -33,12 +38,59 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly tripService: TripService,
     private readonly firebaseService: FirebaseService,
+    private readonly usersService: UsersService,
   ) {}
+
+  // Add authentication middleware for the trips namespace
+  afterInit(server: Server) {
+    server.use((socket, next) => {
+      void (async () => {
+        try {
+          const token = socket.handshake.auth?.token as string;
+          const userType = socket.handshake.auth?.userType as UserType;
+
+          if (!token) {
+            this.logger.warn('No token provided - disconnecting');
+            return next(new Error('Authentication error: No token provided'));
+          }
+
+          if (!userType) {
+            this.logger.warn('No user type provided - disconnecting');
+            return next(
+              new Error('Authentication error: No user type provided'),
+            );
+          }
+
+          const decodedToken = await this.firebaseService
+            .getAuth()
+            .verifyIdToken(token);
+          const user = await this.usersService.findByFirebaseId(
+            decodedToken.uid,
+          );
+
+          // Set socket properties
+          (socket as AuthenticatedSocket).firebaseId = decodedToken.uid;
+          (socket as AuthenticatedSocket).user = decodedToken;
+          (socket as AuthenticatedSocket).userId = user.id;
+          (socket as AuthenticatedSocket).userType = userType;
+
+          this.logger.log(
+            `✅ Trip gateway authentication successful for ${userType}: ${decodedToken.uid}`,
+          );
+          next();
+        } catch (error) {
+          this.logger.error('Trip gateway authentication error:', error);
+          return next(new Error('Authentication error'));
+        }
+      })();
+    });
+  }
 
   async handleConnection(client: AuthenticatedSocket) {
     this.logger.log(`Trip Gateway - Client connected: ${client.id}`);
 
-    const userType = client.handshake.auth?.userType as UserType;
+    // ✅ Use the userType and userId already set by authentication middleware
+    const userType = client.userType;
     const userId = client.firebaseId;
 
     if (!userId) {
@@ -53,15 +105,15 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     if (userType === UserType.DRIVER) {
       this.tripService.registerUserSocket(client);
-      await client.join(`driver:${userId}`);
+      await client.join(`driver:${client.userId}`);
       await client.join('available-drivers'); // For trip broadcasts
-      this.logger.log(`Driver ${userId} connected to trip gateway`);
+      this.logger.log(`Driver ${client.userId} connected to trip gateway`);
     } else if (userType === UserType.RIDER) {
       this.tripService.registerUserSocket(client);
-      await client.join(`rider:${userId}`);
-      this.logger.log(`Rider ${userId} connected to trip gateway`);
+      await client.join(`rider:${client.userId}`);
+      this.logger.log(`Rider ${client.userId} connected to trip gateway`);
     } else {
-      this.logger.warn(`Unknown user type:`);
+      this.logger.warn(`Unknown user type: ${String(userType)}`);
       client.disconnect();
     }
   }
@@ -78,7 +130,7 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * Driver accepts a trip request
    */
   @SubscribeMessage(DriverTripMessage.ACCEPT_TRIP)
-  handleAcceptTrip(
+  async handleAcceptTrip(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: AcceptTripDto,
   ) {
@@ -96,6 +148,11 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Accept the trip (this would update the trip status in database)
       // const updatedTrip = await this.tripService.acceptTrip(data.tripId, data.driverId);
 
+      // ✅ Remove driver from available drivers (they're now busy)
+      await client.leave('available-drivers');
+
+      // TODO: Get actual rider ID from trip to send proper notification
+      // For now, using tripId as placeholder - this needs to be fixed to use actual rider ID
       // Notify the rider that their trip was accepted
       this.server
         .to(`rider:${data.tripId}`)
@@ -376,7 +433,7 @@ export class TripGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log('Sending Websocket trip request to driver ');
       this.server
         .to(`driver:${driverUserId}`)
-        .emit('driver:trip_request_received', tripRequestData);
+        .emit('trip:new_request', tripRequestData);
       this.logger.log(`Trip request sent to driver ${driverUserId}`);
     } catch (e) {
       this.logger.error(
