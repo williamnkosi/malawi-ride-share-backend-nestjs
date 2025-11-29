@@ -16,6 +16,8 @@ import { UpdateDriverLocationDto } from './location_tracking.dto';
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { UsersService } from 'src/users/users.service';
+import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
+import { UserType } from 'src/common/guards/firebase_auth_guard_types';
 
 @WebSocketGateway({
   namespace: '/driver',
@@ -36,35 +38,16 @@ export class LocationTrackingGateway
   ) {}
 
   afterInit(server: Server) {
-    server.use((socket, next) => {
-      void (async () => {
-        try {
-          const token = socket.handshake.auth?.token as string;
-          if (!token) {
-            this.logger.warn('No token provided - disconnecting');
-            return next(new Error('Authentication error: No token provided'));
-          }
-
-          const decodedToken = await this.firebaseService
-            .getAuth()
-            .verifyIdToken(token);
-          const user = await this.usersService.findByFirebaseId(
-            decodedToken.uid,
-          );
-
-          console.log(`✅ Token verified for user: ${decodedToken.uid}`);
-
-          // ✅ THIS WAS MISSING: Set the firebaseId on the socket
-          (socket as AuthenticatedSocket).firebaseId = decodedToken.uid;
-          (socket as AuthenticatedSocket).user = decodedToken;
-          (socket as AuthenticatedSocket).userId = user.id; // Database user ID
-          next();
-        } catch (error) {
-          this.logger.error('Error during authentication', error);
-          return next(new Error('Authentication error'));
-        }
-      })();
-    });
+    WebSocketAuthUtil.applyAuthMiddleware(
+      server,
+      this.firebaseService,
+      this.usersService,
+      this.logger,
+      {
+        requireUserType: UserType.DRIVER,
+        gatewayName: 'Location Tracking Gateway',
+      },
+    );
   }
 
   async handleConnection(client: AuthenticatedSocket) {

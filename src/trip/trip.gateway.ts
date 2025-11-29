@@ -24,6 +24,7 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { TripRequestNotification } from 'src/notifications/driver_notifications/driver_trip_notification';
 import { UsersService } from 'src/users/users.service';
+import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
 @WebSocketGateway({
   namespace: '/trips',
   cors: { origin: '*' },
@@ -43,47 +44,15 @@ export class TripGateway
 
   // Add authentication middleware for the trips namespace
   afterInit(server: Server) {
-    server.use((socket, next) => {
-      void (async () => {
-        try {
-          const token = socket.handshake.auth?.token as string;
-          const userType = socket.handshake.auth?.userType as UserType;
-
-          if (!token) {
-            this.logger.warn('No token provided - disconnecting');
-            return next(new Error('Authentication error: No token provided'));
-          }
-
-          if (!userType) {
-            this.logger.warn('No user type provided - disconnecting');
-            return next(
-              new Error('Authentication error: No user type provided'),
-            );
-          }
-
-          const decodedToken = await this.firebaseService
-            .getAuth()
-            .verifyIdToken(token);
-          const user = await this.usersService.findByFirebaseId(
-            decodedToken.uid,
-          );
-
-          // Set socket properties
-          (socket as AuthenticatedSocket).firebaseId = decodedToken.uid;
-          (socket as AuthenticatedSocket).user = decodedToken;
-          (socket as AuthenticatedSocket).userId = user.id;
-          (socket as AuthenticatedSocket).userType = userType;
-
-          this.logger.log(
-            `✅ Trip gateway authentication successful for ${userType}: ${decodedToken.uid}`,
-          );
-          next();
-        } catch (error) {
-          this.logger.error('Trip gateway authentication error:', error);
-          return next(new Error('Authentication error'));
-        }
-      })();
-    });
+    WebSocketAuthUtil.applyAuthMiddleware(
+      server,
+      this.firebaseService,
+      this.usersService,
+      this.logger,
+      {
+        gatewayName: 'Trip Gateway',
+      },
+    );
   }
 
   async handleConnection(client: AuthenticatedSocket) {
