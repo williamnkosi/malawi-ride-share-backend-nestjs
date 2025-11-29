@@ -91,18 +91,7 @@ export class TripGateway
 
     // ✅ Use the userType and userId already set by authentication middleware
     const userType = client.userType;
-    const userId = client.firebaseId;
 
-    if (!userId) {
-      this.logger.warn('No Firebase ID - disconnecting');
-      client.disconnect();
-      return;
-    }
-    if (!userType) {
-      this.logger.warn('No user type provided - disconnecting');
-      client.disconnect();
-      return;
-    }
     if (userType === UserType.DRIVER) {
       this.tripService.registerUserSocket(client);
       await client.join(`driver:${client.userId}`);
@@ -145,8 +134,10 @@ export class TripGateway
         return;
       }
 
-      // Accept the trip (this would update the trip status in database)
-      // const updatedTrip = await this.tripService.acceptTrip(data.tripId, data.driverId);
+      const updatedTrip = await this.tripService.acceptTrip(
+        data.tripId,
+        client.userId,
+      );
 
       // ✅ Remove driver from available drivers (they're now busy)
       await client.leave('available-drivers');

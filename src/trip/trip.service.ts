@@ -99,4 +99,16 @@ export class TripService {
     const trip = this.tripRepository.create(tripData);
     return await this.tripRepository.save(trip);
   }
+
+  async acceptTrip(tripId: string, driverId: string): Promise<TripEntity> {
+    const trip = await this.tripRepository.findOne({ where: { id: tripId } });
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    trip.status = TripStatus.ACCEPTED;
+    trip.driverId = driverId;
+
+    return await this.tripRepository.save(trip);
+  }
 }
