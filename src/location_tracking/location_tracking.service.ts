@@ -74,19 +74,6 @@ export class LocationTrackingService {
     this.logger.debug(
       `Driver ${driverUserEntity.id} location updated to (${location.latitude}, ${location.longitude}) with status ${status}`,
     );
-
-    // Broadcast location change to riders tracking this driver
-    if (this.server) {
-      this.server
-        .to(`driver:${driverUserEntity.id}`)
-        .emit('driver:location_changed', {
-          driverId: driverUserEntity.id,
-          location: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-        });
-    }
   }
 
   updateDriverStatus(userId: string, status: DriverStatus): DriverStatus {
@@ -129,8 +116,8 @@ export class LocationTrackingService {
     return driver ? driver.status === DriverStatus.ONLINE : false;
   }
 
-  unregisterDriver(socketId: string): void {
-    const driverId = this.socketDrivers.get(socketId);
+  unregisterDriver(userId: string): void {
+    const driverId = this.socketDrivers.get(userId);
     if (!driverId) return;
 
     this.logger.log(`Unregistering driver ${driverId} from tracking`);
@@ -143,7 +130,7 @@ export class LocationTrackingService {
 
     this.onlineDrivers.delete(driverId);
     this.driverSockets.delete(driverId);
-    this.socketDrivers.delete(socketId);
+    this.socketDrivers.delete(driverId);
   }
 
   /**

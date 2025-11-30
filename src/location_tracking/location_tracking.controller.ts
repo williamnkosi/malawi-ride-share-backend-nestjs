@@ -5,7 +5,6 @@ import {
   NotFoundException,
   Param,
 } from '@nestjs/common';
-import { ApiResponse } from 'src/common/types/api_response';
 import { LocationTrackingService } from './location_tracking.service';
 
 @Controller('location-tracking')
@@ -43,9 +42,9 @@ export class LocationTrackingController {
   @Get('driver/:driverId/status')
   getDriverStatus(@Param('driverId') driverId: string) {
     const isOnline = this.locationService.isDriverOnline(driverId);
-    return new ApiResponse(true, 'Driver status retrieved', {
+    return {
       driverId,
       isOnline,
-    });
+    };
   }
 }

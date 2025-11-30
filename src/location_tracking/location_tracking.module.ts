@@ -6,7 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
-  imports: [UsersModule, FirebaseModule, FirebaseModule],
+  imports: [UsersModule, FirebaseModule],
   controllers: [LocationTrackingController],
   providers: [LocationTrackingService, LocationTrackingGateway],
   exports: [LocationTrackingService, LocationTrackingGateway],
