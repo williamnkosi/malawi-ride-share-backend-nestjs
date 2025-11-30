@@ -48,15 +48,12 @@ export class LocationTrackingGateway
         gatewayName: 'Location Tracking Gateway',
       },
     );
-
-    // Inject server instance into service for broadcasting
-    this.locationService.setServer(server);
   }
 
-  async handleConnection(client: AuthenticatedSocket) {
+  handleConnection(client: AuthenticatedSocket) {
     this.logger.log(`Location Gateway - Client connected: ${client.userId}`);
     try {
-      await this.locationService.handleDriverConnection(client);
+      this.locationService.handleDriverConnection(client);
     } catch (error) {
       this.logger.error(`Failed to setup driver ${client.userId}:`, error);
       client.disconnect();

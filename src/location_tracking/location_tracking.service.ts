@@ -29,20 +29,10 @@ export class LocationTrackingService {
   constructor(private readonly userService: UsersService) {}
 
   /**
-   * Set the WebSocket server instance for broadcasting
-   */
-  setServer(server: Server): void {
-    this.server = server;
-  }
-
-  /**
    * Setup driver connection and assign appropriate rooms
    */
-  async handleDriverConnection(client: AuthenticatedSocket): Promise<void> {
+  handleDriverConnection(client: AuthenticatedSocket): void {
     this.logger.log(`Setting up driver ${client.userId} for location tracking`);
-
-    // Business logic: Join driver-specific room for targeted messages
-    await client.join(`driver:${client.userId}`);
 
     // Register socket mapping for tracking
     this.driverSockets.set(client.userId, client.id);
@@ -117,22 +107,6 @@ export class LocationTrackingService {
   }
 
   getAllOnlineDrivers(): DriverLocationDto[] {
-    this.logger.log('Retrieving all online drivers');
-    this.logger.log(`Total drivers in map: ${this.onlineDrivers.size}`);
-    this.logger.log(
-      `Expected DriverStatus.ONLINE value: "${DriverStatus.ONLINE}"`,
-    );
-
-    // Debug: Log all drivers and their statuses
-    for (const [userId, driver] of this.onlineDrivers.entries()) {
-      this.logger.log(
-        `  Driver ${userId}: status="${driver.status}" (type: ${typeof driver.status}), hasLocation=${!!driver.location}`,
-      );
-      this.logger.log(
-        `    Comparison: "${driver.status}" === "${DriverStatus.ONLINE}" = ${driver.status === DriverStatus.ONLINE}`,
-      );
-    }
-
     const onlineDrivers = Array.from(this.onlineDrivers.values()).filter(
       (driver) => {
         // Normalize the status comparison to handle string values
