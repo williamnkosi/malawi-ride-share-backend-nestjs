@@ -20,7 +20,7 @@ import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
 import { UserType } from 'src/common/guards/firebase_auth_guard_types';
 
 @WebSocketGateway({
-  namespace: '/driver',
+  namespace: '/location',
   cors: { origin: '*' },
 })
 export class LocationTrackingGateway
