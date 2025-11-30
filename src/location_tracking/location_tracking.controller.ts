@@ -1,6 +1,11 @@
-import { Body, Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+} from '@nestjs/common';
 import { ApiResponse } from 'src/common/types/api_response';
-import { CustomError } from 'src/common/types/customError/errorMessageResponse';
 import { LocationTrackingService } from './location_tracking.service';
 
 @Controller('location-tracking')
@@ -12,17 +17,12 @@ export class LocationTrackingController {
    */
   @Get('driver/:driverId')
   getDriverLocation(@Param('driverId') driverId: string) {
-    try {
-      const location = this.locationService.getDriverLocation(driverId);
-
-      if (!location) {
-        return new ApiResponse(false, 'Driver location not found', null);
-      }
-
-      return new ApiResponse(true, 'Driver location retrieved', location);
-    } catch {
-      throw new CustomError('Error retrieving driver location', 500);
+    const location = this.locationService.getDriverLocation(driverId);
+    if (!location) {
+      throw new NotFoundException('Driver location not found');
     }
+
+    return location;
   }
 
   /**
@@ -30,15 +30,11 @@ export class LocationTrackingController {
    */
   @Get('drivers/online')
   getOnlineDrivers() {
-    try {
-      const drivers = this.locationService.getAllOnlineDrivers();
-      return new ApiResponse(true, 'Online drivers retrieved', {
-        count: drivers.length,
-        drivers,
-      });
-    } catch {
-      throw new CustomError('Error retrieving online drivers', 500);
-    }
+    const drivers = this.locationService.getAllOnlineDrivers();
+    return {
+      count: drivers.length,
+      drivers,
+    };
   }
 
   /**
@@ -46,14 +42,10 @@ export class LocationTrackingController {
    */
   @Get('driver/:driverId/status')
   getDriverStatus(@Param('driverId') driverId: string) {
-    try {
-      const isOnline = this.locationService.isDriverOnline(driverId);
-      return new ApiResponse(true, 'Driver status retrieved', {
-        driverId,
-        isOnline,
-      });
-    } catch {
-      throw new CustomError('Error retrieving driver status', 500);
-    }
+    const isOnline = this.locationService.isDriverOnline(driverId);
+    return new ApiResponse(true, 'Driver status retrieved', {
+      driverId,
+      isOnline,
+    });
   }
 }
