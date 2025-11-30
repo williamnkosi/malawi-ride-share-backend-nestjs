@@ -5,7 +5,7 @@ import {
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
 import { UsersService } from 'src/users/users.service';
-
+import { Server } from 'socket.io';
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
 
@@ -19,6 +19,7 @@ export interface NearbyDriverResult {
 @Injectable()
 export class LocationTrackingService {
   private readonly logger = new Logger(LocationTrackingService.name);
+  private server: Server;
 
   // In-memory store for real-time tracking
   private onlineDrivers = new Map<string, DriverLocationDto>(); // userId -> location
@@ -27,10 +28,35 @@ export class LocationTrackingService {
 
   constructor(private readonly userService: UsersService) {}
 
+  /**
+   * Set the WebSocket server instance for broadcasting
+   */
+  setServer(server: Server): void {
+    this.server = server;
+  }
+
+  /**
+   * Setup driver connection and assign appropriate rooms
+   */
+  async handleDriverConnection(client: AuthenticatedSocket): Promise<void> {
+    this.logger.log(`Setting up driver ${client.userId} for location tracking`);
+
+    // Business logic: Join driver-specific room for targeted messages
+    await client.join(`driver:${client.userId}`);
+
+    // Register socket mapping for tracking
+    this.driverSockets.set(client.userId, client.id);
+    this.socketDrivers.set(client.id, client.userId);
+
+    this.logger.log(
+      `Driver ${client.userId} registered and ready for location tracking`,
+    );
+  }
+
   async updateDriverLocation(
     client: AuthenticatedSocket,
     updateDto: UpdateDriverLocationDto,
-  ): Promise<DriverLocationDto> {
+  ): Promise<void> {
     const { location, status } = updateDto;
     const driverUserEntity = await this.userService.findById(client.userId);
 
@@ -56,16 +82,34 @@ export class LocationTrackingService {
     this.onlineDrivers.set(driverUserEntity.id, updatedLocation);
 
     this.logger.debug(
-      `Updated location for driver ${driverUserEntity.id} (memory only) latitude: ${updatedLocation.location?.latitude}, longitude: ${updatedLocation.location?.longitude} and status: ${updatedLocation.status}`,
+      `Driver ${driverUserEntity.id} location updated to (${location.latitude}, ${location.longitude}) with status ${status}`,
     );
-    return updatedLocation;
+
+    // Broadcast location change to riders tracking this driver
+    if (this.server) {
+      this.server
+        .to(`driver:${driverUserEntity.id}`)
+        .emit('driver:location_changed', {
+          driverId: driverUserEntity.id,
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+    }
   }
 
-  updateDriverStatus(firebaseId: string, status: DriverStatus): void {
-    const driver = this.onlineDrivers.get(firebaseId);
-    if (driver) {
-      driver.status = status; // ← Type-safe enum usage
+  updateDriverStatus(userId: string, status: DriverStatus): DriverStatus {
+    const driver = this.onlineDrivers.get(userId);
+    if (!driver) {
+      this.logger.warn(`Cannot update status for driver ${userId}: not found`);
+      throw new Error('Driver not found');
     }
+
+    driver.status = status;
+    this.logger.log(`Driver ${userId} status updated to ${status}`);
+
+    return status;
   }
 
   getDriverLocation(firebaseId: string): DriverLocationDto | null {
@@ -74,10 +118,36 @@ export class LocationTrackingService {
 
   getAllOnlineDrivers(): DriverLocationDto[] {
     this.logger.log('Retrieving all online drivers');
-    this.logger.log(this.onlineDrivers);
-    return Array.from(this.onlineDrivers.values()).filter(
-      (driver) => driver.status === DriverStatus.ONLINE,
+    this.logger.log(`Total drivers in map: ${this.onlineDrivers.size}`);
+    this.logger.log(
+      `Expected DriverStatus.ONLINE value: "${DriverStatus.ONLINE}"`,
     );
+
+    // Debug: Log all drivers and their statuses
+    for (const [userId, driver] of this.onlineDrivers.entries()) {
+      this.logger.log(
+        `  Driver ${userId}: status="${driver.status}" (type: ${typeof driver.status}), hasLocation=${!!driver.location}`,
+      );
+      this.logger.log(
+        `    Comparison: "${driver.status}" === "${DriverStatus.ONLINE}" = ${driver.status === DriverStatus.ONLINE}`,
+      );
+    }
+
+    const onlineDrivers = Array.from(this.onlineDrivers.values()).filter(
+      (driver) => {
+        // Normalize the status comparison to handle string values
+        const normalizedStatus =
+          typeof driver.status === 'string'
+            ? driver.status.toLowerCase()
+            : driver.status;
+        return (
+          normalizedStatus === 'online' || driver.status === DriverStatus.ONLINE
+        );
+      },
+    );
+
+    this.logger.log(`Filtered online drivers: ${onlineDrivers.length}`);
+    return onlineDrivers;
   }
 
   isDriverOnline(firebaseId: string): boolean {
