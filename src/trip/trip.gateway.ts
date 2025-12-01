@@ -58,20 +58,10 @@ export class TripGateway
   async handleConnection(client: AuthenticatedSocket) {
     this.logger.log(`Trip Gateway - Client connected: ${client.id}`);
 
-    // ✅ Use the userType and userId already set by authentication middleware
-    const userType = client.userType;
-
-    if (userType === UserType.DRIVER) {
-      this.tripService.registerUserSocket(client);
-      await client.join(`driver:${client.userId}`);
-      await client.join('available-drivers'); // For trip broadcasts
-      this.logger.log(`Driver ${client.userId} connected to trip gateway`);
-    } else if (userType === UserType.RIDER) {
-      this.tripService.registerUserSocket(client);
-      await client.join(`rider:${client.userId}`);
-      this.logger.log(`Rider ${client.userId} connected to trip gateway`);
-    } else {
-      this.logger.warn(`Unknown user type: ${String(userType)}`);
+    try {
+      await this.tripService.handleUserConnection(client);
+    } catch (error) {
+      this.logger.error(`Failed to setup user ${client.userId}:`, error);
       client.disconnect();
     }
   }
