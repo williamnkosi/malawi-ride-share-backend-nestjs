@@ -11,6 +11,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
 import { UsersModule } from 'src/users/users.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { TripEntity } from './entities/trip.entity';
+import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TripEntity } from './entities/trip.entity';
     TripGateway,
     LocationTrackingGateway,
     LocationTrackingService,
+    SequentialNotifcationService,
   ],
   exports: [TripService, TripGateway], // Export services for use in other modules
 })
