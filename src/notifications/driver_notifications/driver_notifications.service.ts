@@ -79,7 +79,7 @@ export class DriverNotificationsService {
 
           // 1 minute to respond
         };
-        this.tripGateway.notifyDriverOfTripRequest(driver.userId, tripRequest);
+        // this.tripGateway.notifyDriverOfTripRequest(driver.userId, tripRequest);
       }
     } catch (error) {
       this.logger.error('Failed to Handle the trip request', error);
