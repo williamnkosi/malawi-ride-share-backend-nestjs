@@ -11,6 +11,8 @@ import { UsersModule } from 'src/users/users.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { TripEntity } from './entities/trip.entity';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { GoogleMapsServiceModule } from 'src/google_maps_service/google_maps_service.module';
+import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 
 @Module({
   imports: [
@@ -18,10 +20,16 @@ import { SequentialNotifcationService } from './services/sequential_notifcation/
     LocationTrackingModule,
     FirebaseModule,
     UsersModule,
+    GoogleMapsServiceModule,
     forwardRef(() => NotificationsModule), // Use forwardRef to break circular dependency
   ],
   controllers: [TripController],
-  providers: [TripService, TripGateway, SequentialNotifcationService],
+  providers: [
+    TripService,
+    TripGateway,
+    SequentialNotifcationService,
+    GoogleMapsService,
+  ],
   exports: [TripService, TripGateway], // Export services for use in other modules
 })
 export class TripModule {}

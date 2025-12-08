@@ -1,4 +1,6 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { RouteResponseDto } from 'src/google_maps_service/dtos/route-response.dto';
+import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
 import { NearbyDriverResult } from 'src/location_tracking/location_tracking.service';
 
 import { TripEntity } from 'src/trip/entities/trip.entity';
@@ -19,11 +21,17 @@ export class SequentialNotifcationService {
   constructor(
     @Inject(forwardRef(() => TripGateway))
     private readonly tripGateway: TripGateway,
+    //private readonly logger: Logger,
+    private readonly googleMapsService: GoogleMapsService,
   ) {}
   async sendNotificationsInSequence(
     trip: TripEntity,
     drivers: NearbyDriverResult[],
   ) {
+    const route = await this.googleMapsService.calculateRoute(
+      `${trip.pickupLatitude},${trip.pickupLongitude}`,
+      `${trip.dropoffLatitude},${trip.dropoffLongitude}`,
+    );
     for (const driver of drivers) {
       this.logger.log(
         `Notifying driver ${driver.userId} about trip request ${trip.id}`,
@@ -33,6 +41,7 @@ export class SequentialNotifcationService {
         trip,
         driver.userId,
         TIMEOUT_MS,
+        route,
       );
 
       if (driverResponse === 'accepted') {
@@ -58,6 +67,7 @@ export class SequentialNotifcationService {
     trip: TripEntity,
     driverId: string,
     timeoutMs: number,
+    route: RouteResponseDto,
   ): Promise<'accepted' | 'rejected' | 'timeout'> {
     return new Promise((resolve) => {
       const key = `${trip.id}:${driverId}`;
@@ -85,7 +95,7 @@ export class SequentialNotifcationService {
       this.tripGateway.server.to(`driver:${driverId}`).emit('trip:request', {
         id: trip.id,
         timeoutSeconds: timeoutMs / 1000,
-        data: toTripResponse(trip),
+        data: toTripResponse(trip, route),
         // ... trip details
       });
     });
@@ -111,7 +121,7 @@ export class SequentialNotifcationService {
   }
 }
 
-function toTripResponse(trip: TripEntity) {
+function toTripResponse(trip: TripEntity, route: RouteResponseDto) {
   return {
     tripId: trip.id,
     status: trip.status,
@@ -129,5 +139,6 @@ function toTripResponse(trip: TripEntity) {
     riderLastName: trip.rider.lastName,
     passengerCount: trip.passengerCount,
     createdAt: trip.createdAt,
+    route,
   };
 }
