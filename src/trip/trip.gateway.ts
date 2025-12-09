@@ -66,17 +66,42 @@ export class TripGateway
   }
 
   @SubscribeMessage('trip:accept')
-  handleAcceptTrip(
+  async handleAcceptTrip(
     @MessageBody() dto: AcceptTripDto,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    // Notify the sequential service
-    this.sequentialNotificationService.handleDriverAccept(
-      dto.tripId,
-      client.userId,
-    );
+    try {
+      // 1. Check if this acceptance is valid (trip was waiting for this driver)
+      const isValidAcceptance =
+        this.sequentialNotificationService.handleDriverAccept(
+          dto.tripId,
+          client.userId,
+        );
 
-    // Rest of acceptance logic...
+      if (!isValidAcceptance) {
+        // Driver tried to accept a trip that wasn't offered to them or already expired
+        client.emit('trip:accept_error', {
+          message: 'Trip is no longer available or was not offered to you',
+          tripId: dto.tripId,
+        });
+        return;
+      }
+
+      // 2. Update trip status in database
+      const trip = await this.tripService.acceptTrip(dto.tripId, client.userId);
+
+      // 3. Send confirmation to driver with route to pickup
+      // 4. Notify rider that driver was found
+      // TODO: Add route calculation and notifications here
+
+      this.logger.log(`Driver ${client.userId} accepted trip ${dto.tripId}`);
+    } catch (error) {
+      this.logger.error(`Error accepting trip ${dto.tripId}:`, error);
+      client.emit('trip:accept_error', {
+        message: 'Failed to accept trip',
+        tripId: dto.tripId,
+      });
+    }
   }
 
   @SubscribeMessage('trip:reject')

@@ -5,7 +5,6 @@ import {
   UnitSystem,
 } from '@googlemaps/google-maps-services-js';
 import { RouteResponseDto } from './dtos/route-response.dto';
-
 @Injectable()
 export class GoogleMapsService {
   private readonly client: Client = new Client({});

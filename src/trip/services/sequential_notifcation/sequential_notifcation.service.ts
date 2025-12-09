@@ -44,17 +44,17 @@ export class SequentialNotifcationService {
         route,
       );
 
-      if (driverResponse === 'accepted') {
+      if (driverResponse === 'trip:accept') {
         this.logger.log(`Driver ${driver.userId} accepted trip ${trip.id}`);
         return driver.userId; // ✅ Driver accepted, stop loop
       }
 
-      if (driverResponse === 'rejected') {
+      if (driverResponse === 'trip:declined') {
         this.logger.log(`Driver ${driver.userId} rejected trip ${trip.id}`);
         // Continue to next driver
       }
 
-      if (driverResponse === 'timeout') {
+      if (driverResponse === 'trip:timeout') {
         this.logger.warn(
           `Driver ${driver.userId} timed out for trip ${trip.id}`,
         );
@@ -68,19 +68,19 @@ export class SequentialNotifcationService {
     driverId: string,
     timeoutMs: number,
     route: RouteResponseDto,
-  ): Promise<'accepted' | 'rejected' | 'timeout'> {
+  ): Promise<'trip:accept' | 'trip:declined' | 'trip:timeout'> {
     return new Promise((resolve) => {
       const key = `${trip.id}:${driverId}`;
 
       // Set up timeout
       const timeout = setTimeout(() => {
         this.pendingResponses.delete(key);
-        resolve('timeout');
+        resolve('trip:timeout');
       }, timeoutMs);
 
       // Store the resolver
       this.pendingResponses.set(key, {
-        resolve: (response: 'accepted' | 'rejected') => {
+        resolve: (response: 'trip:accept' | 'trip:declined') => {
           clearTimeout(timeout);
           this.pendingResponses.delete(key);
           resolve(response);
@@ -102,22 +102,28 @@ export class SequentialNotifcationService {
   }
 
   // Called from TripGateway when driver responds
-  handleDriverAccept(tripId: string, driverId: string): void {
+  handleDriverAccept(tripId: string, driverId: string): boolean {
     const key = `${tripId}:${driverId}`;
     const pending = this.pendingResponses.get(key);
 
     if (pending) {
-      pending.resolve('accepted');
+      pending.resolve('trip:accept');
+      return true; // Valid acceptance - trip was waiting for this driver
     }
+
+    return false; // Invalid - no pending request for this driver/trip
   }
 
-  handleDriverReject(tripId: string, driverId: string): void {
+  handleDriverReject(tripId: string, driverId: string): boolean {
     const key = `${tripId}:${driverId}`;
     const pending = this.pendingResponses.get(key);
 
     if (pending) {
-      pending.resolve('rejected');
+      pending.resolve('trip:declined');
+      return true; // Valid rejection - trip was waiting for this driver
     }
+
+    return false; // Invalid - no pending request for this driver/trip
   }
 }
 
