@@ -89,8 +89,8 @@ export class LocationTrackingService {
     return status;
   }
 
-  getDriverLocation(firebaseId: string): DriverLocationDto | null {
-    return this.onlineDrivers.get(firebaseId) || null;
+  getDriverLocation(driverId: string): DriverLocationDto | null {
+    return this.onlineDrivers.get(driverId) || null;
   }
 
   getAllOnlineDrivers(): DriverLocationDto[] {

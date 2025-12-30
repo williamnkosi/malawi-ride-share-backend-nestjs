@@ -87,6 +87,7 @@ export class SequentialNotifcationService {
         },
         timeout,
         reject: function (error: Error): void {
+          console.log(error);
           throw new Error('Function not implemented.');
         },
       });

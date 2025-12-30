@@ -12,7 +12,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
 import { TripEntity } from './entities/trip.entity';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { GoogleMapsServiceModule } from 'src/google_maps_service/google_maps_service.module';
-import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
+import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.s
     TripService,
     TripGateway,
     SequentialNotifcationService,
-    GoogleMapsService,
+    TripCommunicationService,
   ],
   exports: [TripService, TripGateway], // Export services for use in other modules
 })

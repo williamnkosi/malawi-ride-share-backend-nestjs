@@ -88,11 +88,7 @@ export class TripGateway
       }
 
       // 2. Update trip status in database
-      const trip = await this.tripService.acceptTrip(dto.tripId, client.userId);
-
-      // 3. Send confirmation to driver with route to pickup
-      // 4. Notify rider that driver was found
-      // TODO: Add route calculation and notifications here
+      await this.tripService.acceptTrip(this.server, dto.tripId, client.userId);
 
       this.logger.log(`Driver ${client.userId} accepted trip ${dto.tripId}`);
     } catch (error) {

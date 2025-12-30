@@ -12,6 +12,8 @@ import {
 import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
 import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class TripService {
@@ -23,6 +25,7 @@ export class TripService {
     private readonly userService: UsersService,
     private readonly locationTrackingService: LocationTrackingService,
     private readonly sequentialNotificationService: SequentialNotifcationService,
+    private readonly tripCommunicationService: TripCommunicationService,
   ) {}
 
   /**
@@ -93,7 +96,13 @@ export class TripService {
     return await this.tripRepository.save(trip);
   }
 
-  async acceptTrip(tripId: string, driverId: string): Promise<TripEntity> {
+  async acceptTrip(
+    server: Server,
+    tripId: string,
+    driverId: string,
+  ): Promise<void> {
+    const currentDriverLocation =
+      this.locationTrackingService.getDriverLocation(driverId);
     const trip = await this.tripRepository.findOne({ where: { id: tripId } });
     if (!trip) {
       throw new Error('Trip not found');
@@ -102,6 +111,12 @@ export class TripService {
     trip.status = TripStatus.ACCEPTED;
     trip.driverId = driverId;
 
-    return await this.tripRepository.save(trip);
+    await this.tripRepository.save(trip);
+
+    await this.tripCommunicationService.notifyUsersOfTripAccepted(
+      server,
+      trip,
+      currentDriverLocation!,
+    );
   }
 }
