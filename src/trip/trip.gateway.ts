@@ -19,6 +19,7 @@ import { UsersService } from 'src/users/users.service';
 import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { RejectTripDto } from 'src/common/dto/trip/reject_trip.dto';
+import { StartTripDto } from './dtos/start_trip.dto';
 @WebSocketGateway({
   namespace: '/trips',
   cors: { origin: '*' },
@@ -65,7 +66,7 @@ export class TripGateway
     this.logger.log(`Trip Gateway - Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('trip:accept')
+  @SubscribeMessage('trip:accepted_confirmation')
   async handleAcceptTrip(
     @MessageBody() dto: AcceptTripDto,
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -110,5 +111,23 @@ export class TripGateway
       dto.tripId,
       client.userId,
     );
+  }
+
+  @SubscribeMessage('trip:started')
+  async handleStartTrip(
+    @MessageBody() dto: StartTripDto,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    try {
+      await this.tripService.startTrip(this.server, dto.tripId, client.userId);
+      this.logger.log(`Trip ${dto.tripId} started by driver ${client.userId}`);
+    } catch (error) {
+      this.logger.error(`Error starting trip ${dto.tripId}:`, error);
+      client.emit('trip:error', {
+        message:
+          error instanceof Error ? error.message : 'Failed to start trip',
+        tripId: dto.tripId,
+      });
+    }
   }
 }

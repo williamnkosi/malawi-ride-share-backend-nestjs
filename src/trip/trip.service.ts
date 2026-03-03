@@ -119,4 +119,50 @@ export class TripService {
       currentDriverLocation!,
     );
   }
+
+  /**
+   * Start the trip to destination
+   * Called when driver has picked up the rider and begins journey
+   */
+  async startTrip(
+    server: Server,
+    tripId: string,
+    driverId: string,
+  ): Promise<TripEntity> {
+    // 1. Validate trip exists
+    const trip = await this.tripRepository.findOne({ where: { id: tripId } });
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    // 2. Validate driver is assigned to this trip
+    if (trip.driverId !== driverId) {
+      throw new Error('You are not the assigned driver for this trip');
+    }
+
+    // 3. Validate trip is in correct status
+    if (trip.status !== TripStatus.ACCEPTED) {
+      throw new Error('Trip must be in ACCEPTED status to start');
+    }
+
+    // 4. Update status to IN_PROGRESS
+    trip.status = TripStatus.IN_PROGRESS;
+
+    // 5. Save updated trip
+    const updatedTrip = await this.tripRepository.save(trip);
+
+    // 6. Get driver's current location and notify both parties
+    const currentDriverLocation =
+      this.locationTrackingService.getDriverLocation(driverId);
+
+    await this.tripCommunicationService.notifyTripStarted(
+      server,
+      updatedTrip,
+      currentDriverLocation!,
+    );
+
+    this.logger.log(`Trip ${tripId} started by driver ${driverId}`);
+
+    return updatedTrip;
+  }
 }

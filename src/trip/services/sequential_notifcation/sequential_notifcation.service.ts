@@ -7,9 +7,20 @@ import { TripEntity } from 'src/trip/entities/trip.entity';
 import { TripGateway } from 'src/trip/trip.gateway';
 
 const TIMEOUT_MS = 15000; // 15 seconds
+
+interface TripNotificationState {
+  currentDriverId: string;
+  notifiedDrivers: string[]; // Drivers already notified (declined/timeout)
+  startedAt: Date;
+}
+
 @Injectable()
 export class SequentialNotifcationService {
   private readonly logger = new Logger(SequentialNotifcationService.name);
+
+  // Track which driver is currently being notified for each trip
+  private activeNotifications = new Map<string, TripNotificationState>();
+
   private pendingResponses = new Map<
     string,
     {
@@ -32,34 +43,62 @@ export class SequentialNotifcationService {
       `${trip.pickupLatitude},${trip.pickupLongitude}`,
       `${trip.dropoffLatitude},${trip.dropoffLongitude}`,
     );
-    for (const driver of drivers) {
-      this.logger.log(
-        `Notifying driver ${driver.userId} about trip request ${trip.id}`,
-      );
 
-      const driverResponse = await this.waitForDriverResponse(
-        trip,
-        driver.userId,
-        TIMEOUT_MS,
-        route,
-      );
+    // Initialize tracking for this trip
+    this.activeNotifications.set(trip.id, {
+      currentDriverId: '',
+      notifiedDrivers: [],
+      startedAt: new Date(),
+    });
 
-      if (driverResponse === 'trip:accept') {
-        this.logger.log(`Driver ${driver.userId} accepted trip ${trip.id}`);
-        return driver.userId; // ✅ Driver accepted, stop loop
-      }
+    try {
+      for (let i = 0; i < drivers.length; i++) {
+        const driver = drivers[i];
 
-      if (driverResponse === 'trip:declined') {
-        this.logger.log(`Driver ${driver.userId} rejected trip ${trip.id}`);
-        // Continue to next driver
-      }
+        // Update current driver being notified
+        const state = this.activeNotifications.get(trip.id)!;
+        state.currentDriverId = driver.userId;
 
-      if (driverResponse === 'trip:timeout') {
-        this.logger.warn(
-          `Driver ${driver.userId} timed out for trip ${trip.id}`,
+        this.logger.log(
+          `Notifying driver ${driver.userId} about trip request ${trip.id} (${i + 1}/${drivers.length})`,
         );
-        // Continue to next driver
+
+        const driverResponse = await this.waitForDriverResponse(
+          trip,
+          driver.userId,
+          TIMEOUT_MS,
+          route,
+        );
+
+        if (driverResponse === 'trip:accept') {
+          this.logger.log(`Driver ${driver.userId} accepted trip ${trip.id}`);
+          this.activeNotifications.delete(trip.id);
+          return driver.userId; // ✅ Driver accepted, stop loop
+        }
+
+        // Track this driver as notified (declined or timeout)
+        state.notifiedDrivers.push(driver.userId);
+
+        if (driverResponse === 'trip:declined') {
+          this.logger.log(`Driver ${driver.userId} rejected trip ${trip.id}`);
+          // Continue to next driver
+        }
+
+        if (driverResponse === 'trip:timeout') {
+          this.logger.warn(
+            `Driver ${driver.userId} timed out for trip ${trip.id}`,
+          );
+          // Continue to next driver
+        }
       }
+
+      // All drivers exhausted, no one accepted
+      this.logger.warn(`No driver accepted trip ${trip.id}`);
+      this.activeNotifications.delete(trip.id);
+      return null;
+    } catch (error) {
+      this.activeNotifications.delete(trip.id);
+      throw error;
     }
   }
 
@@ -75,6 +114,15 @@ export class SequentialNotifcationService {
       // Set up timeout
       const timeout = setTimeout(() => {
         this.pendingResponses.delete(key);
+
+        // Notify the driver that they timed out
+        this.tripGateway.server.to(`driver:${driverId}`).emit('trip:timeout', {
+          tripId: trip.id,
+          data: {
+            message: 'Trip request expired. You did not respond in time.',
+          },
+        });
+
         resolve('trip:timeout');
       }, timeoutMs);
 
@@ -125,6 +173,55 @@ export class SequentialNotifcationService {
     }
 
     return false; // Invalid - no pending request for this driver/trip
+  }
+
+  /**
+   * Get the current driver being notified for a trip
+   */
+  getCurrentDriverForTrip(tripId: string): string | null {
+    const state = this.activeNotifications.get(tripId);
+    return state?.currentDriverId ?? null;
+  }
+
+  /**
+   * Get all drivers that have already been notified for a trip
+   */
+  getNotifiedDriversForTrip(tripId: string): string[] {
+    const state = this.activeNotifications.get(tripId);
+    return state?.notifiedDrivers ?? [];
+  }
+
+  /**
+   * Check if a trip is currently searching for a driver
+   */
+  isTripSearchingForDriver(tripId: string): boolean {
+    return this.activeNotifications.has(tripId);
+  }
+
+  /**
+   * Cancel the driver search for a trip (e.g., when rider cancels)
+   */
+  cancelDriverSearch(tripId: string): void {
+    const state = this.activeNotifications.get(tripId);
+    if (state?.currentDriverId) {
+      // Clear the pending response for current driver
+      const key = `${tripId}:${state.currentDriverId}`;
+      const pending = this.pendingResponses.get(key);
+      if (pending) {
+        clearTimeout(pending.timeout);
+        this.pendingResponses.delete(key);
+      }
+
+      // Notify current driver that trip was cancelled
+      this.tripGateway.server
+        .to(`driver:${state.currentDriverId}`)
+        .emit('trip:cancelled', {
+          tripId,
+          message: 'Rider cancelled the trip request.',
+        });
+    }
+    this.activeNotifications.delete(tripId);
+    this.logger.log(`Driver search cancelled for trip ${tripId}`);
   }
 }
 

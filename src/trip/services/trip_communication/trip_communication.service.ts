@@ -76,17 +76,71 @@ export class TripCommunicationService {
       message: `Your driver is on the way! They will arrive in about ${Math.ceil(routeToPickup.durationMin)} minutes.`,
     });
   }
-}
 
-// function toRiderTripMessage(trip: TripEntity, route: any) {
-//   return {
-//     tripId: trip.id,
-//     driverId: trip.driverId,
-//     pickupLatitude: trip.pickupLatitude,
-//     pickupLongitude: trip.pickupLongitude,
-//     dropoffLatitude: trip.dropoffLatitude,
-//     dropoffLongitude: trip.dropoffLongitude,
-//     route: route,
-//     // Add other necessary trip details
-//   };
-// }
+  /**
+   * Notify both parties when trip starts to destination
+   */
+  async notifyTripStarted(
+    server: Server,
+    trip: TripEntity,
+    currentDriverLocation: DriverLocationDto,
+  ): Promise<void> {
+    const driverId = trip.driverId;
+    const riderId = trip.riderId;
+
+    // Calculate route from current location to destination
+    const routeToDestination = await this.googleMapsService.calculateRoute(
+      `${currentDriverLocation.location?.latitude},${currentDriverLocation.location?.longitude}`,
+      `${trip.dropoffLatitude},${trip.dropoffLongitude}`,
+    );
+
+    const startedAt = new Date().toISOString();
+    const estimatedArrivalTime = new Date(
+      Date.now() + routeToDestination.durationMin * 60000,
+    ).toISOString();
+
+    // Emit to driver with navigation route
+    server.to(`driver:${driverId}`).emit('trip:started', {
+      tripId: trip.id,
+      status: 'IN_PROGRESS',
+      startedAt,
+      routeToDestination: {
+        polyline: routeToDestination.polyline,
+        distanceKm: routeToDestination.distanceKm,
+        durationMin: routeToDestination.durationMin,
+      },
+      destination: {
+        latitude: trip.dropoffLatitude,
+        longitude: trip.dropoffLongitude,
+        address: trip.dropoffAddress,
+      },
+      estimatedArrival: {
+        minutes: Math.ceil(routeToDestination.durationMin),
+        time: estimatedArrivalTime,
+      },
+      message: 'Trip started! Navigate to destination.',
+    });
+
+    // Emit to rider with ETA
+    server.to(`rider:${riderId}`).emit('trip:started', {
+      tripId: trip.id,
+      status: 'IN_PROGRESS',
+      startedAt,
+      destination: {
+        latitude: trip.dropoffLatitude,
+        longitude: trip.dropoffLongitude,
+        address: trip.dropoffAddress,
+      },
+      route: {
+        polyline: routeToDestination.polyline,
+        distanceKm: routeToDestination.distanceKm,
+        durationMin: routeToDestination.durationMin,
+      },
+      estimatedArrival: {
+        minutes: Math.ceil(routeToDestination.durationMin),
+        time: estimatedArrivalTime,
+      },
+      message: `Trip started! Estimated arrival in ${Math.ceil(routeToDestination.durationMin)} minutes.`,
+    });
+  }
+}
