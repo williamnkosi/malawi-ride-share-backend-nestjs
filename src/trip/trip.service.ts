@@ -165,4 +165,43 @@ export class TripService {
 
     return updatedTrip;
   }
+
+  /**
+   * Complete the trip
+   * Called when driver arrives at destination
+   */
+  async completeTrip(
+    server: Server,
+    tripId: string,
+    driverId: string,
+  ): Promise<TripEntity> {
+    // 1. Validate trip exists
+    const trip = await this.tripRepository.findOne({ where: { id: tripId } });
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    // 2. Validate driver is assigned to this trip
+    if (trip.driverId !== driverId) {
+      throw new Error('You are not the assigned driver for this trip');
+    }
+
+    // 3. Validate trip is in correct status
+    if (trip.status !== TripStatus.IN_PROGRESS) {
+      throw new Error('Trip must be in IN_PROGRESS status to complete');
+    }
+
+    // 4. Update status to COMPLETED
+    trip.status = TripStatus.COMPLETED;
+
+    // 5. Save updated trip
+    const updatedTrip = await this.tripRepository.save(trip);
+
+    // 6. Notify both parties
+    this.tripCommunicationService.notifyTripCompleted(server, updatedTrip);
+
+    this.logger.log(`Trip ${tripId} completed by driver ${driverId}`);
+
+    return updatedTrip;
+  }
 }

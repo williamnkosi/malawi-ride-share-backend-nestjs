@@ -20,6 +20,7 @@ import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { RejectTripDto } from 'src/common/dto/trip/reject_trip.dto';
 import { StartTripDto } from './dtos/start_trip.dto';
+import { CompleteTripDto } from './dtos/complete_trip.dto';
 @WebSocketGateway({
   namespace: '/trips',
   cors: { origin: '*' },
@@ -113,7 +114,7 @@ export class TripGateway
     );
   }
 
-  @SubscribeMessage('trip:started')
+  @SubscribeMessage('trip:start')
   async handleStartTrip(
     @MessageBody() dto: StartTripDto,
     @ConnectedSocket() client: AuthenticatedSocket,
@@ -126,6 +127,28 @@ export class TripGateway
       client.emit('trip:error', {
         message:
           error instanceof Error ? error.message : 'Failed to start trip',
+        tripId: dto.tripId,
+      });
+    }
+  }
+
+  @SubscribeMessage('trip:complete')
+  async handleCompleteTrip(
+    @MessageBody() dto: CompleteTripDto,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    try {
+      await this.tripService.completeTrip(
+        this.server,
+        dto.tripId,
+        client.userId,
+      );
+      this.logger.log(`Trip ${dto.tripId} completed by driver ${client.userId}`);
+    } catch (error) {
+      this.logger.error(`Error completing trip ${dto.tripId}:`, error);
+      client.emit('trip:error', {
+        message:
+          error instanceof Error ? error.message : 'Failed to complete trip',
         tripId: dto.tripId,
       });
     }

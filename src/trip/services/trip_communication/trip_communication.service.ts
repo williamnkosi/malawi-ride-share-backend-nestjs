@@ -143,4 +143,39 @@ export class TripCommunicationService {
       message: `Trip started! Estimated arrival in ${Math.ceil(routeToDestination.durationMin)} minutes.`,
     });
   }
+
+  /**
+   * Notify both parties when trip is completed
+   */
+  notifyTripCompleted(server: Server, trip: TripEntity): void {
+    const driverId = trip.driverId;
+    const riderId = trip.riderId;
+    const completedAt = new Date().toISOString();
+
+    // Emit to driver
+    server.to(`driver:${driverId}`).emit('trip:completed', {
+      tripId: trip.id,
+      status: 'COMPLETED',
+      completedAt,
+      destination: {
+        latitude: trip.dropoffLatitude,
+        longitude: trip.dropoffLongitude,
+        address: trip.dropoffAddress,
+      },
+      message: 'Trip completed successfully!',
+    });
+
+    // Emit to rider
+    server.to(`rider:${riderId}`).emit('trip:completed', {
+      tripId: trip.id,
+      status: 'COMPLETED',
+      completedAt,
+      destination: {
+        latitude: trip.dropoffLatitude,
+        longitude: trip.dropoffLongitude,
+        address: trip.dropoffAddress,
+      },
+      message: 'You have arrived at your destination!',
+    });
+  }
 }
