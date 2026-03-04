@@ -1,17 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { LocationTrackingGateway } from 'src/location_tracking/location_tracking.gateway';
+import { LocationTrackingGateway } from '../../location_tracking/location_tracking.gateway';
 import { NotificationsService } from '../notifications.service';
 import { OnEvent } from '@nestjs/event-emitter';
-import { TripEntity } from 'src/trip/entities/trip.entity';
+import { TripEntity } from '../../trip/entities/trip.entity';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
 import {
   LocationTrackingService,
   NearbyDriverResult,
-} from 'src/location_tracking/location_tracking.service';
-import { TripGateway } from 'src/trip/trip.gateway';
+} from '../../location_tracking/location_tracking.service';
+import { TripGateway } from '../../trip/trip.gateway';
 import { TripRequestNotification } from './driver_trip_notification';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/users/users.entity';
+import { UserEntity } from '../../users/users.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

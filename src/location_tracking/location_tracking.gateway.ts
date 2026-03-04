@@ -13,11 +13,11 @@ import { Logger } from '@nestjs/common';
 import { LocationTrackingService } from './location_tracking.service';
 import { UpdateDriverLocationDto } from './location_tracking.dto';
 
-import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
-import { FirebaseService } from 'src/firebase/firebase.service';
-import { UsersService } from 'src/users/users.service';
-import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
-import { UserType } from 'src/common/guards/firebase_auth_guard_types';
+import { AuthenticatedSocket } from '../common/guards/firebase_auth_guard_types';
+import { FirebaseService } from '../firebase/firebase.service';
+import { UsersService } from '../users/users.service';
+import { WebSocketAuthUtil } from '../common/utils/websocket-auth.util';
+import { UserType } from '../common/guards/firebase_auth_guard_types';
 
 @WebSocketGateway({
   namespace: '/location',

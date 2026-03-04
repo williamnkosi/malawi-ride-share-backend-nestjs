@@ -4,8 +4,8 @@ import {
   AuthenticatedSocket,
   UserType,
 } from '../guards/firebase_auth_guard_types';
-import { FirebaseService } from 'src/firebase/firebase.service';
-import { UsersService } from 'src/users/users.service';
+import { FirebaseService } from '../../firebase/firebase.service';
+import { UsersService } from '../../users/users.service';
 
 /**
  * Centralized WebSocket authentication middleware factory
