@@ -5,10 +5,6 @@ import { Column } from 'typeorm';
 export class CreateUserDeviceDto {
   @Column({ unique: true })
   @IsString()
-  firebaseUserId: string;
-
-  @Column({ unique: true })
-  @IsString()
   fcmToken: string;
 
   @IsEnum(DevicePlatform)

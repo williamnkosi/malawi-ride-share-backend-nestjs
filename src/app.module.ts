@@ -7,17 +7,18 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule } from './testing/testing.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { UserDeviceModule } from './user_device/user_device.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { GoogleMapsServiceModule } from './google_maps_service/google_maps_service.module';
 import { LocationTrackingModule } from './location_tracking/location_tracking.module';
 import { UsersModule } from './users/users.module';
+import { TripModule } from './trip/trip.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(), // Initialize EventEmitter globally
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -26,6 +27,7 @@ const isProd = process.env.NODE_ENV === 'production';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+
       synchronize: true, // Turn off in production
       //dropSchema: !isProd, // Drop schema in development
     }),
@@ -33,10 +35,10 @@ const isProd = process.env.NODE_ENV === 'production';
     NotificationsModule,
     FirebaseModule,
     ...(!isProd ? [TestingModule] : []),
-    UserDeviceModule,
     GoogleMapsServiceModule,
     LocationTrackingModule,
     UsersModule,
+    TripModule,
   ],
   controllers: [],
   providers: [],

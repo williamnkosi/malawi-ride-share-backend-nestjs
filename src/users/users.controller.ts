@@ -9,14 +9,17 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update_user.dto';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { FirebaseAuthGuard } from 'src/common/guards/firebase_auth_guard';
 
 @Controller('users')
+@UseGuards(FirebaseAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

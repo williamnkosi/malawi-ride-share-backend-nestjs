@@ -14,13 +14,14 @@ export enum StorageBucket {
 }
 @Injectable()
 export class FirebaseService implements OnModuleInit {
+  private app: admin.app.App;
   private storage: admin.storage.Storage;
   private buckets: Map<StorageBucket, Bucket> = new Map();
   constructor(private readonly config: ConfigService) {}
 
   async onModuleInit() {
     if (admin.apps.length === 0) {
-      admin.initializeApp({
+      this.app = admin.initializeApp({
         credential: admin.credential.cert(
           serviceAccount as admin.ServiceAccount,
         ),
@@ -62,8 +63,8 @@ export class FirebaseService implements OnModuleInit {
     return admin.firestore();
   }
 
-  getMessaging() {
-    return admin.messaging();
+  getMessaging(): admin.messaging.Messaging {
+    return admin.messaging(this.app);
   }
 
   async uploadUserProfileImage(

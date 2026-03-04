@@ -1,10 +1,10 @@
 import {
   IsNumber,
-  IsString,
   IsOptional,
   Min,
   Max,
   IsEnum,
+  IsNotEmpty,
 } from 'class-validator';
 
 export enum DriverStatus {
@@ -15,21 +15,18 @@ export enum DriverStatus {
 }
 
 export class LocationDto {
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
+  @IsNumber({}, { message: 'Latitude must be a number' })
+  @Min(-90, { message: 'Latitude must be >= -90' })
+  @Max(90, { message: 'Latitude must be <= 90' })
   latitude: number;
 
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
+  @IsNumber({}, { message: 'Longitude must be a number' })
+  @Min(-180, { message: 'Longitude must be >= -180' })
+  @Max(180, { message: 'Longitude must be <= 180' })
   longitude: number;
 }
 
 export class DriverLocationDto {
-  @IsString()
-  firebaseId: string;
-
   @IsEnum(DriverStatus)
   status?: DriverStatus;
 
@@ -38,12 +35,12 @@ export class DriverLocationDto {
 }
 
 export class UpdateDriverLocationDto {
-  @IsString()
-  firebaseId: string;
-
   location: LocationDto;
 
-  @IsEnum(DriverStatus)
+  @IsEnum(DriverStatus, {
+    message: 'Status must be one of: online, offline, busy, on_trip',
+  })
+  @IsNotEmpty()
   status: DriverStatus;
 }
 
@@ -58,9 +55,6 @@ export class FindNearbyDriversDto {
 }
 
 export class DriverConnectionDto {
-  @IsString()
-  firebaseId: string;
-
   @IsOptional()
   initialLocation?: LocationDto;
 }

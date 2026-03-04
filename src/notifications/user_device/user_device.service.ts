@@ -20,10 +20,11 @@ export class UserDeviceService {
   }
 
   async registerOrUpdateDevice(
+    userId: string,
     dto: CreateUserDeviceDto,
   ): Promise<UserDeviceEntity> {
     const existing = await this.userDeviceRepository.findOne({
-      where: { firebaseUserId: dto.firebaseUserId },
+      where: { user: { id: userId } },
     });
 
     if (existing) {
@@ -33,8 +34,11 @@ export class UserDeviceService {
       return await this.userDeviceRepository.save(existing);
     }
 
-    // Create new entry
-    const newDevice = this.userDeviceRepository.create(dto);
+    const newDevice = this.userDeviceRepository.create({
+      user: { id: userId },
+      ...dto,
+    });
+
     return await this.userDeviceRepository.save(newDevice);
   }
 
@@ -42,12 +46,11 @@ export class UserDeviceService {
     return await this.userDeviceRepository.find();
   }
 
-  async findOne(firebaseUserId: string): Promise<UserDeviceEntity> {
+  async findOne(userId: string): Promise<UserDeviceEntity> {
     const device = await this.userDeviceRepository.findOne({
-      where: { firebaseUserId },
+      where: { user: { id: userId } },
     });
-    if (!device)
-      throw new NotFoundException(`UserDevice ${firebaseUserId} not found`);
+    if (!device) throw new NotFoundException(`UserDevice ${userId} not found`);
     return device;
   }
 
