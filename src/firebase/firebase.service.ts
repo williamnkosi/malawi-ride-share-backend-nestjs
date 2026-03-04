@@ -3,8 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { Bucket } from '@google-cloud/storage';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import serviceAccount = require('../../environment/serviceAccountKey.json');
+// Load service account from env var or local file
+const getServiceAccount = (): admin.ServiceAccount => {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  }
+  // Fallback to local file for development
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('../../environment/serviceAccountKey.json');
+};
 
 export enum StorageBucket {
   USER_PROFILES_IMAGES = 'malawi-ride-share-profiles-images',
@@ -22,9 +29,7 @@ export class FirebaseService implements OnModuleInit {
   async onModuleInit() {
     if (admin.apps.length === 0) {
       this.app = admin.initializeApp({
-        credential: admin.credential.cert(
-          serviceAccount as admin.ServiceAccount,
-        ),
+        credential: admin.credential.cert(getServiceAccount()),
       });
     }
 

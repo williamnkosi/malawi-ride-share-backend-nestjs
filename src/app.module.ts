@@ -27,8 +27,10 @@ const isProd = process.env.NODE_ENV === 'production';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-
-      synchronize: true, // Turn off in production
+      ssl: {
+        rejectUnauthorized: false, // Required for Neon serverless
+      },
+      synchronize: !isProd, // Turn off in production
       //dropSchema: !isProd, // Drop schema in development
     }),
     AuthModule,
