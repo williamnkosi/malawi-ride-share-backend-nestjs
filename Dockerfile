@@ -5,17 +5,26 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock ./
+# Enable corepack for yarn
+RUN corepack enable
+
+# Copy package files and yarn config
+COPY package.json yarn.lock .yarnrc.yml ./
 
 # Install all dependencies (including devDependencies for build)
-RUN yarn install --frozen-lockfile
+RUN yarn install --immutable
 
 # Copy source code
 COPY . .
 
+# Clean build - remove any stale build cache
+RUN rm -rf dist *.tsbuildinfo
+
 # Build the application
 RUN yarn build
+
+# Prune dev dependencies after build
+RUN yarn workspaces focus --all --production || true
 
 # ================================
 # Production Stage
@@ -27,14 +36,10 @@ WORKDIR /app
 # Set environment to production
 ENV NODE_ENV=production
 
-# Copy package files
-COPY package.json yarn.lock ./
-
-# Install only production dependencies
-RUN yarn install --frozen-lockfile --production && yarn cache clean
-
-# Copy built application from builder stage
+# Copy built application and production node_modules from builder
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 
 # Expose port
 EXPOSE 3000

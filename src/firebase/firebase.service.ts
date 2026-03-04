@@ -2,9 +2,29 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { Bucket } from '@google-cloud/storage';
+import * as path from 'path';
+import * as fs from 'fs';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import serviceAccount = require('../../environment/serviceAccountKey.json');
+// Load service account from env var (production) or local file (development)
+const getServiceAccount = (): admin.ServiceAccount => {
+  // First check env var (for Docker/production)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  }
+
+  // Fallback to local file for development (relative to project root)
+  const localPath = path.join(
+    process.cwd(),
+    'environment/serviceAccountKey.json',
+  );
+  if (fs.existsSync(localPath)) {
+    return JSON.parse(fs.readFileSync(localPath, 'utf-8'));
+  }
+
+  throw new Error(
+    'Firebase service account not found. Set FIREBASE_SERVICE_ACCOUNT env var or add environment/serviceAccountKey.json',
+  );
+};
 
 export enum StorageBucket {
   USER_PROFILES_IMAGES = 'malawi-ride-share-profiles-images',
@@ -22,9 +42,7 @@ export class FirebaseService implements OnModuleInit {
   async onModuleInit() {
     if (admin.apps.length === 0) {
       this.app = admin.initializeApp({
-        credential: admin.credential.cert(
-          serviceAccount as admin.ServiceAccount,
-        ),
+        credential: admin.credential.cert(getServiceAccount()),
       });
     }
 
