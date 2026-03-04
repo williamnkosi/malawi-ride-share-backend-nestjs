@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
-import { UpdateUserDeviceDto } from 'src/common/dto/user_device/update_user_device.dto';
-import { UserDeviceEntity } from 'src/common/entities/user_device.entity';
+import { CreateUserDeviceDto } from '../../common/dto/user_device/create_user_device.dto';
+import { UpdateUserDeviceDto } from '../../common/dto/user_device/update_user_device.dto';
+import { UserDeviceEntity } from '../../common/entities/user_device.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

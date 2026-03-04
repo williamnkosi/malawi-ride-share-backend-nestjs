@@ -1,10 +1,10 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
-import { RouteResponseDto } from 'src/google_maps_service/dtos/route-response.dto';
-import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
-import { NearbyDriverResult } from 'src/location_tracking/location_tracking.service';
+import { RouteResponseDto } from '../../../google_maps_service/dtos/route-response.dto';
+import { GoogleMapsService } from '../../../google_maps_service/google_maps_service.service';
+import { NearbyDriverResult } from '../../../location_tracking/location_tracking.service';
 
-import { TripEntity } from 'src/trip/entities/trip.entity';
-import { TripGateway } from 'src/trip/trip.gateway';
+import { TripEntity } from '../../entities/trip.entity';
+import { TripGateway } from '../../trip.gateway';
 
 const TIMEOUT_MS = 15000; // 15 seconds
 

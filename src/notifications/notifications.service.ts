@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
-import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
-import { CustomError } from 'src/common/types/customError/errorMessageResponse';
-import { FirebaseService } from 'src/firebase/firebase.service';
-import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
+import { CreateUserDeviceDto } from '../common/dto/user_device/create_user_device.dto';
+import { CustomError } from '../common/types/customError/errorMessageResponse';
+import { FirebaseService } from '../firebase/firebase.service';
+import { UserDeviceService } from './user_device/user_device.service';
 
 @Injectable()
 export class NotificationsService {

@@ -1,7 +1,7 @@
-import { TripEntity } from 'src/trip/entities/trip.entity';
+import { TripEntity } from '../../trip/entities/trip.entity';
 import { NotificationEventEmitters } from '../models/notification_event_emitters_types';
-import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
-import { NearbyDriverResult } from 'src/location_tracking/location_tracking.service';
+import { DriverLocationDto } from '../../location_tracking/location_tracking.dto';
+import { NearbyDriverResult } from '../../location_tracking/location_tracking.service';
 
 export interface TripNotificationEvents {
   [NotificationEventEmitters.TRIP_REQUESTED]: {

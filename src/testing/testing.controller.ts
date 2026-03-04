@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
-import { CustomError } from 'src/common/types/customError/errorMessageResponse';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { CustomError } from '../common/types/customError/errorMessageResponse';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Controller('testing')
 export class TestingController {

@@ -6,9 +6,9 @@ import {
   Inject,
 } from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
-import { FirebaseService } from 'src/firebase/firebase.service';
-import { UsersService } from 'src/users/users.service';
-import { UserEntity } from 'src/users/users.entity';
+import { FirebaseService } from '../../firebase/firebase.service';
+import { UsersService } from '../../users/users.service';
+import { UserEntity } from '../../users/users.entity';
 import { AuthenticatedRequest, UserType } from './firebase_auth_guard_types';
 
 @Injectable()

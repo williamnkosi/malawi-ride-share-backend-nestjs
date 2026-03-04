@@ -3,7 +3,7 @@ import { DriverEntity } from './driver.entity';
 import { UsersService } from '../users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CustomError } from 'src/common/types/customError/errorMessageResponse';
+import { CustomError } from '../../common/types/customError/errorMessageResponse';
 
 @Injectable()
 export class DriversService {

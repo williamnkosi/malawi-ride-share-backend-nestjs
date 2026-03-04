@@ -4,13 +4,13 @@ import { TripEntity, TripStatus } from './entities/trip.entity';
 import { Repository } from 'typeorm';
 
 import { RequestTripDto } from './dtos/request_trip.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import {
   AuthenticatedSocket,
   UserType,
-} from 'src/common/guards/firebase_auth_guard_types';
-import { LocationTrackingService } from 'src/location_tracking/location_tracking.service';
-import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
+} from '../common/guards/firebase_auth_guard_types';
+import { LocationTrackingService } from '../location_tracking/location_tracking.service';
+import { UserLocationDto } from '../common/dto/location/user_location.dto';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 import { Server } from 'socket.io';

@@ -10,15 +10,15 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
+import { AuthenticatedSocket } from '../common/guards/firebase_auth_guard_types';
 import { TripService } from './trip.service';
-import { AcceptTripDto } from 'src/common/dto/trip/accept_trip.dto';
-import { FirebaseService } from 'src/firebase/firebase.service';
+import { AcceptTripDto } from '../common/dto/trip/accept_trip.dto';
+import { FirebaseService } from '../firebase/firebase.service';
 
-import { UsersService } from 'src/users/users.service';
-import { WebSocketAuthUtil } from 'src/common/utils/websocket-auth.util';
+import { UsersService } from '../users/users.service';
+import { WebSocketAuthUtil } from '../common/utils/websocket-auth.util';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
-import { RejectTripDto } from 'src/common/dto/trip/reject_trip.dto';
+import { RejectTripDto } from '../common/dto/trip/reject_trip.dto';
 import { StartTripDto } from './dtos/start_trip.dto';
 import { CompleteTripDto } from './dtos/complete_trip.dto';
 @WebSocketGateway({

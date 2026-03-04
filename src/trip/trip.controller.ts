@@ -1,8 +1,8 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { RequestTripDto } from './dtos/request_trip.dto';
-import { FirebaseAuthGuard } from 'src/common/guards/firebase_auth_guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase_auth_guard';
 import { TripService } from './trip.service';
-import { AuthenticatedRequest } from 'src/common/guards/firebase_auth_guard_types';
+import { AuthenticatedRequest } from '../common/guards/firebase_auth_guard_types';
 
 @Controller('trips')
 export class TripController {

@@ -4,10 +4,10 @@ import {
   DriverStatus,
   UpdateDriverLocationDto,
 } from './location_tracking.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { Server } from 'socket.io';
-import { UserLocationDto } from 'src/common/dto/location/user_location.dto';
-import { AuthenticatedSocket } from 'src/common/guards/firebase_auth_guard_types';
+import { UserLocationDto } from '../common/dto/location/user_location.dto';
+import { AuthenticatedSocket } from '../common/guards/firebase_auth_guard_types';
 
 export interface NearbyDriverResult {
   userId: string;

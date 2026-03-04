@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 
-import { GoogleMapsService } from 'src/google_maps_service/google_maps_service.service';
-import { DriverLocationDto } from 'src/location_tracking/location_tracking.dto';
-import { TripEntity } from 'src/trip/entities/trip.entity';
+import { GoogleMapsService } from '../../../google_maps_service/google_maps_service.service';
+import { DriverLocationDto } from '../../../location_tracking/location_tracking.dto';
+import { TripEntity } from '../../entities/trip.entity';
 
 @Injectable()
 export class TripCommunicationService {
