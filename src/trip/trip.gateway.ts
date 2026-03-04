@@ -29,7 +29,7 @@ export class TripGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
   private readonly logger = new Logger(TripGateway.name);
 
   constructor(
