@@ -143,7 +143,9 @@ export class TripGateway
         dto.tripId,
         client.userId,
       );
-      this.logger.log(`Trip ${dto.tripId} completed by driver ${client.userId}`);
+      this.logger.log(
+        `Trip ${dto.tripId} completed by driver ${client.userId}`,
+      );
     } catch (error) {
       this.logger.error(`Error completing trip ${dto.tripId}:`, error);
       client.emit('trip:error', {
