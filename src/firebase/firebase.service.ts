@@ -9,7 +9,21 @@ import * as fs from 'fs';
 const getServiceAccount = (): admin.ServiceAccount => {
   // First check env var (for Docker/production)
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    let jsonStr = process.env.FIREBASE_SERVICE_ACCOUNT;
+    
+    // Remove surrounding quotes if present (common issue with env vars)
+    if ((jsonStr.startsWith('"') && jsonStr.endsWith('"')) || 
+        (jsonStr.startsWith("'") && jsonStr.endsWith("'"))) {
+      jsonStr = jsonStr.slice(1, -1);
+    }
+    
+    try {
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
+      console.error('First 100 chars:', jsonStr.substring(0, 100));
+      throw e;
+    }
   }
 
   // Fallback to local file for development (relative to project root)

@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   Client,
   TravelMode,
@@ -8,12 +9,11 @@ import { RouteResponseDto } from './dtos/route-response.dto';
 @Injectable()
 export class GoogleMapsService {
   private readonly client: Client = new Client({});
+  private readonly apiKey: string;
 
-  private readonly apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
-  constructor() {
+  constructor(private configService: ConfigService) {
+    this.apiKey = this.configService.get<string>('GOOGLE_MAPS_API_KEY') || '';
     if (!this.apiKey) {
-      this.client = new Client({});
       throw new InternalServerErrorException(
         'Google Maps API key is not set in environment variables',
       );
