@@ -2,9 +2,43 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import { Bucket } from '@google-cloud/storage';
+import * as path from 'path';
+import * as fs from 'fs';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import serviceAccount = require('../../environment/serviceAccountKey.json');
+// Load service account from env var (production) or local file (development)
+const getServiceAccount = (): admin.ServiceAccount => {
+  // First check env var (for Docker/production)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    let jsonStr = process.env.FIREBASE_SERVICE_ACCOUNT;
+    
+    // Remove surrounding quotes if present (common issue with env vars)
+    if ((jsonStr.startsWith('"') && jsonStr.endsWith('"')) || 
+        (jsonStr.startsWith("'") && jsonStr.endsWith("'"))) {
+      jsonStr = jsonStr.slice(1, -1);
+    }
+    
+    try {
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', e);
+      console.error('First 100 chars:', jsonStr.substring(0, 100));
+      throw e;
+    }
+  }
+
+  // Fallback to local file for development (relative to project root)
+  const localPath = path.join(
+    process.cwd(),
+    'environment/serviceAccountKey.json',
+  );
+  if (fs.existsSync(localPath)) {
+    return JSON.parse(fs.readFileSync(localPath, 'utf-8'));
+  }
+
+  throw new Error(
+    'Firebase service account not found. Set FIREBASE_SERVICE_ACCOUNT env var or add environment/serviceAccountKey.json',
+  );
+};
 
 export enum StorageBucket {
   USER_PROFILES_IMAGES = 'malawi-ride-share-profiles-images',
@@ -22,9 +56,7 @@ export class FirebaseService implements OnModuleInit {
   async onModuleInit() {
     if (admin.apps.length === 0) {
       this.app = admin.initializeApp({
-        credential: admin.credential.cert(
-          serviceAccount as admin.ServiceAccount,
-        ),
+        credential: admin.credential.cert(getServiceAccount()),
       });
     }
 

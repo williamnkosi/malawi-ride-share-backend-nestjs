@@ -1,10 +1,10 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { CreateUserDeviceDto } from 'src/common/dto/user_device/create_user_device.dto';
+import { CreateUserDeviceDto } from '../common/dto/user_device/create_user_device.dto';
 import { NotificationsService } from './notifications.service';
-import { ApiResponse } from 'src/common/types/api_response';
-import { UserDeviceService } from 'src/notifications/user_device/user_device.service';
-import { AuthenticatedRequest } from 'src/common/guards/firebase_auth_guard_types';
-import { FirebaseAuthGuard } from 'src/common/guards/firebase_auth_guard';
+import { ApiResponse } from '../common/types/api_response';
+import { UserDeviceService } from './user_device/user_device.service';
+import { AuthenticatedRequest } from '../common/guards/firebase_auth_guard_types';
+import { FirebaseAuthGuard } from '../common/guards/firebase_auth_guard';
 
 @Controller('notifications')
 export class NotificationsController {

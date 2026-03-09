@@ -15,6 +15,8 @@ import { UsersModule } from './users/users.module';
 import { TripModule } from './trip/trip.module';
 
 const isProd = process.env.NODE_ENV === 'production';
+const useSSL = isProd || process.env.DB_HOST?.includes('neon.tech');
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,8 +29,8 @@ const isProd = process.env.NODE_ENV === 'production';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-
-      synchronize: true, // Turn off in production
+      ssl: useSSL ? { rejectUnauthorized: false } : false,
+      synchronize: !isProd, // Turn off in production
       //dropSchema: !isProd, // Drop schema in development
     }),
     AuthModule,
