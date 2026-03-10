@@ -19,17 +19,18 @@ import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { FirebaseAuthGuard } from '../common/guards/firebase_auth_guard';
 
 @Controller('users')
-@UseGuards(FirebaseAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
   async getAllUsers() {
     return await this.usersService.findAll();
   }
 
   @Get(':firebaseId')
+  @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
   async getUserData(@Param('firebaseId') firebaseId: string) {
     return await this.usersService.findById(firebaseId);
@@ -42,6 +43,7 @@ export class UsersController {
   }
 
   @Post(':firebaseId/profile-image')
+  @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('profileImage'))
   uploadProfileImage(
@@ -55,6 +57,7 @@ export class UsersController {
   }
 
   @Patch(':firebaseId')
+  @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
   async updateUser(
     @Param('firebaseId') firebaseId: string,
@@ -64,6 +67,7 @@ export class UsersController {
   }
 
   @Delete(':firebaseId')
+  @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUserData(@Param('firebaseId') firebaseId: string) {
     return await this.usersService.remove(firebaseId);
