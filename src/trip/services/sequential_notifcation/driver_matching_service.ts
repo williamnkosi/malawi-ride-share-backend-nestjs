@@ -5,7 +5,7 @@ import { NearbyDriverResult } from '../../../location_tracking/location_tracking
 
 import { TripEntity } from '../../entities/trip.entity';
 import { TripGateway } from '../../trip.gateway';
-import { DriverTripRequestDto } from '../../dtos/driver-trip-request.dto';
+import { TripCommunicationService } from '../trip_communication/trip_communication.service';
 
 const TIMEOUT_MS = 15000; // 15 seconds
 
@@ -32,11 +32,10 @@ export class DriverMatchingService {
   >();
   constructor(
     @Inject(forwardRef(() => TripGateway))
-    private readonly tripGateway: TripGateway,
-    //private readonly logger: Logger,
+    private readonly tripCommunicationService: TripCommunicationService,
     private readonly googleMapsService: GoogleMapsService,
   ) {}
-  async sendNotificationsInSequence(
+  async searchForAvailableDriver(
     trip: TripEntity,
     drivers: NearbyDriverResult[],
   ) {
@@ -105,11 +104,9 @@ export class DriverMatchingService {
         this.pendingResponses.delete(key);
 
         // Notify the driver that they timed out
-        this.tripGateway.server.to(`driver:${driverId}`).emit('trip:timeout', {
+        this.tripCommunicationService.driverNotifyTimeout({
           tripId: trip.id,
-          data: {
-            message: 'Trip request expired. You did not respond in time.',
-          },
+          driverId,
         });
 
         resolve('trip:timeout');
@@ -130,11 +127,12 @@ export class DriverMatchingService {
       });
 
       // Send WebSocket message to driver
-      this.tripGateway.server.to(`driver:${driverId}`).emit('trip:request', {
-        id: trip.id,
-        timeoutSeconds: timeoutMs / 1000,
-        data: toTripResponse(trip, route),
-        // ... trip details
+      this.tripCommunicationService.driverNotifyTripRequested({
+        tripId: trip.id,
+        driverId,
+        timeoutMs,
+        route,
+        trip,
       });
     });
   }
@@ -165,29 +163,6 @@ export class DriverMatchingService {
   }
 
   /**
-   * Get the current driver being notified for a trip
-   */
-  getCurrentDriverForTrip(tripId: string): string | null {
-    const state = this.activeNotifications.get(tripId);
-    return state?.currentDriverId ?? null;
-  }
-
-  /**
-   * Get all drivers that have already been notified for a trip
-   */
-  getNotifiedDriversForTrip(tripId: string): string[] {
-    const state = this.activeNotifications.get(tripId);
-    return state?.notifiedDrivers ?? [];
-  }
-
-  /**
-   * Check if a trip is currently searching for a driver
-   */
-  isTripSearchingForDriver(tripId: string): boolean {
-    return this.activeNotifications.has(tripId);
-  }
-
-  /**
    * Cancel the driver search for a trip (e.g., when rider cancels)
    */
   cancelDriverSearch(tripId: string): void {
@@ -202,39 +177,12 @@ export class DriverMatchingService {
       }
 
       // Notify current driver that trip was cancelled
-      this.tripGateway.server
-        .to(`driver:${state.currentDriverId}`)
-        .emit('trip:cancelled', {
-          tripId,
-          message: 'Rider cancelled the trip request.',
-        });
+      this.tripCommunicationService.driverNotifyTripCancelled({
+        tripId,
+        driverId: state.currentDriverId,
+      });
     }
     this.activeNotifications.delete(tripId);
     this.logger.log(`Driver search cancelled for trip ${tripId}`);
   }
-}
-
-function toTripResponse(
-  trip: TripEntity,
-  route: RouteResponseDto,
-): DriverTripRequestDto {
-  const dto = new DriverTripRequestDto();
-  dto.tripId = trip.id;
-  dto.status = trip.status;
-  dto.pickupLocation = {
-    latitude: trip.pickupLatitude,
-    longitude: trip.pickupLongitude,
-    address: trip.pickupAddress ?? '',
-  };
-  dto.dropoffLocation = {
-    latitude: trip.dropoffLatitude,
-    longitude: trip.dropoffLongitude,
-    address: trip.dropoffAddress ?? '',
-  };
-  dto.riderFirstName = trip.rider.firstName;
-  dto.riderLastName = trip.rider.lastName;
-  dto.passengerCount = trip.passengerCount;
-  dto.createdAt = trip.createdAt;
-  dto.route = route;
-  return dto;
 }

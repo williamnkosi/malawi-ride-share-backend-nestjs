@@ -1,15 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 
 import { GoogleMapsService } from '../../../google_maps_service/google_maps_service.service';
 import { DriverLocationDto } from '../../../location_tracking/location_tracking.dto';
 import { TripEntity } from '../../entities/trip.entity';
+import { RouteResponseDto } from 'src/google_maps_service/dtos/route-response.dto';
+import { DriverTripRequestDto } from 'src/trip/dtos/driver-trip-request.dto';
 
 @Injectable()
 export class TripCommunicationService {
-  constructor(private readonly googleMapsService: GoogleMapsService) {}
+  constructor(
+    @Inject('WEBSOCKET_SERVER') private readonly server: Server,
+    private readonly googleMapsService: GoogleMapsService,
+  ) {}
   async notifyUsersOfTripAccepted(
-    server: Server,
     trip: TripEntity,
     currentDriverLocation: DriverLocationDto,
   ): Promise<void> {
@@ -23,7 +27,7 @@ export class TripCommunicationService {
     );
 
     // Notify driver with confirmation and navigation
-    server.to(`driver:${driverId}`).emit('trip:accepted_confirmation', {
+    this.server.to(`driver:${driverId}`).emit('trip:accepted_confirmation', {
       tripId: trip.id,
       status: 'ACCEPTED',
       routeToPickup,
@@ -50,7 +54,7 @@ export class TripCommunicationService {
     });
 
     // Notify rider that driver was found
-    server.to(`rider:${riderId}`).emit('trip:driver_found', {
+    this.server.to(`rider:${riderId}`).emit('trip:driver_found', {
       tripId: trip.id,
       status: 'DRIVER_ASSIGNED',
       driver: {
@@ -177,5 +181,77 @@ export class TripCommunicationService {
       },
       message: 'You have arrived at your destination!',
     });
+  }
+
+  driverNotifyTripRequested({
+    tripId,
+    driverId,
+    timeoutMs,
+    route,
+    trip,
+  }: {
+    tripId: string;
+    driverId: string;
+    timeoutMs: number;
+    route: RouteResponseDto;
+    trip: TripEntity;
+  }): void {
+    this.server.to(`driver:${driverId}`).emit('trip:request', {
+      id: tripId,
+      timeoutSeconds: timeoutMs / 1000,
+      data: this.toTripResponse(trip, route),
+      // ... trip details
+    });
+  }
+  driverNotifyTimeout({
+    tripId,
+    driverId,
+  }: {
+    tripId: string;
+    driverId: string;
+  }): void {
+    this.server.to(`driver:${driverId}`).emit('trip:timeout', {
+      tripId: tripId,
+      data: {
+        message: 'Trip request expired. You did not respond in time.',
+      },
+    });
+  }
+  driverNotifyTripCancelled({
+    tripId,
+    driverId,
+  }: {
+    tripId: string;
+    driverId: string;
+  }): void {
+    this.server.to(`driver:${driverId}`).emit('trip:cancelled', {
+      tripId,
+      message: 'Rider cancelled the trip request.',
+    });
+  }
+
+  private toTripResponse(
+    trip: TripEntity,
+    route: RouteResponseDto,
+  ): DriverTripRequestDto {
+    const dto = new DriverTripRequestDto();
+    dto.tripId = trip.id;
+    dto.status = trip.status;
+    dto.pickupLocation = {
+      latitude: trip.pickupLatitude,
+      longitude: trip.pickupLongitude,
+      address: trip.pickupAddress ?? '',
+    };
+    dto.dropoffLocation = {
+      latitude: trip.dropoffLatitude,
+      longitude: trip.dropoffLongitude,
+      address: trip.dropoffAddress ?? '',
+    };
+    dto.riderFirstName = trip.rider.firstName;
+    dto.riderLastName = trip.rider.lastName;
+    dto.passengerCount = trip.passengerCount;
+    dto.createdAt = trip.createdAt;
+    dto.route = route;
+    return dto;
   }
 }

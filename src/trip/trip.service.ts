@@ -85,7 +85,7 @@ export class TripService {
       throw new Error('No drivers available nearby');
     }
 
-    await this.driverMatchingService.sendNotificationsInSequence(
+    await this.driverMatchingService.searchForAvailableDriver(
       savedTrip,
       nearbyDrivers,
     );
