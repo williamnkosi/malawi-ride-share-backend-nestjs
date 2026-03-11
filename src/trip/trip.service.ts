@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TripEntity, TripStatus } from './entities/trip.entity';
 import { Repository } from 'typeorm';
 
-import { RequestTripDto } from './dtos/request_trip.dto';
 import { UsersService } from '../users/users.service';
 import {
   AuthenticatedSocket,
@@ -50,29 +49,29 @@ export class TripService {
     }
   }
 
-  async requestTrip(requestTripDto: RequestTripDto, userId: string) {
+  async requestTrip(riderRequestTripDto: RiderRequestTripDto, userId: string) {
     const riderEntity = await this.userService.findById(userId); // Ensure user exists
     // 2. Create trip entity
     const trip = this.tripRepository.create({
       riderId: userId, // Use database user ID
       rider: riderEntity,
-      pickupAddress: requestTripDto.pickupLocation.address,
-      dropoffAddress: requestTripDto.dropoffLocation.address,
-      pickupLatitude: requestTripDto.pickupLocation.latitude,
-      pickupLongitude: requestTripDto.pickupLocation.longitude,
-      dropoffLatitude: requestTripDto.dropoffLocation.latitude,
-      dropoffLongitude: requestTripDto.dropoffLocation.longitude,
-      passengerCount: requestTripDto.passengerCount,
-      notes: requestTripDto.notes,
+      pickupAddress: riderRequestTripDto.pickupLocation.address,
+      dropoffAddress: riderRequestTripDto.dropoffLocation.address,
+      pickupLatitude: riderRequestTripDto.pickupLocation.latitude,
+      pickupLongitude: riderRequestTripDto.pickupLocation.longitude,
+      dropoffLatitude: riderRequestTripDto.dropoffLocation.latitude,
+      dropoffLongitude: riderRequestTripDto.dropoffLocation.longitude,
+      passengerCount: riderRequestTripDto.passengerCount,
+      notes: riderRequestTripDto.notes,
       status: TripStatus.REQUESTED,
-      scheduledTime: requestTripDto.scheduledTime,
+      //scheduledTime: requestTripDto.scheduledTime,
     });
 
     // 3. Save trip to database
     const savedTrip = await this.tripRepository.save(trip);
     const userLocation: UserLocationDto = {
-      latitude: requestTripDto.pickupLocation.latitude,
-      longitude: requestTripDto.pickupLocation.longitude,
+      latitude: riderRequestTripDto.pickupLocation.latitude,
+      longitude: riderRequestTripDto.pickupLocation.longitude,
     };
     const nearbyDrivers =
       this.locationTrackingService.findNearbyDrivers(userLocation);
@@ -205,9 +204,4 @@ export class TripService {
 
     return updatedTrip;
   }
-
-  async riderRequestTrip(
-    dto: RiderRequestTripDto,
-    client: AuthenticatedSocket,
-  ) {}
 }

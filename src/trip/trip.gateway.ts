@@ -166,6 +166,6 @@ export class TripGateway
     @MessageBody() riderRequestTripDto: RiderRequestTripDto,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    await this.tripService.riderRequestTrip(riderRequestTripDto, client);
+    await this.tripService.requestTrip(riderRequestTripDto, client.userId);
   }
 }
