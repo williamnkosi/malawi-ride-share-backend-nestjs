@@ -15,30 +15,30 @@ export class LocationDto {
   @IsNumber()
   @Min(-90, { message: 'Latitude must be between -90 and 90' })
   @Max(90, { message: 'Latitude must be between -90 and 90' })
-  latitude: number;
+  latitude!: number;
 
   @IsNumber()
   @Min(-180, { message: 'Longitude must be between -180 and 180' })
   @Max(180, { message: 'Longitude must be between -180 and 180' })
-  longitude: number;
+  longitude!: number;
 
   @IsOptional()
   @IsString()
   address?: string;
 }
 
-export class RequestTripDto {
+export class RiderRequestTripDto {
   @IsNotEmpty({ message: 'Pickup location is required' })
   @IsObject()
   @ValidateNested()
   @Type(() => LocationDto)
-  readonly pickupLocation: LocationDto;
+  readonly pickupLocation: LocationDto = new LocationDto();
 
   @IsNotEmpty({ message: 'Dropoff location is required' })
   @IsObject()
   @ValidateNested()
   @Type(() => LocationDto)
-  readonly dropoffLocation: LocationDto;
+  readonly dropoffLocation: LocationDto = new LocationDto();
 
   @IsOptional()
   @IsDateString({}, { message: 'Scheduled time must be a valid date' })
@@ -47,7 +47,7 @@ export class RequestTripDto {
   @IsNumber({}, { message: 'Passenger count must be a number' })
   @Min(1, { message: 'At least 1 passenger is required' })
   @Max(8, { message: 'Maximum 8 passengers allowed' })
-  readonly passengerCount: number;
+  readonly passengerCount: number = 1;
 
   @IsOptional()
   @IsString()

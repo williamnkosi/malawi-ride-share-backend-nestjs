@@ -2,26 +2,26 @@ import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { RequestTripDto } from './dtos/request_trip.dto';
 import { FirebaseAuthGuard } from '../common/guards/firebase_auth_guard';
 import { TripService } from './trip.service';
-import { AuthenticatedRequest } from '../common/guards/firebase_auth_guard_types';
+// import { AuthenticatedRequest } from '../common/guards/firebase_auth_guard_types';
 
 @Controller('trips')
 export class TripController {
   constructor(private readonly tripService: TripService) {}
   // === RIDER ENDPOINTS ===
 
-  @Post('request')
-  @UseGuards(FirebaseAuthGuard)
-  async requestTrip(
-    @Req() request: AuthenticatedRequest,
-    @Body() requestTripDto: RequestTripDto,
-  ) {
-    if (!request.user) {
-      throw new Error('User not authenticated');
-    }
-    await this.tripService.requestTrip(requestTripDto, request.userId);
+  // @Post('request')
+  // @UseGuards(FirebaseAuthGuard)
+  // async requestTrip(
+  //   @Req() request: AuthenticatedRequest,
+  //   @Body() requestTripDto: RequestTripDto,
+  // ) {
+  //   if (!request.user) {
+  //     throw new Error('User not authenticated');
+  //   }
+  //   await this.tripService.requestTrip(requestTripDto, request.userId);
 
-    return { message: 'Trip requested' };
-  }
+  //   return { message: 'Trip requested' };
+  // }
 
   // @Post(':tripId/cancel')
   // async cancelTrip(@Param('tripId') tripId: string) {

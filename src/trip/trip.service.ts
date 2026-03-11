@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TripEntity, TripStatus } from './entities/trip.entity';
 import { Repository } from 'typeorm';
 
-import { RequestTripDto } from './dtos/request_trip.dto';
 import { UsersService } from '../users/users.service';
 import {
   AuthenticatedSocket,
@@ -11,9 +10,10 @@ import {
 } from '../common/guards/firebase_auth_guard_types';
 import { LocationTrackingService } from '../location_tracking/location_tracking.service';
 import { UserLocationDto } from '../common/dto/location/user_location.dto';
-import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 import { Server } from 'socket.io';
+import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
 
 @Injectable()
 export class TripService {
@@ -24,7 +24,7 @@ export class TripService {
     private readonly tripRepository: Repository<TripEntity>,
     private readonly userService: UsersService,
     private readonly locationTrackingService: LocationTrackingService,
-    private readonly sequentialNotificationService: SequentialNotifcationService,
+    private readonly driverMatchingService: DriverMatchingService,
     private readonly tripCommunicationService: TripCommunicationService,
   ) {}
 
@@ -49,29 +49,29 @@ export class TripService {
     }
   }
 
-  async requestTrip(requestTripDto: RequestTripDto, userId: string) {
+  async requestTrip(riderRequestTripDto: RiderRequestTripDto, userId: string) {
     const riderEntity = await this.userService.findById(userId); // Ensure user exists
     // 2. Create trip entity
     const trip = this.tripRepository.create({
       riderId: userId, // Use database user ID
       rider: riderEntity,
-      pickupAddress: requestTripDto.pickupLocation.address,
-      dropoffAddress: requestTripDto.dropoffLocation.address,
-      pickupLatitude: requestTripDto.pickupLocation.latitude,
-      pickupLongitude: requestTripDto.pickupLocation.longitude,
-      dropoffLatitude: requestTripDto.dropoffLocation.latitude,
-      dropoffLongitude: requestTripDto.dropoffLocation.longitude,
-      passengerCount: requestTripDto.passengerCount,
-      notes: requestTripDto.notes,
+      pickupAddress: riderRequestTripDto.pickupLocation.address,
+      dropoffAddress: riderRequestTripDto.dropoffLocation.address,
+      pickupLatitude: riderRequestTripDto.pickupLocation.latitude,
+      pickupLongitude: riderRequestTripDto.pickupLocation.longitude,
+      dropoffLatitude: riderRequestTripDto.dropoffLocation.latitude,
+      dropoffLongitude: riderRequestTripDto.dropoffLocation.longitude,
+      passengerCount: riderRequestTripDto.passengerCount,
+      notes: riderRequestTripDto.notes,
       status: TripStatus.REQUESTED,
-      scheduledTime: requestTripDto.scheduledTime,
+      //scheduledTime: requestTripDto.scheduledTime,
     });
 
     // 3. Save trip to database
     const savedTrip = await this.tripRepository.save(trip);
     const userLocation: UserLocationDto = {
-      latitude: requestTripDto.pickupLocation.latitude,
-      longitude: requestTripDto.pickupLocation.longitude,
+      latitude: riderRequestTripDto.pickupLocation.latitude,
+      longitude: riderRequestTripDto.pickupLocation.longitude,
     };
     const nearbyDrivers =
       this.locationTrackingService.findNearbyDrivers(userLocation);
@@ -83,7 +83,7 @@ export class TripService {
       throw new Error('No drivers available nearby');
     }
 
-    await this.sequentialNotificationService.sendNotificationsInSequence(
+    await this.driverMatchingService.sendNotificationsInSequence(
       savedTrip,
       nearbyDrivers,
     );

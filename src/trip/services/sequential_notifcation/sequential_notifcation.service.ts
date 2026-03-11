@@ -15,8 +15,8 @@ interface TripNotificationState {
 }
 
 @Injectable()
-export class SequentialNotifcationService {
-  private readonly logger = new Logger(SequentialNotifcationService.name);
+export class DriverMatchingService {
+  private readonly logger = new Logger(DriverMatchingService.name);
 
   // Track which driver is currently being notified for each trip
   private activeNotifications = new Map<string, TripNotificationState>();

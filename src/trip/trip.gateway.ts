@@ -17,10 +17,11 @@ import { FirebaseService } from '../firebase/firebase.service';
 
 import { UsersService } from '../users/users.service';
 import { WebSocketAuthUtil } from '../common/utils/websocket-auth.util';
-import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { RejectTripDto } from '../common/dto/trip/reject_trip.dto';
 import { StartTripDto } from './dtos/start_trip.dto';
 import { CompleteTripDto } from './dtos/complete_trip.dto';
+import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
 @WebSocketGateway({
   namespace: '/trips',
   cors: { origin: '*' },
@@ -36,7 +37,7 @@ export class TripGateway
     private readonly tripService: TripService,
     private readonly firebaseService: FirebaseService,
     private readonly usersService: UsersService,
-    private readonly sequentialNotificationService: SequentialNotifcationService,
+    private readonly sequentialNotificationService: DriverMatchingService,
   ) {}
 
   // Add authentication middleware for the trips namespace
@@ -154,5 +155,17 @@ export class TripGateway
         tripId: dto.tripId,
       });
     }
+  }
+
+  // -----------------------------------------
+  // RIDER TRIP EVENTS
+  // -----------------------------------------
+
+  @SubscribeMessage('trip:rider_request')
+  async handleRiderRequestTrip(
+    @MessageBody() riderRequestTripDto: RiderRequestTripDto,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    await this.tripService.requestTrip(riderRequestTripDto, client.userId);
   }
 }
