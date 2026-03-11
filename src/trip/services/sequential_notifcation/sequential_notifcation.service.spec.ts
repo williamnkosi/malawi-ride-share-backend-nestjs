@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SequentialNotifcationService } from './sequential_notifcation.service';
+import { DriverMatchingService } from './sequential_notifcation.service';
 
-describe('SequentialNotifcationService', () => {
-  let service: SequentialNotifcationService;
+describe('DriverMatchingService', () => {
+  let service: DriverMatchingService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

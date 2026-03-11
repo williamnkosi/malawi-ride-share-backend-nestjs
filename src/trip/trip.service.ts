@@ -10,7 +10,7 @@ import {
 } from '../common/guards/firebase_auth_guard_types';
 import { LocationTrackingService } from '../location_tracking/location_tracking.service';
 import { UserLocationDto } from '../common/dto/location/user_location.dto';
-import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 import { Server } from 'socket.io';
 import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
@@ -24,7 +24,7 @@ export class TripService {
     private readonly tripRepository: Repository<TripEntity>,
     private readonly userService: UsersService,
     private readonly locationTrackingService: LocationTrackingService,
-    private readonly sequentialNotificationService: SequentialNotifcationService,
+    private readonly driverMatchingService: DriverMatchingService,
     private readonly tripCommunicationService: TripCommunicationService,
   ) {}
 
@@ -83,7 +83,7 @@ export class TripService {
       throw new Error('No drivers available nearby');
     }
 
-    await this.sequentialNotificationService.sendNotificationsInSequence(
+    await this.driverMatchingService.sendNotificationsInSequence(
       savedTrip,
       nearbyDrivers,
     );
