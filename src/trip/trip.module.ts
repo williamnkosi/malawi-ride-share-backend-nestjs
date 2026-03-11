@@ -10,7 +10,7 @@ import { FirebaseModule } from '../firebase/firebase.module';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { TripEntity } from './entities/trip.entity';
-import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/driver_matching_service';
 import { GoogleMapsServiceModule } from '../google_maps_service/google_maps_service.module';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 

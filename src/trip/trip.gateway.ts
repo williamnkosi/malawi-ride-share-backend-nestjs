@@ -17,7 +17,7 @@ import { FirebaseService } from '../firebase/firebase.service';
 
 import { UsersService } from '../users/users.service';
 import { WebSocketAuthUtil } from '../common/utils/websocket-auth.util';
-import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/driver_matching_service';
 import { RejectTripDto } from '../common/dto/trip/reject_trip.dto';
 import { StartTripDto } from './dtos/start_trip.dto';
 import { CompleteTripDto } from './dtos/complete_trip.dto';

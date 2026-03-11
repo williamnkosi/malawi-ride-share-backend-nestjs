@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DriverMatchingService } from './sequential_notifcation.service';
+import { DriverMatchingService } from './driver_matching_service';
 
 describe('DriverMatchingService', () => {
   let service: DriverMatchingService;
@@ -9,7 +9,9 @@ describe('DriverMatchingService', () => {
       providers: [SequentialNotifcationService],
     }).compile();
 
-    service = module.get<SequentialNotifcationService>(SequentialNotifcationService);
+    service = module.get<SequentialNotifcationService>(
+      SequentialNotifcationService,
+    );
   });
 
   it('should be defined', () => {

@@ -79,18 +79,6 @@ export class DriverMatchingService {
 
         // Track this driver as notified (declined or timeout)
         state.notifiedDrivers.push(driver.userId);
-
-        if (driverResponse === 'trip:declined') {
-          this.logger.log(`Driver ${driver.userId} rejected trip ${trip.id}`);
-          // Continue to next driver
-        }
-
-        if (driverResponse === 'trip:timeout') {
-          this.logger.warn(
-            `Driver ${driver.userId} timed out for trip ${trip.id}`,
-          );
-          // Continue to next driver
-        }
       }
 
       // All drivers exhausted, no one accepted

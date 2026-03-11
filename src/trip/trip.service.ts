@@ -10,7 +10,7 @@ import {
 } from '../common/guards/firebase_auth_guard_types';
 import { LocationTrackingService } from '../location_tracking/location_tracking.service';
 import { UserLocationDto } from '../common/dto/location/user_location.dto';
-import { DriverMatchingService } from './services/sequential_notifcation/sequential_notifcation.service';
+import { DriverMatchingService } from './services/sequential_notifcation/driver_matching_service';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 import { Server } from 'socket.io';
 import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
