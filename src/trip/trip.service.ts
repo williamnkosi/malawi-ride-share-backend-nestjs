@@ -49,6 +49,8 @@ export class TripService {
     }
   }
 
+  // === RIDER METHODS ===
+
   async requestTrip(riderRequestTripDto: RiderRequestTripDto, userId: string) {
     const riderEntity = await this.userService.findById(userId); // Ensure user exists
     // 2. Create trip entity

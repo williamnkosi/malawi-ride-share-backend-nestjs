@@ -5,6 +5,7 @@ import { NearbyDriverResult } from '../../../location_tracking/location_tracking
 
 import { TripEntity } from '../../entities/trip.entity';
 import { TripGateway } from '../../trip.gateway';
+import { DriverTripRequestDto } from '../../dtos/driver-trip-request.dto';
 
 const TIMEOUT_MS = 15000; // 15 seconds
 
@@ -225,24 +226,27 @@ export class DriverMatchingService {
   }
 }
 
-function toTripResponse(trip: TripEntity, route: RouteResponseDto) {
-  return {
-    tripId: trip.id,
-    status: trip.status,
-    pickupLocation: {
-      latitude: trip.pickupLatitude,
-      longitude: trip.pickupLongitude,
-      address: trip.pickupAddress ?? '',
-    },
-    dropoffLocation: {
-      latitude: trip.dropoffLatitude,
-      longitude: trip.dropoffLongitude,
-      address: trip.dropoffAddress ?? '',
-    },
-    riderFirstName: trip.rider.firstName,
-    riderLastName: trip.rider.lastName,
-    passengerCount: trip.passengerCount,
-    createdAt: trip.createdAt,
-    route,
+function toTripResponse(
+  trip: TripEntity,
+  route: RouteResponseDto,
+): DriverTripRequestDto {
+  const dto = new DriverTripRequestDto();
+  dto.tripId = trip.id;
+  dto.status = trip.status;
+  dto.pickupLocation = {
+    latitude: trip.pickupLatitude,
+    longitude: trip.pickupLongitude,
+    address: trip.pickupAddress ?? '',
   };
+  dto.dropoffLocation = {
+    latitude: trip.dropoffLatitude,
+    longitude: trip.dropoffLongitude,
+    address: trip.dropoffAddress ?? '',
+  };
+  dto.riderFirstName = trip.rider.firstName;
+  dto.riderLastName = trip.rider.lastName;
+  dto.passengerCount = trip.passengerCount;
+  dto.createdAt = trip.createdAt;
+  dto.route = route;
+  return dto;
 }
