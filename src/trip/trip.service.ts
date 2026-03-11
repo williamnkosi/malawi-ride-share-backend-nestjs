@@ -14,6 +14,7 @@ import { UserLocationDto } from '../common/dto/location/user_location.dto';
 import { SequentialNotifcationService } from './services/sequential_notifcation/sequential_notifcation.service';
 import { TripCommunicationService } from './services/trip_communication/trip_communication.service';
 import { Server } from 'socket.io';
+import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
 
 @Injectable()
 export class TripService {
@@ -204,4 +205,9 @@ export class TripService {
 
     return updatedTrip;
   }
+
+  async riderRequestTrip(
+    dto: RiderRequestTripDto,
+    client: AuthenticatedSocket,
+  ) {}
 }

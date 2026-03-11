@@ -21,6 +21,7 @@ import { SequentialNotifcationService } from './services/sequential_notifcation/
 import { RejectTripDto } from '../common/dto/trip/reject_trip.dto';
 import { StartTripDto } from './dtos/start_trip.dto';
 import { CompleteTripDto } from './dtos/complete_trip.dto';
+import { RiderRequestTripDto } from './dtos/rider_request_trip.dto';
 @WebSocketGateway({
   namespace: '/trips',
   cors: { origin: '*' },
@@ -154,5 +155,17 @@ export class TripGateway
         tripId: dto.tripId,
       });
     }
+  }
+
+  // -----------------------------------------
+  // RIDER TRIP EVENTS
+  // -----------------------------------------
+
+  @SubscribeMessage('trip:rider_request')
+  async handleRiderRequestTrip(
+    @MessageBody() riderRequestTripDto: RiderRequestTripDto,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    await this.tripService.riderRequestTrip(riderRequestTripDto, client);
   }
 }
