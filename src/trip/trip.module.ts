@@ -29,12 +29,7 @@ import { TripCommunicationService } from './services/trip_communication/trip_com
     TripGateway,
     DriverMatchingService,
     TripCommunicationService,
-    {
-      provide: 'WEBSOCKET_SERVER',
-      useFactory: (tripGateway: TripGateway) => tripGateway.server,
-      inject: [TripGateway],
-    },
   ],
-  exports: [TripService, TripGateway], // Export services for use in other modules
+  exports: [TripService, TripGateway, TripCommunicationService], // Export services for use in other modules
 })
 export class TripModule {}

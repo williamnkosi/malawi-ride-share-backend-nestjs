@@ -98,11 +98,7 @@ export class TripService {
     return await this.tripRepository.save(trip);
   }
 
-  async acceptTrip(
-    server: Server,
-    tripId: string,
-    driverId: string,
-  ): Promise<void> {
+  async acceptTrip(tripId: string, driverId: string): Promise<void> {
     const currentDriverLocation =
       this.locationTrackingService.getDriverLocation(driverId);
     const trip = await this.tripRepository.findOne({ where: { id: tripId } });
@@ -116,7 +112,6 @@ export class TripService {
     await this.tripRepository.save(trip);
 
     await this.tripCommunicationService.notifyUsersOfTripAccepted(
-      server,
       trip,
       currentDriverLocation!,
     );

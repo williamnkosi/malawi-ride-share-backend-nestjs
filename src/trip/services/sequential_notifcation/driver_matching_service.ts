@@ -1,10 +1,9 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RouteResponseDto } from '../../../google_maps_service/dtos/route-response.dto';
 import { GoogleMapsService } from '../../../google_maps_service/google_maps_service.service';
 import { NearbyDriverResult } from '../../../location_tracking/location_tracking.service';
 
 import { TripEntity } from '../../entities/trip.entity';
-import { TripGateway } from '../../trip.gateway';
 import { TripCommunicationService } from '../trip_communication/trip_communication.service';
 
 const TIMEOUT_MS = 15000; // 15 seconds
@@ -31,7 +30,6 @@ export class DriverMatchingService {
     }
   >();
   constructor(
-    @Inject(forwardRef(() => TripGateway))
     private readonly tripCommunicationService: TripCommunicationService,
     private readonly googleMapsService: GoogleMapsService,
   ) {}

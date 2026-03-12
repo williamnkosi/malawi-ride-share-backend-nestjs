@@ -91,7 +91,7 @@ export class TripGateway
       }
 
       // 2. Update trip status in database
-      await this.tripService.acceptTrip(this.server, dto.tripId, client.userId);
+      await this.tripService.acceptTrip(dto.tripId, client.userId);
 
       this.logger.log(`Driver ${client.userId} accepted trip ${dto.tripId}`);
     } catch (error) {

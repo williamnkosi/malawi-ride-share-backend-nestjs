@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Server } from 'socket.io';
 
 import { GoogleMapsService } from '../../../google_maps_service/google_maps_service.service';
@@ -6,13 +6,19 @@ import { DriverLocationDto } from '../../../location_tracking/location_tracking.
 import { TripEntity } from '../../entities/trip.entity';
 import { RouteResponseDto } from 'src/google_maps_service/dtos/route-response.dto';
 import { DriverTripRequestDto } from 'src/trip/dtos/driver-trip-request.dto';
+import { TripGateway } from '../../trip.gateway';
 
 @Injectable()
 export class TripCommunicationService {
   constructor(
-    @Inject('WEBSOCKET_SERVER') private readonly server: Server,
+    @Inject(forwardRef(() => TripGateway))
+    private readonly tripGateway: TripGateway,
     private readonly googleMapsService: GoogleMapsService,
   ) {}
+
+  private get server(): Server {
+    return this.tripGateway.server;
+  }
   async notifyUsersOfTripAccepted(
     trip: TripEntity,
     currentDriverLocation: DriverLocationDto,
