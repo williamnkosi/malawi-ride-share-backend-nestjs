@@ -6,15 +6,20 @@ import { DriverLocationDto } from '../../../location_tracking/location_tracking.
 import { TripEntity } from '../../entities/trip.entity';
 import { RouteResponseDto } from 'src/google_maps_service/dtos/route-response.dto';
 import { DriverTripRequestDto } from 'src/trip/dtos/driver-trip-request.dto';
+import { TripConfirmationBuilder } from '../../builders/trip-confirmation.builder';
 import { TripGateway } from '../../trip.gateway';
 
 @Injectable()
 export class TripCommunicationService {
+  private readonly confirmationBuilder: TripConfirmationBuilder;
+
   constructor(
     @Inject(forwardRef(() => TripGateway))
     private readonly tripGateway: TripGateway,
     private readonly googleMapsService: GoogleMapsService,
-  ) {}
+  ) {
+    this.confirmationBuilder = new TripConfirmationBuilder(googleMapsService);
+  }
 
   private get server(): Server {
     return this.tripGateway.server;
@@ -32,59 +37,29 @@ export class TripCommunicationService {
       `${trip.pickupLatitude},${trip.pickupLongitude}`,
     );
 
+    // Build confirmation DTOs
+    const confirmationDto =
+      this.confirmationBuilder.buildDriverTripConfirmationDto(
+        trip,
+        routeToPickup,
+      );
+
     // Notify driver with confirmation and navigation
-    this.server.to(`driver:${driverId}`).emit('trip:accepted_confirmation', {
-      tripId: trip.id,
-      status: 'ACCEPTED',
-      routeToPickup,
-      pickup: {
-        latitude: trip.pickupLatitude,
-        longitude: trip.pickupLongitude,
-        address: trip.pickupAddress,
-      },
-      destination: {
-        latitude: trip.dropoffLatitude,
-        longitude: trip.dropoffLongitude,
-        address: trip.dropoffAddress,
-      },
-      rider: {
-        firstName: trip.rider?.firstName,
-        lastName: trip.rider?.lastName,
-      },
-      passengerCount: trip.passengerCount,
-      notes: trip.notes,
-      acceptedAt: new Date().toISOString(),
-      estimatedPickupTime: new Date(
-        Date.now() + routeToPickup.durationMin * 60000,
-      ).toISOString(),
-    });
+    this.server
+      .to(`driver:${driverId}`)
+      .emit('trip:accepted_confirmation', confirmationDto);
 
     // Notify rider that driver was found
-    this.server.to(`rider:${riderId}`).emit('trip:driver_found', {
-      tripId: trip.id,
-      status: 'DRIVER_ASSIGNED',
-      driver: {
-        id: driverId,
-        // Add driver details here when available
-      },
-      driverLocation: {
-        latitude: currentDriverLocation.location?.latitude,
-        longitude: currentDriverLocation.location?.longitude,
-      },
-      estimatedArrival: {
-        minutes: Math.ceil(routeToPickup.durationMin),
-        time: new Date(
-          Date.now() + routeToPickup.durationMin * 60000,
-        ).toISOString(),
-      },
-      driverRoute: {
-        polyline: routeToPickup.polyline,
-        distanceKm: routeToPickup.distanceKm,
-        durationMin: routeToPickup.durationMin,
-      },
-      acceptedAt: new Date().toISOString(),
-      message: `Your driver is on the way! They will arrive in about ${Math.ceil(routeToPickup.durationMin)} minutes.`,
-    });
+    const riderConfirmationDto =
+      this.confirmationBuilder.buildRiderTripConfirmationDto(
+        trip,
+        driverId!,
+        routeToPickup,
+      );
+
+    this.server
+      .to(`rider:${riderId}`)
+      .emit('trip:driver_found', riderConfirmationDto);
   }
 
   /**

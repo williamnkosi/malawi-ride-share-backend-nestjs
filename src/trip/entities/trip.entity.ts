@@ -21,17 +21,17 @@ export enum TripStatus {
 @Entity('trips')
 export class TripEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   // === CORE RELATIONSHIPS ===
 
   // Rider who requested the trip
   @ManyToOne(() => UserEntity, { eager: true })
   @JoinColumn({ name: 'rider_id' })
-  rider: UserEntity;
+  rider!: UserEntity;
 
   @Column({ name: 'rider_id' })
-  riderId: string;
+  riderId!: string;
 
   // Driver assigned to the trip (nullable until assigned)
   @ManyToOne(() => UserEntity, { eager: true, nullable: true })
@@ -47,7 +47,7 @@ export class TripEntity {
     type: 'enum',
     enum: TripStatus,
   })
-  status: TripStatus;
+  status!: TripStatus;
 
   // Simple location strings for now
   @Column({ nullable: true })
@@ -58,30 +58,30 @@ export class TripEntity {
   @IsOptional()
   dropoffAddress?: string;
 
-  pickUpLocation: Location;
+  pickUpLocation!: Location;
 
   @Column({ type: 'decimal', precision: 10, scale: 8 })
-  pickupLatitude: number;
+  pickupLatitude!: number;
 
   @Column({ type: 'decimal', precision: 11, scale: 8 })
-  pickupLongitude: number;
+  pickupLongitude!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 8 })
-  dropoffLatitude: number;
+  dropoffLatitude!: number;
 
   @Column({ type: 'decimal', precision: 11, scale: 8 })
-  dropoffLongitude: number;
+  dropoffLongitude!: number;
 
   @Column({ type: 'int', default: 1 })
-  passengerCount: number;
+  passengerCount!: number;
 
   // === TIMESTAMPS ===
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   // === OPTIONAL FIELDS ===
   @Column({ type: 'text', nullable: true })
