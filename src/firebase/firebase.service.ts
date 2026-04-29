@@ -26,8 +26,19 @@ const getServiceAccount = (): admin.ServiceAccount => {
     }
   }
 
-  // Fallback to local file for development (relative to project root)
-  const localPath = path.join(
+  // Fallback to environment-specific local file for development
+  const environment = process.env.NODE_ENV || 'dev';
+  let localPath = path.join(
+    process.cwd(),
+    `environment/serviceAccountKey-${environment}.json`,
+  );
+
+  if (fs.existsSync(localPath)) {
+    return JSON.parse(fs.readFileSync(localPath, 'utf-8'));
+  }
+
+  // Fallback to generic serviceAccountKey.json for backward compatibility
+  localPath = path.join(
     process.cwd(),
     'environment/serviceAccountKey.json',
   );
@@ -36,7 +47,7 @@ const getServiceAccount = (): admin.ServiceAccount => {
   }
 
   throw new Error(
-    'Firebase service account not found. Set FIREBASE_SERVICE_ACCOUNT env var or add environment/serviceAccountKey.json',
+    `Firebase service account not found. Set FIREBASE_SERVICE_ACCOUNT env var or add environment/serviceAccountKey-${environment}.json or environment/serviceAccountKey.json`,
   );
 };
 

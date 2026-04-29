@@ -4,84 +4,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "NestJS: Debug",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:debug"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "restart": true,
-      "protocol": "inspector",
-      "port": 9229,
-      "sourceMaps": true,
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "NestJS: Debug (ts-node)",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register",
-        "-r",
-        "tsconfig-paths/register"
-      ],
-      "args": [],
-      "program": "${workspaceFolder}/src/main.ts",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "autoAttachChildProcesses": true,
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "NestJS: Debug (Staging)",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register",
-        "-r",
-        "tsconfig-paths/register"
-      ],
-      "args": [],
-      "program": "${workspaceFolder}/src/main.ts",
-      "cwd": "${workspaceFolder}",
-      "envFile": "${workspaceFolder}/.env.staging",
-      "autoAttachChildProcesses": true,
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "NODE_ENV": "staging"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "NestJS: Debug (Production)",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register",
-        "-r",
-        "tsconfig-paths/register"
-      ],
-      "args": [],
-      "program": "${workspaceFolder}/src/main.ts",
-      "cwd": "${workspaceFolder}",
-      "envFile": "${workspaceFolder}/.env.production",
-      "autoAttachChildProcesses": true,
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "NestJS: Debug (Local)",
+      "name": "NestJS: Debug (Dev)",
       "runtimeArgs": [
         "-r",
         "ts-node/register",
@@ -92,11 +15,34 @@
       "program": "${workspaceFolder}/src/main.ts",
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "sourceMaps": true,
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "dev"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "NestJS: Debug (Prod)",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": [],
+      "program": "${workspaceFolder}/src/main.ts",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env.production",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "NODE_ENV": "prod"
       }
     }
   ]
