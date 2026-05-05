@@ -5,6 +5,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Set build environment
+ENV NODE_ENV=prod
+
 # Enable corepack for yarn
 RUN corepack enable
 

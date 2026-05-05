@@ -18,9 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "docker:build": "docker build -t malawi-ride-share .",
-    "docker:run": "docker run -p 3000:3000 --env-file .env malawi-ride-share",
-    "docker:dev": "docker build -t malawi-ride-share . && docker run -p 3000:3000 --env-file .env malawi-ride-share"
+    "docker:build": "docker build --platform linux/amd64 -t williamdevacc/malawi-ride-share .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env.production williamdevacc/malawi-ride-share",
+    "docker:push": "docker push williamdevacc/malawi-ride-share",
+    "docker:dev": "docker build --platform linux/amd64 -t williamdevacc/malawi-ride-share . && docker run -p 3000:3000 --env-file .env.production williamdevacc/malawi-ride-share"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.16.0",

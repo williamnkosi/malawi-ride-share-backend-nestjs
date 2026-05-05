@@ -10,13 +10,15 @@ const getServiceAccount = (): admin.ServiceAccount => {
   // First check env var (for Docker/production)
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     let jsonStr = process.env.FIREBASE_SERVICE_ACCOUNT;
-    
+
     // Remove surrounding quotes if present (common issue with env vars)
-    if ((jsonStr.startsWith('"') && jsonStr.endsWith('"')) || 
-        (jsonStr.startsWith("'") && jsonStr.endsWith("'"))) {
+    if (
+      (jsonStr.startsWith('"') && jsonStr.endsWith('"')) ||
+      (jsonStr.startsWith("'") && jsonStr.endsWith("'"))
+    ) {
       jsonStr = jsonStr.slice(1, -1);
     }
-    
+
     try {
       return JSON.parse(jsonStr);
     } catch (e) {
@@ -38,10 +40,7 @@ const getServiceAccount = (): admin.ServiceAccount => {
   }
 
   // Fallback to generic serviceAccountKey.json for backward compatibility
-  localPath = path.join(
-    process.cwd(),
-    'environment/serviceAccountKey.json',
-  );
+  localPath = path.join(process.cwd(), 'environment/serviceAccountKey.json');
   if (fs.existsSync(localPath)) {
     return JSON.parse(fs.readFileSync(localPath, 'utf-8'));
   }
