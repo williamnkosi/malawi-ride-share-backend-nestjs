@@ -63,37 +63,25 @@ export class FirebaseService implements OnModuleInit {
   private buckets: Map<StorageBucket, Bucket> = new Map();
   constructor(private readonly config: ConfigService) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     if (admin.apps.length === 0) {
       this.app = admin.initializeApp({
         credential: admin.credential.cert(getServiceAccount()),
       });
+    } else {
+      this.app = admin.app();
     }
 
     this.storage = admin.storage();
-    await this.initializeBuckets();
+    this.initializeBuckets();
   }
 
-  private async initializeBuckets() {
+  private initializeBuckets() {
     for (const bucketName of Object.values(StorageBucket)) {
-      try {
-        const bucket = this.storage.bucket(bucketName);
-
-        // Check if bucket exists, create if it doesn't
-        const [exists] = await bucket.exists();
-        if (!exists) {
-          await bucket.create({
-            location: 'US-CENTRAL1',
-            storageClass: 'STANDARD',
-          });
-          console.log(`Created bucket: ${bucketName}`);
-        }
-
-        this.buckets.set(bucketName, bucket);
-        console.log(`Initialized bucket: ${bucketName}`);
-      } catch (error) {
-        console.error(`Error initializing bucket ${bucketName}:`, error);
-      }
+      // Register bucket handles only. Metadata checks require storage.buckets.get.
+      const bucket = this.storage.bucket(bucketName);
+      this.buckets.set(bucketName, bucket);
+      console.log(`Initialized bucket handle: ${bucketName}`);
     }
   }
 
