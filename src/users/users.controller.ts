@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -17,6 +18,7 @@ import { UpdateUserDto } from './dtos/update_user.dto';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { FirebaseAuthGuard } from '../common/guards/firebase_auth_guard';
+import { AuthenticatedRequest } from '../common/guards/firebase_auth_guard_types';
 
 @Controller('users')
 export class UsersController {
@@ -29,11 +31,13 @@ export class UsersController {
     return await this.usersService.findAll();
   }
 
-  @Get(':firebaseId')
+  @Get('me')
   @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getUserData(@Param('firebaseId') firebaseId: string) {
-    return await this.usersService.findById(firebaseId);
+  async getUserData(@Req() request: AuthenticatedRequest) {
+    void request;
+    const id: string = request.userId;
+    return await this.usersService.findById(id);
   }
 
   @Post()
