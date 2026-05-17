@@ -1,7 +1,6 @@
 import {
   IsNotEmpty,
   IsString,
-  IsEmail,
   IsEnum,
   IsOptional,
   IsDateString,
@@ -26,10 +25,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsPhoneNumber('US') // Malawi phone number validation
   phoneNumber: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
 
   @IsNotEmpty()
   @IsEnum(Gender)

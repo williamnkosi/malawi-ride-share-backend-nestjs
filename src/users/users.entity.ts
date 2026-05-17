@@ -10,8 +10,8 @@ import { DriverEntity } from './drivers/driver.entity';
 import { RiderEntity } from './riders/rider.entity';
 
 export enum Gender {
-  male,
-  female,
+  male = 'male',
+  female = 'female',
 }
 
 // src/users/entities/base-user.entity.ts
